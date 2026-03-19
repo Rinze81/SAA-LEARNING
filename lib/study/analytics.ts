@@ -2,6 +2,7 @@ import { quizQuestions } from "@/lib/quiz/data";
 import type { QuizQuestion } from "@/lib/quiz/types";
 import { readReviewRecords } from "@/lib/review/storage";
 import type { ReviewRecord } from "@/lib/review/types";
+import { STUDY_ANALYTICS_CONFIG } from "@/lib/study/config";
 import { readQuizAttempts } from "@/lib/study/storage";
 import type {
   CategoryPriority,
@@ -11,7 +12,8 @@ import type {
 } from "@/lib/study/types";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-const RECENT_WINDOW_IN_MS = 5 * DAY_IN_MS;
+const RECENT_WINDOW_IN_MS =
+  STUDY_ANALYTICS_CONFIG.recentWindowDays * DAY_IN_MS;
 
 function buildQuizHref(questionId: string) {
   return `/quiz?questionId=${questionId}`;
@@ -44,6 +46,7 @@ function buildQuestionSequence(
   reviews: ReviewRecord[],
   forcedQuestionId?: string,
 ) {
+  const { questionOrderWeights } = STUDY_ANALYTICS_CONFIG;
   const priorityMap = new Map(
     priorities.map((priority, index) => [
       priority.category,
@@ -72,15 +75,15 @@ function buildQuestionSequence(
     const leftPriority = priorityMap.get(left.category);
     const rightPriority = priorityMap.get(right.category);
     const leftScore =
-      (leftPriority?.score ?? 0) * 100 +
-      (leftPriority?.rank ?? 0) * 10 +
-      (reviewMap.has(left.id) ? 6 : 0) +
-      (attemptMap.has(left.id) ? 0 : 4);
+      (leftPriority?.score ?? 0) * questionOrderWeights.categoryScore +
+      (leftPriority?.rank ?? 0) * questionOrderWeights.categoryRank +
+      (reviewMap.has(left.id) ? questionOrderWeights.reviewQuestionBoost : 0) +
+      (attemptMap.has(left.id) ? 0 : questionOrderWeights.unattemptedQuestionBoost);
     const rightScore =
-      (rightPriority?.score ?? 0) * 100 +
-      (rightPriority?.rank ?? 0) * 10 +
-      (reviewMap.has(right.id) ? 6 : 0) +
-      (attemptMap.has(right.id) ? 0 : 4);
+      (rightPriority?.score ?? 0) * questionOrderWeights.categoryScore +
+      (rightPriority?.rank ?? 0) * questionOrderWeights.categoryRank +
+      (reviewMap.has(right.id) ? questionOrderWeights.reviewQuestionBoost : 0) +
+      (attemptMap.has(right.id) ? 0 : questionOrderWeights.unattemptedQuestionBoost);
 
     if (rightScore !== leftScore) {
       return rightScore - leftScore;
@@ -98,6 +101,7 @@ function buildQuestionSequence(
 }
 
 export function buildStudyAnalytics(now = Date.now()): StudyAnalytics {
+  const { categoryPriorityWeights } = STUDY_ANALYTICS_CONFIG;
   const attempts = readQuizAttempts();
   const reviews = readReviewRecords();
   const recentThreshold = now - RECENT_WINDOW_IN_MS;
@@ -126,14 +130,25 @@ export function buildStudyAnalytics(now = Date.now()): StudyAnalytics {
       const lastAttemptAt =
         categoryAttempts.length > 0 ? categoryAttempts[0]?.timestamp ?? null : null;
       const staleBoost = lastAttemptAt
-        ? Math.min(3, Math.floor((now - lastAttemptAt) / DAY_IN_MS))
-        : 3;
+        ? Math.min(
+            categoryPriorityWeights.staleDayBoostCap,
+            Math.floor((now - lastAttemptAt) / DAY_IN_MS),
+          )
+        : categoryPriorityWeights.staleDayBoostCap;
       const accuracyPenalty =
-        accuracy === null ? 2 : Math.max(0, Math.round((0.75 - accuracy) * 10));
+        accuracy === null
+          ? categoryPriorityWeights.missingAccuracyPenalty
+          : Math.max(
+              0,
+              Math.round(
+                (categoryPriorityWeights.lowAccuracyBaseline - accuracy) *
+                  categoryPriorityWeights.lowAccuracyPenaltyScale,
+              ),
+            );
       const score =
-        reviewCount * 5 +
-        recentMistakes * 4 +
-        unattemptedCount * 2 +
+        reviewCount * categoryPriorityWeights.reviewCount +
+        recentMistakes * categoryPriorityWeights.recentMistake +
+        unattemptedCount * categoryPriorityWeights.unattemptedQuestion +
         accuracyPenalty +
         staleBoost;
 
