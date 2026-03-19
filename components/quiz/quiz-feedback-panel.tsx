@@ -11,22 +11,22 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
     return (
       <SectionFrame
         eyebrow="解説"
-        title="回答後に、正誤と判断理由をまとめて確認する"
-        description="提出すると、自分の回答と正解の差、それが起きた理由、次に使う判断軸がここに並びます。"
+        title="解答後に、正誤と判断軸をまとめて確認します"
+        description="回答すると、正誤だけでなく解説、比較ポイント、覚える軸までまとめて表示します。"
       >
         <div className="grid gap-4">
           <div className="rounded-[1.25rem] border border-slate-800 bg-slate-900/55 p-4 sm:p-5">
-            <p className="text-[11px] tracking-[0.16em] text-slate-500">提出後に見えるもの</p>
+            <p className="text-[11px] tracking-[0.16em] text-slate-500">解答後に確認できること</p>
             <ul className="mt-3 grid gap-2 text-sm leading-6 text-slate-300">
-              <li>自分の回答と正解</li>
-              <li>なぜその答えなのか</li>
-              <li>似た選択肢とどう違うか</li>
-              <li>次に迷わないための判断軸</li>
+              <li>正解かどうか</li>
+              <li>自分の回答と正答の違い</li>
+              <li>なぜその選択肢になるのかの解説</li>
+              <li>次に使える比較ポイント</li>
             </ul>
           </div>
           <div className="rounded-[1.25rem] border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
             <p className="text-sm leading-6 text-slate-400">
-              まずは条件に合うと思う選択肢を一つ選び、提出してから理由の差を整理します。
+              まずは一度選んでから回答すると、解説の理解がはっきり深まります。
             </p>
           </div>
         </div>
@@ -37,8 +37,8 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
   return (
     <SectionFrame
       eyebrow="解説"
-      title={session.isCorrect ? "正解です。判断軸を言葉にして残す" : "不正解です。迷った理由をここで修正する"}
-      description="正誤だけで終わらず、次の問題にも使える比較軸として持ち帰れる形にしています。"
+      title={session.isCorrect ? "正解です。判断軸もあわせて確認しましょう" : "不正解です。比較の視点をここで整理しましょう"}
+      description="正解だった場合も、なぜそれが最適かまで確認しておくと、次の問題での再現性が高まります。"
       aside={
         <StatusChip
           label={session.isCorrect ? "正解" : "不正解"}
@@ -49,13 +49,13 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
       <div className="grid gap-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-[1.2rem] border border-slate-800 bg-slate-900/55 p-4">
-            <p className="text-[11px] tracking-[0.16em] text-slate-500">自分の回答</p>
+            <p className="text-[11px] tracking-[0.16em] text-slate-500">あなたの回答</p>
             <p className="mt-2 text-sm leading-6 text-slate-200">
               {session.selectedChoice?.label}. {session.selectedChoice?.text}
             </p>
           </div>
           <div className="rounded-[1.2rem] border border-slate-800 bg-slate-900/55 p-4">
-            <p className="text-[11px] tracking-[0.16em] text-slate-500">正解</p>
+            <p className="text-[11px] tracking-[0.16em] text-slate-500">正答</p>
             <p className="mt-2 text-sm leading-6 text-slate-200">
               {session.correctChoice?.label}. {session.correctChoice?.text}
             </p>
@@ -63,7 +63,7 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
         </div>
 
         <div className="rounded-[1.25rem] border border-slate-800 bg-slate-900/55 p-4 sm:p-5">
-          <p className="text-[11px] tracking-[0.16em] text-slate-500">なぜその答えか</p>
+          <p className="text-[11px] tracking-[0.16em] text-slate-500">解説</p>
           <p className="mt-2 text-sm leading-7 text-slate-200">
             {session.question.explanation}
           </p>

@@ -12,14 +12,14 @@ export function QuizHeader({ session }: QuizHeaderProps) {
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
         <div className="space-y-3">
           <p className="text-[11px] tracking-[0.24em] text-slate-500 sm:text-xs sm:tracking-[0.3em]">
-            クイズ学習
+            問題演習
           </p>
           <div className="space-y-2">
             <h1 className="text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
-              読む、選ぶ、理解するを一問ごとに進める
+              弱点カテゴリから順に、判断力を整える
             </h1>
             <p className="max-w-2xl text-sm leading-6 text-slate-400 sm:text-[15px] sm:leading-7">
-              いま何問目かを確認しながら、答えの理由まで整理して次の一問につなげます。
+              復習リストの誤答カテゴリと直近の学習状況をもとに、今取り組む優先度が高い問題から出題します。
             </p>
           </div>
         </div>
@@ -42,16 +42,16 @@ export function QuizHeader({ session }: QuizHeaderProps) {
               }
             />
           </div>
-          <ProgressBar value={session.progressPercent} label="全体の進み具合" />
+          <ProgressBar value={session.progressPercent} label="今回の進捗" />
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-[1.15rem] border border-slate-800 bg-slate-950/80 p-4">
-              <p className="text-[11px] tracking-[0.16em] text-slate-500">現在のカテゴリ</p>
+              <p className="text-[11px] tracking-[0.16em] text-slate-500">カテゴリ</p>
               <p className="mt-2 text-base font-medium text-slate-100">
                 {session.question.category}
               </p>
             </div>
             <div className="rounded-[1.15rem] border border-slate-800 bg-slate-950/80 p-4">
-              <p className="text-[11px] tracking-[0.16em] text-slate-500">ここまでの正答率</p>
+              <p className="text-[11px] tracking-[0.16em] text-slate-500">今回の正答率</p>
               <p className="mt-2 text-base font-medium text-slate-100">
                 {session.accuracyPercent}%
               </p>

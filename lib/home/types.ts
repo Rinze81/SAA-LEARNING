@@ -48,6 +48,10 @@ export type HomeSnapshot = {
     bars: ProgressBarItem[];
   };
   paths: LearningPath[];
+  weakCategories: {
+    category: string;
+    detail: string;
+  }[];
   focus: {
     title: string;
     description: string;

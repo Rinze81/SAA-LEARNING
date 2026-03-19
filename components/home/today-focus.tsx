@@ -5,22 +5,27 @@ import type { HomeSnapshot } from "@/lib/home/types";
 
 type TodayFocusProps = {
   snapshot: HomeSnapshot;
+  isHydrated: boolean;
 };
 
-export function TodayFocus({ snapshot }: TodayFocusProps) {
+export function TodayFocus({ snapshot, isHydrated }: TodayFocusProps) {
   const { focus } = snapshot;
 
   return (
     <SectionFrame
-      eyebrow="今日の一歩"
-      title={`今日は ${focus.title} に絞る`}
-      description={focus.description}
+      eyebrow="今日の重点ポイント"
+      title={`今日は ${focus.title}`}
+      description={
+        isHydrated
+          ? focus.description
+          : "学習状況の読み込み後に、今日優先したいカテゴリと比較ポイントを反映します。"
+      }
       aside={
         <Link
           href={focus.href}
           className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-slate-800 px-5 text-sm font-semibold text-slate-100 transition hover:-translate-y-0.5"
         >
-          このテーマを見る
+          ここから進める
         </Link>
       }
       className="bg-slate-900/60"
@@ -34,26 +39,36 @@ export function TodayFocus({ snapshot }: TodayFocusProps) {
             {focus.whyNow}
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {focus.checkpoints.map((checkpoint) => (
-              <div
-                key={checkpoint.label}
-                className="rounded-[1.15rem] border border-slate-800 bg-slate-900/70 p-4"
-              >
-                <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs sm:tracking-[0.22em]">
-                  {checkpoint.label}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-200">
-                  {checkpoint.value}
-                </p>
-              </div>
-            ))}
+            {isHydrated
+              ? focus.checkpoints.map((checkpoint) => (
+                  <div
+                    key={checkpoint.label}
+                    className="rounded-[1.15rem] border border-slate-800 bg-slate-900/70 p-4"
+                  >
+                    <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs sm:tracking-[0.22em]">
+                      {checkpoint.label}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-200">
+                      {checkpoint.value}
+                    </p>
+                  </div>
+                ))
+              : Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="rounded-[1.15rem] border border-slate-800 bg-slate-900/70 p-4"
+                  >
+                    <div className="h-3 w-16 rounded bg-slate-800" />
+                    <div className="mt-3 h-10 rounded bg-slate-900" />
+                  </div>
+                ))}
           </div>
         </div>
 
         <div className="grid gap-4 rounded-[1.35rem] border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
           <div>
             <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs sm:tracking-[0.22em]">
-              今日の進め方
+              次の学習
             </p>
             <p className="mt-2.5 text-xl font-semibold text-slate-50 sm:text-2xl">
               {focus.stepTitle}
@@ -62,19 +77,31 @@ export function TodayFocus({ snapshot }: TodayFocusProps) {
               {focus.stepDescription}
             </p>
           </div>
-          <ProgressBar value={focus.readiness} label="このテーマの準備度" />
+          <ProgressBar value={focus.readiness} label="理解の準備度" />
           <ol className="grid gap-3">
-            {focus.actions.map((action, index) => (
-              <li
-                key={action}
-                className="grid grid-cols-[auto_1fr] gap-3 rounded-[1.15rem] border border-slate-800 bg-slate-900/50 p-3.5 sm:p-4"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 text-sm text-slate-300">
-                  {index + 1}
-                </span>
-                <p className="text-sm leading-6 text-slate-200">{action}</p>
-              </li>
-            ))}
+            {isHydrated
+              ? focus.actions.map((action, index) => (
+                  <li
+                    key={action}
+                    className="grid grid-cols-[auto_1fr] gap-3 rounded-[1.15rem] border border-slate-800 bg-slate-900/50 p-3.5 sm:p-4"
+                  >
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 text-sm text-slate-300">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm leading-6 text-slate-200">{action}</p>
+                  </li>
+                ))
+              : Array.from({ length: 3 }).map((_, index) => (
+                  <li
+                    key={index}
+                    className="grid grid-cols-[auto_1fr] gap-3 rounded-[1.15rem] border border-slate-800 bg-slate-900/50 p-3.5 sm:p-4"
+                  >
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 text-sm text-slate-300">
+                      {index + 1}
+                    </span>
+                    <div className="mt-1 h-5 rounded bg-slate-900" />
+                  </li>
+                ))}
           </ol>
         </div>
       </div>

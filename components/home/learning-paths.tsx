@@ -9,9 +9,9 @@ type LearningPathsProps = {
 export function LearningPaths({ snapshot }: LearningPathsProps) {
   return (
     <SectionFrame
-      eyebrow="学習導線"
-      title="いまの状態に合う入口を選ぶ"
-      description="リンク集ではなく、何のために入るかで選べる3つの学習モードです。"
+      eyebrow="学習ルート"
+      title="今の理解に合わせて、学ぶ順番を選ぶ"
+      description="用語の整理、比較での判断、優先クイズのどこからでも始められます。今の課題に合う流れを選んで学習を進めましょう。"
     >
       <div className="grid gap-4">
         {snapshot.paths.map((path, index) => (
@@ -39,7 +39,7 @@ export function LearningPaths({ snapshot }: LearningPathsProps) {
             <div className="grid gap-3 border-t border-slate-800 pt-4 sm:grid-cols-[1fr_auto] sm:items-end">
               <div className="space-y-1">
                 <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs sm:tracking-[0.22em]">
-                  こんなときに使う
+                  このルートがおすすめな理由
                 </p>
                 <p className="text-sm text-slate-200">{path.reason}</p>
               </div>

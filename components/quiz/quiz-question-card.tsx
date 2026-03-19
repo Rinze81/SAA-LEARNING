@@ -15,8 +15,8 @@ export function QuizQuestionCard({
   return (
     <SectionFrame
       eyebrow="問題"
-      title="要件を先に読み取り、判断に必要な条件をつかむ"
-      description="サービス名に飛びつかず、何が求められているかを先に整理してから選びます。"
+      title="設問から判断材料を拾い、最適な選択肢を選ぶ"
+      description="正答だけでなく、なぜ他の選択肢ではないのかも意識して考えると、解説の理解が深まりやすくなります。"
       aside={<StatusChip label={question.category} tone="accent" />}
     >
       <div className="grid gap-4">
@@ -35,9 +35,9 @@ export function QuizQuestionCard({
 
         {session.isSubmitted ? (
           <div className="rounded-[1.2rem] border border-slate-800 bg-slate-900/45 p-4">
-            <p className="text-[11px] tracking-[0.16em] text-slate-500">回答後の見方</p>
+            <p className="text-[11px] tracking-[0.16em] text-slate-500">提出後の見方</p>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              正誤だけで終わらせず、どの条件で選び分けるべきだったかを右側で整理します。
+              正解の選択肢だけでなく、選ばなかった選択肢が外れる理由まで一緒に確認すると、次の問題に強くなります。
             </p>
           </div>
         ) : null}

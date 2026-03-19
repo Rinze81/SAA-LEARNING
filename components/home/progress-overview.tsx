@@ -9,9 +9,9 @@ type ProgressOverviewProps = {
 export function ProgressOverview({ snapshot }: ProgressOverviewProps) {
   return (
     <SectionFrame
-      eyebrow="進み具合"
-      title="進捗を、次の判断に使える形で見る"
-      description="数字を並べるだけでなく、どこから手を付けると効率がいいかが見えるようにしています。"
+      eyebrow="学習の進み具合"
+      title="数字で確認して、次の学習に活かす"
+      description="進捗を追うだけでなく、どこで判断がぶれやすいかを見つけやすい形でまとめています。"
       aside={
         <div className="rounded-full border border-slate-800 px-4 py-2 text-sm text-slate-300">
           学習時間 {snapshot.progress.studyHours}h
@@ -22,7 +22,7 @@ export function ProgressOverview({ snapshot }: ProgressOverviewProps) {
         <div className="grid gap-4 lg:grid-cols-[0.96fr_1.04fr]">
           <div className="rounded-[1.35rem] border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
             <p className="text-sm leading-6 text-slate-400">
-              苦手を先に戻せるように、判断に直結する指標をまとめています。
+              正答率だけでなく、用語理解と比較判断も並べて見ることで、どの学習が効いているかを見直しやすくしています。
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
               {snapshot.progress.highlights.map((item) => (

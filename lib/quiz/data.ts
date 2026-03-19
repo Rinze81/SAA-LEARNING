@@ -4,127 +4,72 @@ export const quizQuestions: QuizQuestion[] = [
   {
     id: "storage-1",
     category: "Storage",
-    modeLabel: "比較で覚える",
+    modeLabel: "使い分け重視",
     prompt:
-      "複数の Linux ベース EC2 インスタンスから同時にマウントでき、アプリケーション間で共有したい永続ストレージとして最も適切なサービスはどれですか。",
+      "複数の Linux ベース EC2 インスタンスから同時にマウントでき、アプリケーション層で共有したいファイルストレージとして最も適切なサービスはどれですか。",
     context:
-      "共有性と運用のしやすさを重視しています。単一インスタンス専用のボリュームでは要件を満たせません。",
+      "複数台の EC2 で同じファイルを共有したいケースです。オブジェクト保存ではなく、マウントして使う前提で考えます。",
     correctChoiceId: "c",
     choices: [
-      {
-        id: "a",
-        label: "A",
-        text: "Amazon S3",
-        hint: "オブジェクトストレージ",
-      },
-      {
-        id: "b",
-        label: "B",
-        text: "Amazon EBS",
-        hint: "単一 EC2 向けのブロックストレージ",
-      },
-      {
-        id: "c",
-        label: "C",
-        text: "Amazon EFS",
-        hint: "複数サーバーで共有できるファイルストレージ",
-      },
+      { id: "a", label: "A", text: "Amazon S3", hint: "オブジェクトストレージ" },
+      { id: "b", label: "B", text: "Amazon EBS", hint: "単一 EC2 に近いブロックストレージ" },
+      { id: "c", label: "C", text: "Amazon EFS", hint: "複数 EC2 から共有できるファイルストレージ" },
       {
         id: "d",
         label: "D",
         text: "Amazon FSx for Windows File Server",
-        hint: "Windows ワークロード向け",
+        hint: "Windows ワークロード向けの共有ファイルストレージ",
       },
     ],
     explanation:
-      "EFS は複数の Linux ベース EC2 インスタンスから同時に利用できるマネージドファイルストレージです。S3 はオブジェクトストレージ、EBS は単一インスタンス向けのブロックストレージなので、この要件には合いません。",
+      "EFS は複数の Linux ベース EC2 から同時に利用できるマネージドファイルストレージです。S3 はオブジェクトストレージ、EBS は基本的に単一インスタンス向けのブロックストレージなので要件に合いません。",
     comparePoint:
-      "EBS は 1 台の EC2 に近い使い方、EFS は複数サーバーで共有、S3 はファイル共有ではなくオブジェクト保存です。",
+      "EBS は 1 台の EC2 に近い用途、EFS は複数台で共有するファイル用途、S3 は API ベースで扱うオブジェクト用途です。",
     rememberAxis:
-      "共有したいなら EFS。1 台に強く結びつくブロックストレージなら EBS。HTTP ベースの保存先なら S3 と整理します。",
+      "共有してマウントしたいなら EFS。1 台に近いブロック用途なら EBS。HTTP/API 前提の保存なら S3。",
   },
   {
     id: "network-1",
     category: "Networking",
-    modeLabel: "判断軸を使う",
+    modeLabel: "設計判断",
     prompt:
-      "複数リージョンに配置されたアプリケーションへ、利用者を最も近い正常なエンドポイントへ誘導したいです。最初に検討すべきサービスはどれですか。",
+      "複数リージョンに展開したアプリケーションへ、利用者を最も近いエンドポイントへ誘導したいです。まず選ぶべきサービスはどれですか。",
     context:
-      "リージョンをまたいだ振り分けが必要です。アプリケーションロードバランサー単体では範囲が足りません。",
+      "リージョン間の振り分けが必要です。アプリケーションロードバランサー単体ではリージョンをまたいだ判断はできません。",
     correctChoiceId: "b",
     choices: [
-      {
-        id: "a",
-        label: "A",
-        text: "Application Load Balancer",
-        hint: "リージョン内での L7 負荷分散",
-      },
-      {
-        id: "b",
-        label: "B",
-        text: "Amazon Route 53",
-        hint: "DNS レベルでルーティングする",
-      },
-      {
-        id: "c",
-        label: "C",
-        text: "AWS Direct Connect",
-        hint: "専用線接続",
-      },
-      {
-        id: "d",
-        label: "D",
-        text: "Amazon CloudFront",
-        hint: "コンテンツ配信",
-      },
+      { id: "a", label: "A", text: "Application Load Balancer", hint: "L7 の負荷分散" },
+      { id: "b", label: "B", text: "Amazon Route 53", hint: "DNS レベルでルーティングできる" },
+      { id: "c", label: "C", text: "AWS Direct Connect", hint: "専用線接続" },
+      { id: "d", label: "D", text: "Amazon CloudFront", hint: "コンテンツ配信" },
     ],
     explanation:
-      "Route 53 は DNS レベルでヘルスチェックやルーティングポリシーを使い、複数リージョン間の誘導を行えます。ALB はリージョン内の負荷分散なので、広域ルーティングの起点にはなりません。",
+      "Route 53 は DNS レベルでレイテンシーベースルーティングなどを提供し、複数リージョン間での誘導に向いています。ALB は各リージョン内での負荷分散には有効ですが、リージョン選択の役割ではありません。",
     comparePoint:
-      "Route 53 はリージョンの外側で振り分ける仕組み、ALB はリージョン内でトラフィックを分散する仕組みです。",
+      "Route 53 はどこへ誘導するかを決める役割、Load Balancer は選ばれた先でどうさばくかを決める役割です。",
     rememberAxis:
-      "ドメイン解決の段階で行き先を決めたいなら Route 53。受け取った後に負荷分散したいなら Load Balancer と考えます。",
+      "入口で宛先リージョンを決めるなら Route 53。選ばれた先でトラフィックを振り分けるなら Load Balancer。",
   },
   {
     id: "database-1",
     category: "Database",
-    modeLabel: "実戦で確認",
+    modeLabel: "要件から選ぶ",
     prompt:
-      "ミリ秒単位の応答が必要で、アクセス量の変動が大きく、キーと値で高速に処理したいアプリケーションに最も適したサービスはどれですか。",
+      "ミリ秒単位の応答が必要で、アクセス量の変動が大きいキーと値中心のアプリケーションに最も適したサービスはどれですか。",
     context:
-      "スキーマの柔軟性とスケールしやすさを優先します。複雑な結合よりも高速アクセスが重要です。",
+      "スキーマ固定のリレーショナル処理よりも、スケールしやすいキーバリューアクセスを重視します。",
     correctChoiceId: "d",
     choices: [
-      {
-        id: "a",
-        label: "A",
-        text: "Amazon RDS for MySQL",
-        hint: "リレーショナルデータベース",
-      },
-      {
-        id: "b",
-        label: "B",
-        text: "Amazon Redshift",
-        hint: "分析向けデータウェアハウス",
-      },
-      {
-        id: "c",
-        label: "C",
-        text: "Amazon Aurora",
-        hint: "高性能なリレーショナルデータベース",
-      },
-      {
-        id: "d",
-        label: "D",
-        text: "Amazon DynamoDB",
-        hint: "サーバーレス NoSQL",
-      },
+      { id: "a", label: "A", text: "Amazon RDS for MySQL", hint: "リレーショナル DB" },
+      { id: "b", label: "B", text: "Amazon Redshift", hint: "分析向けデータウェアハウス" },
+      { id: "c", label: "C", text: "Amazon Aurora", hint: "高性能なリレーショナル DB" },
+      { id: "d", label: "D", text: "Amazon DynamoDB", hint: "サーバーレス NoSQL" },
     ],
     explanation:
-      "DynamoDB はサーバーレスの NoSQL データベースで、キーと値による高速アクセスと大きなスケールに向いています。RDS や Aurora はリレーショナル設計が必要な場面に適しています。",
+      "DynamoDB はサーバーレスな NoSQL データベースで、キーバリュー中心のアクセスと大きなスケール変動に向いています。RDS や Aurora はリレーショナル要件が強い場面で選びます。",
     comparePoint:
-      "SQL や結合を重視するなら RDS/Aurora、高速なキーアクセスと柔軟なスケールを重視するなら DynamoDB です。",
+      "SQL や複雑な結合を重視するなら RDS/Aurora。キーバリュー中心で高いスケーラビリティを重視するなら DynamoDB。",
     rememberAxis:
-      "アクセスパターンが決まっていて素早くさばきたいなら DynamoDB。関係性を扱うなら RDS 系と切り分けます。",
+      "アクセスパターンが先に決まっていて高速に捌きたいなら DynamoDB。関係性や SQL が重要なら RDS/Aurora。",
   },
 ];

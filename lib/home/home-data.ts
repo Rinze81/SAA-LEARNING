@@ -1,4 +1,7 @@
 import type { HomeSnapshot, PersistedHomeState } from "@/lib/home/types";
+import { quizQuestions } from "@/lib/quiz/data";
+import { buildStudyAnalytics } from "@/lib/study/analytics";
+import type { StudyAnalytics } from "@/lib/study/types";
 
 const STORAGE_KEY = "saa-home-state";
 
@@ -12,9 +15,44 @@ const defaultState: Required<PersistedHomeState> = {
   comparisonMastery: 47,
   streakDays: 4,
   reviewedToday: 12,
-  weakDomain: "VPC / Route 53 / ELB の使い分け",
+  weakDomain: "Networking",
   lastVisitedPath: "/quiz",
 };
+
+function createFallbackAnalytics(): StudyAnalytics {
+  const fallbackQuestion = quizQuestions[0];
+
+  return {
+    priorities: [
+      {
+        category: defaultState.weakDomain,
+        score: 0,
+        reviewCount: 0,
+        recentMistakes: 0,
+        recentAttempts: 0,
+        accuracy: null,
+        unattemptedCount: quizQuestions.filter(
+          (question) => question.category === defaultState.weakDomain,
+        ).length,
+        lastAttemptAt: null,
+      },
+    ],
+    recommendation: {
+      focusCategory: defaultState.weakDomain,
+      nextQuestionId: fallbackQuestion?.id ?? "",
+      quizHref: fallbackQuestion ? `/quiz?questionId=${fallbackQuestion.id}` : "/quiz",
+      reviewHref: "/review",
+      comparisonsHref: "/comparisons",
+      reason:
+        "保存済みの学習状況は読み込み後に反映されます。まずは次の 1 問から始めましょう。",
+    },
+    totalAttempts: 0,
+    overallAccuracy: 0,
+    reviewedToday: 0,
+    recentMistakes: 0,
+    streakDays: 0,
+  };
+}
 
 export function readPersistedHomeState(): PersistedHomeState {
   if (typeof window === "undefined") {
@@ -35,31 +73,52 @@ export function readPersistedHomeState(): PersistedHomeState {
   }
 }
 
-export function buildHomeSnapshot(state: PersistedHomeState): HomeSnapshot {
+type BuildHomeSnapshotOptions = {
+  analytics?: StudyAnalytics;
+};
+
+export function buildHomeSnapshot(
+  state: PersistedHomeState,
+  options: BuildHomeSnapshotOptions = {},
+): HomeSnapshot {
   const merged = { ...defaultState, ...state };
+  const analytics = options.analytics ?? createFallbackAnalytics();
+  const topPriorities =
+    analytics.priorities.length > 0
+      ? analytics.priorities.slice(0, 3)
+      : createFallbackAnalytics().priorities;
+  const focusCategory = analytics.recommendation.focusCategory || merged.weakDomain;
+  const focusQuestion = quizQuestions.find(
+    (question) => question.id === analytics.recommendation.nextQuestionId,
+  );
+  const quizAccuracy =
+    analytics.totalAttempts > 0 ? analytics.overallAccuracy : merged.quizAccuracy;
+  const reviewedToday =
+    analytics.reviewedToday > 0 ? analytics.reviewedToday : merged.reviewedToday;
+  const streakDays = analytics.streakDays > 0 ? analytics.streakDays : merged.streakDays;
+  const weakDomain = topPriorities[0]?.category ?? merged.weakDomain;
 
   return {
     hero: {
-      primaryLabel: `${merged.weakDomain} を先に整理する`,
-      primaryDescription:
-        "苦手な比較を先に戻すと、その後の問題演習が進めやすくなります。",
-      primaryHref: "/quiz",
+      primaryLabel: `${focusCategory} の次の 1 問から始める`,
+      primaryDescription: analytics.recommendation.reason,
+      primaryHref: analytics.recommendation.quizHref || "/quiz",
       secondaryHref: merged.lastVisitedPath,
       metrics: [
         {
-          label: "連続学習",
-          value: `${merged.streakDays}日`,
-          caption: "学習リズムを保てています",
+          label: "学習継続日数",
+          value: `${streakDays}日`,
+          caption: "連続して学習できている日数",
         },
         {
-          label: "今日触れた量",
-          value: `${merged.reviewedToday}項目`,
-          caption: "今日はここまで進めています",
+          label: "今日の復習",
+          value: `${reviewedToday}件`,
+          caption: "直近 24 時間で見直した問題数",
         },
         {
-          label: "今の弱点",
-          value: "ネットワーク",
-          caption: merged.weakDomain,
+          label: "弱点カテゴリ",
+          value: weakDomain,
+          caption: "次に優先して取り組む領域",
         },
       ],
     },
@@ -70,103 +129,116 @@ export function buildHomeSnapshot(state: PersistedHomeState): HomeSnapshot {
       studyHours: merged.studyHours,
       highlights: [
         {
-          label: "問題正答率",
-          value: `${merged.quizAccuracy}%`,
-          caption: "本番形式での安定度",
+          label: "クイズ正答率",
+          value: `${quizAccuracy}%`,
+          caption: "演習全体の回答結果を反映",
         },
         {
           label: "用語理解",
           value: `${merged.termsMastery}%`,
-          caption: "サービスの役割を説明できる割合",
+          caption: "サービスの役割を言葉で説明できる度合い",
         },
         {
-          label: "比較理解",
+          label: "比較判断",
           value: `${merged.comparisonMastery}%`,
-          caption: "違いを答え分けられる割合",
+          caption: "似たサービスの違いを整理できる度合い",
         },
       ],
       bars: [
         {
           label: "用語理解",
           value: merged.termsMastery,
-          caption: "サービスの責務と用途を言い換えられるか",
+          caption: "用語を一言で説明できる状態を目指す",
         },
         {
-          label: "比較理解",
+          label: "比較判断",
           value: merged.comparisonMastery,
-          caption: "S3 / EBS / EFS のような差分判断",
+          caption: "似た選択肢の違いを判断できるようにする",
         },
         {
-          label: "問題対応力",
-          value: merged.quizAccuracy,
-          caption: "文脈を読んで選択肢を捨てる力",
+          label: "クイズ精度",
+          value: quizAccuracy,
+          caption: "最近の回答でどれだけ安定して選べているか",
         },
       ],
     },
     paths: [
       {
         key: "terms",
-        title: "用語から確認",
+        title: "用語の使い分けを言葉で整理する",
         description:
-          "各サービスの役割を短く思い出す入口です。学習を再開した直後でも入りやすくしています。",
-        reason: "まず全体像を思い出したいとき向けです。",
-        cta: "用語を見直す",
+          "クイズで迷ったカテゴリに出てくるサービス名を、用途とセットで確認して理解を固める流れです。",
+        reason: "判断の土台になる言葉が曖昧だと、問題文を読んでも選択肢の差が見えにくくなります。",
+        cta: "用語学習へ進む",
         href: "/terms",
         pace: "ウォームアップ",
       },
       {
         key: "comparisons",
-        title: "違いで整理する",
+        title: `${focusCategory} を比較で理解する`,
         description:
-          "似たサービスの使い分けに絞る入口です。SAAで迷いやすい比較を短時間で戻せます。",
-        reason: "どちらを選ぶべきかを整理したいとき向けです。",
-        cta: "比較を見直す",
+          "似たサービスを並べて見比べながら、なぜその選択が最適なのかを整理する流れです。",
+        reason: `${focusCategory} は今の弱点カテゴリなので、比較の判断軸を先に整える効果が高いです。`,
+        cta: "比較表へ進む",
         href: "/comparisons",
-        pace: "判断整理",
+        pace: "判断軸づくり",
       },
       {
         key: "quiz",
-        title: "問題で確かめる",
+        title: `${focusCategory} の問題演習に進む`,
         description:
-          "実戦形式で理解の穴を見つける入口です。選んだ理由まで確認したい日に向いています。",
-        reason: "合格優先で弱点を洗い出したいときに最短です。",
-        cta: "問題に進む",
-        href: "/quiz",
-        pace: "本番形式",
+          "復習リストに保存された誤答カテゴリと最近の回答状況から、次に解くべき問題を優先して出題します。",
+        reason: analytics.recommendation.reason,
+        cta: "問題演習へ進む",
+        href: analytics.recommendation.quizHref || "/quiz",
+        pace: "本番演習",
       },
     ],
+    weakCategories: topPriorities.map((priority) => ({
+      category: priority.category,
+      detail:
+        priority.reviewCount > 0
+          ? `復習リスト ${priority.reviewCount} 件 / 直近の誤答 ${priority.recentMistakes} 件`
+          : `直近の誤答 ${priority.recentMistakes} 件 / 未着手 ${priority.unattemptedCount} 問`,
+    })),
     focus: {
-      title: "Storage の使い分け",
+      title: `${focusCategory} を今日の主軸にする`,
       description:
-        "S3 / EBS / EFS / FSx は頻出で、用途の違いを問われやすいテーマです。",
-      whyNow:
-        "保存先を選ぶ理由が曖昧なままだと、設計問題でも選択肢を切りづらくなります。",
-      href: "/comparisons",
+        focusQuestion?.comparePoint ??
+        `${focusCategory} は似た選択肢の差を言葉にできるようにすると、一気に正答率が安定しやすいカテゴリです。`,
+      whyNow: analytics.recommendation.reason,
+      href: analytics.recommendation.quizHref || "/quiz",
       readiness: Math.round(
         (merged.termsMastery + merged.comparisonMastery) / 2,
       ),
-      stepTitle: "3つの保存先を用途で言い分ける",
+      stepTitle: `${focusCategory} をステップで見直す`,
       stepDescription:
-        "仕様を覚えるより先に、要件から保存先を選べる状態を今日のゴールにします。",
+        "解いた問題を起点に、解説と比較ポイントまで一連の流れで確認できる構成にしています。",
       checkpoints: [
         {
-          label: "思い出す",
-          value: "S3 はオブジェクト、EBS は単一 EC2 向け、EFS は共有ファイル",
+          label: "次の 1 問",
+          value: focusQuestion?.prompt ?? "問題データの準備後に、次の 1 問を表示します。",
         },
         {
-          label: "比べる",
-          value: "共有性・接続先・用途の違いを一言で整理する",
+          label: "覚える軸",
+          value:
+            focusQuestion?.rememberAxis ??
+            "正解だけでなく、他の選択肢を外せる理由まで言えるようにしていきましょう。",
         },
         {
-          label: "使う",
-          value: "問題文から『なぜそれを選ぶか』まで説明する",
+          label: "復習の状況",
+          value: `${focusCategory} に復習 ${topPriorities[0]?.reviewCount ?? 0} 件 / 直近の誤答 ${topPriorities[0]?.recentMistakes ?? 0} 件`,
         },
       ],
       actions: [
-        "用語で S3 / EBS / EFS の定義を 3 分だけ見直す",
-        "比較で共有可否とユースケースの違いを並べて見る",
-        "問題でストレージ系を 5 問だけ解いて判断理由を確認する",
+        `まずは ${focusCategory} の問題演習を 1 問解く`,
+        "解説を読みながら、誤答の理由と正答の理由をセットで確認する",
+        "まだ迷う場合は比較表に戻って、似たサービスとの違いを整理する",
       ],
     },
   };
+}
+
+export function buildClientHomeSnapshot(state: PersistedHomeState): HomeSnapshot {
+  return buildHomeSnapshot(state, { analytics: buildStudyAnalytics() });
 }

@@ -4,23 +4,24 @@ import type { HomeSnapshot } from "@/lib/home/types";
 
 type HomeHeroProps = {
   snapshot: HomeSnapshot;
+  isHydrated: boolean;
 };
 
-export function HomeHero({ snapshot }: HomeHeroProps) {
+export function HomeHero({ snapshot, isHydrated }: HomeHeroProps) {
   return (
     <section className="overflow-hidden rounded-[1.75rem] border border-slate-800 bg-slate-950 sm:rounded-[2rem]">
       <div className="grid gap-6 p-5 sm:gap-7 sm:p-7 lg:grid-cols-[1.25fr_0.75fr] lg:p-10">
         <div className="space-y-6 sm:space-y-7">
           <div className="space-y-3">
             <p className="text-[11px] tracking-[0.24em] text-slate-500 sm:text-xs sm:tracking-[0.3em]">
-              学習を止めずに再開する
+              AWS SAA 学習ガイド
             </p>
             <div className="space-y-2.5">
               <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl lg:text-5xl">
-                次にやることが、開いた瞬間にわかるホーム。
+                迷わず次の学習に進める、実践重視の学習導線
               </h1>
               <p className="max-w-xl text-sm leading-6 text-slate-400 sm:text-[15px] sm:leading-7">
-                まず優先アクション、そのあとに進み具合と学習モードを確認できる構成です。
+                復習リストの誤答カテゴリと直近の学習状況をもとに、今やるべき 1 問と学習の優先順位をすぐに確認できます。
               </p>
             </div>
           </div>
@@ -34,20 +35,22 @@ export function HomeHero({ snapshot }: HomeHeroProps) {
                 {snapshot.hero.primaryLabel}
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                {snapshot.hero.primaryDescription}
+                {isHydrated
+                  ? snapshot.hero.primaryDescription
+                  : "保存済みの学習状況を読み込み後に反映します。まずは次の 1 問から始めましょう。"}
               </p>
             </div>
             <div className="grid gap-3 sm:min-w-[11rem]">
               <ActionLink
                 href={snapshot.hero.primaryHref}
-                label="学習を再開"
+                label="問題演習を始める"
                 className="w-full"
               >
-                このまま始める
+                今すぐ始める
               </ActionLink>
               <ActionLink
                 href={snapshot.hero.secondaryHref}
-                label="前回の場所を見る"
+                label="前回の画面へ戻る"
                 tone="muted"
                 className="w-full"
               >
@@ -61,21 +64,20 @@ export function HomeHero({ snapshot }: HomeHeroProps) {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[11px] tracking-[0.2em] text-slate-500 sm:text-xs sm:tracking-[0.24em]">
-                現在地
+                進捗
               </p>
               <p className="mt-2.5 text-4xl font-semibold text-slate-50 sm:text-[2.5rem]">
                 {snapshot.progress.overallPercent}%
               </p>
             </div>
             <p className="max-w-[8.5rem] text-right text-sm leading-6 text-slate-400 sm:max-w-[10rem]">
-              {snapshot.progress.completedTopics} / {snapshot.progress.totalTopics}
-              {" "}テーマ完了
+              {snapshot.progress.completedTopics} / {snapshot.progress.totalTopics} トピック完了
             </p>
           </div>
 
           <ProgressBar
             value={snapshot.progress.overallPercent}
-            label="仕上がりの目安"
+            label="学習全体の進捗"
           />
 
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">

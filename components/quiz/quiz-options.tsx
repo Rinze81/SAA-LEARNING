@@ -10,11 +10,15 @@ export function QuizOptions({ session }: QuizOptionsProps) {
   return (
     <SectionFrame
       eyebrow="選択肢"
-      title={session.isSubmitted ? "選択結果を比較して差分をつかむ" : "4つの候補から最も合うものを選ぶ"}
+      title={
+        session.isSubmitted
+          ? "選択肢を見比べて、判断の差を確認する"
+          : "4 つの候補から、最も適切なものを選ぶ"
+      }
       description={
         session.isSubmitted
-          ? "正解、不正解、自分が選んだものの差を見比べて、次回の判断軸に変えます。"
-          : "似て見える選択肢ほど、条件との一致で比べるのがポイントです。"
+          ? "正解と誤答の違いを見ながら、問題に含まれていた判断軸を確認しましょう。"
+          : "料金、可用性、共有責任、アクセスパターンなど、設問に効いている条件を見極めながら選びましょう。"
       }
     >
       <div className="grid gap-3">
