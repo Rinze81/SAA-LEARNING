@@ -7,8 +7,12 @@ import { QuizOptions } from "@/components/quiz/quiz-options";
 import { QuizQuestionCard } from "@/components/quiz/quiz-question-card";
 import { useQuizSession } from "@/lib/quiz/use-quiz-session";
 
-export function QuizExperience() {
-  const session = useQuizSession();
+type QuizExperienceProps = {
+  initialQuestionId?: string;
+};
+
+export function QuizExperience({ initialQuestionId }: QuizExperienceProps) {
+  const session = useQuizSession({ initialQuestionId });
 
   return (
     <main className="min-h-screen px-4 pb-16 pt-6 sm:px-6 lg:px-8">

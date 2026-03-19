@@ -3,11 +3,12 @@ import type { QuizQuestion } from "@/lib/quiz/types";
 export const quizQuestions: QuizQuestion[] = [
   {
     id: "storage-1",
-    category: "ストレージ",
-    modeLabel: "比較理解モード",
+    category: "Storage",
+    modeLabel: "比較で覚える",
     prompt:
-      "複数の EC2 インスタンスから同時にマウントでき、Linux ベースのアプリケーションで共有ファイルとして扱いたい保存先はどれですか。",
-    context: "性能よりも共有性と運用のシンプルさを優先します。",
+      "複数の Linux ベース EC2 インスタンスから同時にマウントでき、アプリケーション間で共有したい永続ストレージとして最も適切なサービスはどれですか。",
+    context:
+      "共有性と運用のしやすさを重視しています。単一インスタンス専用のボリュームでは要件を満たせません。",
     correctChoiceId: "c",
     choices: [
       {
@@ -20,48 +21,49 @@ export const quizQuestions: QuizQuestion[] = [
         id: "b",
         label: "B",
         text: "Amazon EBS",
-        hint: "単一 EC2 向けブロックストレージ",
+        hint: "単一 EC2 向けのブロックストレージ",
       },
       {
         id: "c",
         label: "C",
         text: "Amazon EFS",
-        hint: "共有ファイルストレージ",
+        hint: "複数サーバーで共有できるファイルストレージ",
       },
       {
         id: "d",
         label: "D",
         text: "Amazon FSx for Windows File Server",
-        hint: "Windows 連携向け",
+        hint: "Windows ワークロード向け",
       },
     ],
     explanation:
-      "EFS は複数の Linux ベース EC2 から同時に利用できるマネージドファイルストレージです。S3 はファイル共有マウントの前提が異なり、EBS は通常単一インスタンス向けです。",
+      "EFS は複数の Linux ベース EC2 インスタンスから同時に利用できるマネージドファイルストレージです。S3 はオブジェクトストレージ、EBS は単一インスタンス向けのブロックストレージなので、この要件には合いません。",
     comparePoint:
-      "EBS は単一接続、EFS は複数接続、S3 はオブジェクト保存という軸で切り分けると判断しやすくなります。",
+      "EBS は 1 台の EC2 に近い使い方、EFS は複数サーバーで共有、S3 はファイル共有ではなくオブジェクト保存です。",
     rememberAxis:
-      "共有したいなら EFS、1 台に高性能ブロックなら EBS、HTTP ベースの保存なら S3。",
+      "共有したいなら EFS。1 台に強く結びつくブロックストレージなら EBS。HTTP ベースの保存先なら S3 と整理します。",
   },
   {
     id: "network-1",
-    category: "ネットワーク",
-    modeLabel: "問題演習モード",
+    category: "Networking",
+    modeLabel: "判断軸を使う",
     prompt:
-      "独自ドメインで複数リージョンにトラフィックを振り分け、障害時には健全なリージョンへ自動で寄せたいとき、最も適したサービスはどれですか。",
-    context: "可用性を優先し、DNS レベルで振り分けたいケースです。",
+      "複数リージョンに配置されたアプリケーションへ、利用者を最も近い正常なエンドポイントへ誘導したいです。最初に検討すべきサービスはどれですか。",
+    context:
+      "リージョンをまたいだ振り分けが必要です。アプリケーションロードバランサー単体では範囲が足りません。",
     correctChoiceId: "b",
     choices: [
       {
         id: "a",
         label: "A",
         text: "Application Load Balancer",
-        hint: "L7 ロードバランサー",
+        hint: "リージョン内での L7 負荷分散",
       },
       {
         id: "b",
         label: "B",
         text: "Amazon Route 53",
-        hint: "DNS とヘルスチェック",
+        hint: "DNS レベルでルーティングする",
       },
       {
         id: "c",
@@ -77,38 +79,39 @@ export const quizQuestions: QuizQuestion[] = [
       },
     ],
     explanation:
-      "Route 53 は DNS ベースのルーティングとヘルスチェックで、複数リージョン間のフェイルオーバーに対応できます。ALB はリージョン内の負荷分散が中心です。",
+      "Route 53 は DNS レベルでヘルスチェックやルーティングポリシーを使い、複数リージョン間の誘導を行えます。ALB はリージョン内の負荷分散なので、広域ルーティングの起点にはなりません。",
     comparePoint:
-      "リージョンをまたいだ名前解決の制御なら Route 53、リージョン内のトラフィック分散なら ALB と考えると整理しやすいです。",
+      "Route 53 はリージョンの外側で振り分ける仕組み、ALB はリージョン内でトラフィックを分散する仕組みです。",
     rememberAxis:
-      "ドメイン名の行き先を変える話なら Route 53、到達後の振り分けなら Load Balancer。",
+      "ドメイン解決の段階で行き先を決めたいなら Route 53。受け取った後に負荷分散したいなら Load Balancer と考えます。",
   },
   {
     id: "database-1",
-    category: "データベース",
-    modeLabel: "理解確認モード",
+    category: "Database",
+    modeLabel: "実戦で確認",
     prompt:
-      "ミリ秒未満の応答が必要で、アクセス量の変動が大きく、キーと値で高速に取得したいアプリケーションに適したサービスはどれですか。",
-    context: "スキーマの柔軟性も重視します。",
+      "ミリ秒単位の応答が必要で、アクセス量の変動が大きく、キーと値で高速に処理したいアプリケーションに最も適したサービスはどれですか。",
+    context:
+      "スキーマの柔軟性とスケールしやすさを優先します。複雑な結合よりも高速アクセスが重要です。",
     correctChoiceId: "d",
     choices: [
       {
         id: "a",
         label: "A",
         text: "Amazon RDS for MySQL",
-        hint: "リレーショナルDB",
+        hint: "リレーショナルデータベース",
       },
       {
         id: "b",
         label: "B",
         text: "Amazon Redshift",
-        hint: "分析向けDWH",
+        hint: "分析向けデータウェアハウス",
       },
       {
         id: "c",
         label: "C",
         text: "Amazon Aurora",
-        hint: "高性能リレーショナルDB",
+        hint: "高性能なリレーショナルデータベース",
       },
       {
         id: "d",
@@ -118,10 +121,10 @@ export const quizQuestions: QuizQuestion[] = [
       },
     ],
     explanation:
-      "DynamoDB はサーバーレスな NoSQL データベースで、低レイテンシかつスケーラブルなキー・バリューアクセスに向いています。RDS や Aurora はリレーショナル要件に適しています。",
+      "DynamoDB はサーバーレスの NoSQL データベースで、キーと値による高速アクセスと大きなスケールに向いています。RDS や Aurora はリレーショナル設計が必要な場面に適しています。",
     comparePoint:
-      "リレーショナルな結合や厳密なSQLが必要なら RDS/Aurora、高速なキーアクセス中心なら DynamoDB です。",
+      "SQL や結合を重視するなら RDS/Aurora、高速なキーアクセスと柔軟なスケールを重視するなら DynamoDB です。",
     rememberAxis:
-      "アクセスパターンが単純で速さ重視なら DynamoDB、複雑なクエリや結合なら RDS 系。",
+      "アクセスパターンが決まっていて素早くさばきたいなら DynamoDB。関係性を扱うなら RDS 系と切り分けます。",
   },
 ];

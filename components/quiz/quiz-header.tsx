@@ -16,10 +16,10 @@ export function QuizHeader({ session }: QuizHeaderProps) {
           </p>
           <div className="space-y-2">
             <h1 className="text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
-              読む → 選ぶ → 理由を理解する
+              読む、選ぶ、理解するを一問ごとに進める
             </h1>
             <p className="max-w-2xl text-sm leading-6 text-slate-400 sm:text-[15px] sm:leading-7">
-              今どこまで進んだかを見ながら、1問ずつ落ち着いて判断できる構成です。
+              いま何問目かを確認しながら、答えの理由まで整理して次の一問につなげます。
             </p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export function QuizHeader({ session }: QuizHeaderProps) {
               </p>
             </div>
             <div className="rounded-[1.15rem] border border-slate-800 bg-slate-950/80 p-4">
-              <p className="text-[11px] tracking-[0.16em] text-slate-500">ここまでの正解率</p>
+              <p className="text-[11px] tracking-[0.16em] text-slate-500">ここまでの正答率</p>
               <p className="mt-2 text-base font-medium text-slate-100">
                 {session.accuracyPercent}%
               </p>

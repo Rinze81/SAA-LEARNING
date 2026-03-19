@@ -1,5 +1,11 @@
 import { QuizExperience } from "@/components/quiz/quiz-experience";
 
-export default function QuizPage() {
-  return <QuizExperience />;
+type QuizPageProps = {
+  searchParams?: {
+    questionId?: string;
+  };
+};
+
+export default function QuizPage({ searchParams }: QuizPageProps) {
+  return <QuizExperience initialQuestionId={searchParams?.questionId} />;
 }

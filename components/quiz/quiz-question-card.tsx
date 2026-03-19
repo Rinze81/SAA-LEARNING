@@ -14,9 +14,9 @@ export function QuizQuestionCard({
 }: QuizQuestionCardProps) {
   return (
     <SectionFrame
-      eyebrow="問題文"
-      title="まずは要件を落ち着いて読む"
-      description="サービス名を先に探すのではなく、何が求められているかを先に拾うための領域です。"
+      eyebrow="問題"
+      title="要件を先に読み取り、判断に必要な条件をつかむ"
+      description="サービス名に飛びつかず、何が求められているかを先に整理してから選びます。"
       aside={<StatusChip label={question.category} tone="accent" />}
     >
       <div className="grid gap-4">
@@ -37,7 +37,7 @@ export function QuizQuestionCard({
           <div className="rounded-[1.2rem] border border-slate-800 bg-slate-900/45 p-4">
             <p className="text-[11px] tracking-[0.16em] text-slate-500">回答後の見方</p>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              正誤だけで終わらせず、なぜその選択肢になるかを右側で確認します。
+              正誤だけで終わらせず、どの条件で選び分けるべきだったかを右側で整理します。
             </p>
           </div>
         ) : null}
