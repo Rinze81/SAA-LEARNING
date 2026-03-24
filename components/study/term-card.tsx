@@ -117,6 +117,13 @@ export function TermCard({ term, isHighlighted = false }: TermCardProps) {
               </section>
             </div>
 
+            {term.diagram ? (
+              <div className="overflow-x-auto rounded-[1.25rem] border border-slate-800 bg-slate-900/30 p-4">
+                <p className="mb-3 text-xs tracking-[0.16em] text-slate-500">構成図</p>
+                <div dangerouslySetInnerHTML={{ __html: term.diagram }} />
+              </div>
+            ) : null}
+
             {quizCategory ? (
               <Link
                 href={`/quiz?category=${quizCategory}`}

@@ -6,7 +6,10 @@ export type StudyTerm = {
   description: string;
   examTip: string;
   related: string[];
+  diagram?: string;
 };
+
+import { termDiagrams } from "@/lib/study/term-diagrams";
 
 export const studyTerms: StudyTerm[] = [
   {
@@ -96,6 +99,7 @@ export const studyTerms: StudyTerm[] = [
     examTip:
       "ALB と NLB の使い分け、Auto Scaling や Multi-AZ と組み合わせた構成でよく問われます。",
     related: ["ALB", "NLB", "Auto Scaling"],
+    diagram: termDiagrams["load-balancer"],
   },
   {
     id: "object-storage",
@@ -129,6 +133,7 @@ export const studyTerms: StudyTerm[] = [
     examTip:
       "CloudFront の役割としてよく出ます。保存先の S3 と混同しないことが大切です。",
     related: ["CloudFront", "S3", "Durability"],
+    diagram: termDiagrams["cdn"],
   },
   {
     id: "stateless",
@@ -151,6 +156,7 @@ export const studyTerms: StudyTerm[] = [
     examTip:
       "Public Subnet や Private Subnet、Security Group との関係をまとめて理解しているかが問われます。",
     related: ["Public Subnet", "Private Subnet", "Security Group"],
+    diagram: termDiagrams["vpc"],
   },
   {
     id: "public-subnet",
@@ -184,6 +190,7 @@ export const studyTerms: StudyTerm[] = [
     examTip:
       "High Availability や RDS の可用性向上策としてよく出ます。Read Replica とは目的が違います。",
     related: ["High Availability", "Fault Tolerance", "Read Replica"],
+    diagram: termDiagrams["multi-az"],
   },
   {
     id: "read-replica",
@@ -206,6 +213,7 @@ export const studyTerms: StudyTerm[] = [
     examTip:
       "Lambda、SQS、SNS、EventBridge などと組み合わせて、疎結合な設計として出題されやすいです。",
     related: ["Serverless", "Lambda", "SQS"],
+    diagram: termDiagrams["event-driven"],
   },
   {
     id: "serverless",
