@@ -6,6 +6,22 @@ type QuizFeedbackPanelProps = {
   session: ReturnType<typeof useQuizSession>;
 };
 
+function CheckCircleIcon() {
+  return (
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function XCircleIcon() {
+  return (
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
 export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
   if (!session.isSubmitted) {
     return (
@@ -34,34 +50,69 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
     );
   }
 
+  const isCorrect = session.isCorrect;
+
   return (
-    <SectionFrame
-      eyebrow="解説"
-      title={session.isCorrect ? "正解です。判断軸もあわせて確認しましょう" : "不正解です。比較の視点をここで整理しましょう"}
-      description="正解だった場合も、なぜそれが最適かまで確認しておくと、次の問題での再現性が高まります。"
-      aside={
-        <StatusChip
-          label={session.isCorrect ? "正解" : "不正解"}
-          tone={session.isCorrect ? "success" : "danger"}
-        />
-      }
+    <section
+      className={`rounded-[1.75rem] border p-5 backdrop-blur sm:rounded-[2rem] sm:p-7 ${
+        isCorrect
+          ? "border-emerald-800/50 bg-emerald-950/20"
+          : "border-rose-800/50 bg-rose-950/15"
+      }`}
     >
-      <div className="grid gap-4">
+      <div className="flex flex-col gap-5">
+        {/* ── ヘッダー ── */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${
+                isCorrect
+                  ? "bg-emerald-900/60 text-emerald-300"
+                  : "bg-rose-900/60 text-rose-300"
+              }`}
+            >
+              {isCorrect ? <CheckCircleIcon /> : <XCircleIcon />}
+            </div>
+            <div>
+              <p className="text-[11px] tracking-[0.22em] text-slate-500">解説</p>
+              <h2
+                className={`text-xl font-semibold tracking-tight sm:text-2xl ${
+                  isCorrect ? "text-emerald-100" : "text-rose-100"
+                }`}
+              >
+                {isCorrect ? "正解です" : "不正解です"}
+              </h2>
+            </div>
+          </div>
+          <StatusChip
+            label={isCorrect ? "正解" : "不正解"}
+            tone={isCorrect ? "success" : "danger"}
+          />
+        </div>
+
+        {/* ── 回答比較 ── */}
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-[1.2rem] border border-slate-800 bg-slate-900/55 p-4">
+          <div
+            className={`rounded-[1.2rem] border p-4 ${
+              isCorrect
+                ? "border-emerald-800/40 bg-emerald-950/30"
+                : "border-rose-800/40 bg-rose-950/25"
+            }`}
+          >
             <p className="text-[11px] tracking-[0.16em] text-slate-500">あなたの回答</p>
-            <p className="mt-2 text-sm leading-6 text-slate-200">
+            <p className={`mt-2 text-sm font-medium leading-6 ${isCorrect ? "text-emerald-200" : "text-rose-200"}`}>
               {session.selectedChoice?.label}. {session.selectedChoice?.text}
             </p>
           </div>
-          <div className="rounded-[1.2rem] border border-slate-800 bg-slate-900/55 p-4">
+          <div className="rounded-[1.2rem] border border-slate-700/60 bg-slate-900/55 p-4">
             <p className="text-[11px] tracking-[0.16em] text-slate-500">正答</p>
-            <p className="mt-2 text-sm leading-6 text-slate-200">
+            <p className="mt-2 text-sm font-medium leading-6 text-emerald-200">
               {session.correctChoice?.label}. {session.correctChoice?.text}
             </p>
           </div>
         </div>
 
+        {/* ── 解説 ── */}
         <div className="rounded-[1.25rem] border border-slate-800 bg-slate-900/55 p-4 sm:p-5">
           <p className="text-[11px] tracking-[0.16em] text-slate-500">解説</p>
           <p className="mt-2 text-sm leading-7 text-slate-200">
@@ -69,6 +120,7 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
           </p>
         </div>
 
+        {/* ── 比較ポイント ── */}
         <div className="rounded-[1.25rem] border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
           <p className="text-[11px] tracking-[0.16em] text-slate-500">比較ポイント</p>
           <p className="mt-2 text-sm leading-7 text-slate-300">
@@ -76,6 +128,7 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
           </p>
         </div>
 
+        {/* ── 覚える軸 ── */}
         <div className="rounded-[1.25rem] border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
           <p className="text-[11px] tracking-[0.16em] text-slate-500">覚える軸</p>
           <p className="mt-2 text-sm leading-7 text-slate-300">
@@ -83,6 +136,6 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
           </p>
         </div>
       </div>
-    </SectionFrame>
+    </section>
   );
 }

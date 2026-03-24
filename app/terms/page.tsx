@@ -130,7 +130,7 @@ export default function TermsPage() {
                       key={category}
                       type="button"
                       onClick={() => setSelectedCategory(category)}
-                      className={`inline-flex min-h-[40px] items-center rounded-full border px-4 text-sm transition ${
+                      className={`inline-flex min-h-[44px] items-center rounded-full border px-4 text-sm transition ${
                         isSelected
                           ? "border-sky-800 bg-sky-950/70 text-sky-100"
                           : "border-slate-800 bg-slate-900/65 text-slate-300 hover:border-slate-700 hover:text-slate-100"
@@ -152,7 +152,7 @@ export default function TermsPage() {
                     setSearchQuery("");
                     setSelectedCategory(ALL_CATEGORIES);
                   }}
-                  className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-slate-800 px-4 text-sm text-slate-200 transition hover:border-slate-700 hover:text-slate-50"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-slate-800 px-4 text-sm text-slate-200 transition hover:border-slate-700 hover:text-slate-50"
                 >
                   絞り込みをクリア
                 </button>

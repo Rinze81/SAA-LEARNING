@@ -18,7 +18,7 @@ export function MobileBottomNav({ pathname }: MobileBottomNavProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex min-h-[58px] flex-col items-center justify-center rounded-2xl px-2 text-center transition ${
+              className={`flex min-h-[58px] flex-col items-center justify-center rounded-2xl px-2 text-center transition-all duration-150 active:scale-95 active:opacity-80 ${
                 isActive
                   ? "bg-slate-100 text-slate-950"
                   : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"

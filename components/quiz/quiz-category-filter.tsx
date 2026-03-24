@@ -27,22 +27,25 @@ export function QuizCategoryFilter({
       <p className="mb-3 text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs sm:tracking-[0.22em]">
         カテゴリで絞り込む
       </p>
-      <div className="flex flex-wrap gap-2">
-        <CategoryButton
-          label={ALL_LABEL}
-          count={totalCount}
-          isSelected={selected === ALL_VALUE}
-          onClick={() => onChange(ALL_VALUE)}
-        />
-        {categories.map((cat) => (
+      {/* モバイルで横スクロール。-mx でコンテナ端まで広げてフェードを自然に見せる */}
+      <div className="-mx-4 overflow-x-auto px-4 pb-0.5 sm:-mx-5 sm:px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-2" style={{ width: "max-content" }}>
           <CategoryButton
-            key={cat}
-            label={cat}
-            count={questionCounts[cat] ?? 0}
-            isSelected={selected === cat}
-            onClick={() => onChange(cat)}
+            label={ALL_LABEL}
+            count={totalCount}
+            isSelected={selected === ALL_VALUE}
+            onClick={() => onChange(ALL_VALUE)}
           />
-        ))}
+          {categories.map((cat) => (
+            <CategoryButton
+              key={cat}
+              label={cat}
+              count={questionCounts[cat] ?? 0}
+              isSelected={selected === cat}
+              onClick={() => onChange(cat)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -59,7 +62,7 @@ function CategoryButton({ label, count, isSelected, onClick }: CategoryButtonPro
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+      className={`flex min-h-[44px] items-center gap-2 rounded-full border px-4 text-sm font-medium transition-all duration-200 active:scale-95 ${
         isSelected
           ? "border-slate-500 bg-slate-700 text-white"
           : "border-slate-700 bg-slate-950/60 text-slate-400 hover:border-slate-600 hover:text-slate-200"

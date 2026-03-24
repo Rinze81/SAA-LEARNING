@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { SectionFrame } from "@/components/ui/section-frame";
 import type { CategoryStat, HomeSnapshot } from "@/lib/home/types";
@@ -98,8 +101,8 @@ function CategoryAccuracyChart({ stats, isHydrated }: CategoryAccuracyChartProps
         </p>
       ) : (
         <div className="grid gap-3">
-          {stats.map((stat) => (
-            <CategoryBar key={stat.category} stat={stat} />
+          {stats.map((stat, i) => (
+            <CategoryBar key={stat.category} stat={stat} index={i} />
           ))}
         </div>
       )}
@@ -107,10 +110,21 @@ function CategoryAccuracyChart({ stats, isHydrated }: CategoryAccuracyChartProps
   );
 }
 
-function CategoryBar({ stat }: { stat: CategoryStat }) {
+function CategoryBar({ stat, index }: { stat: CategoryStat; index: number }) {
   const { category, accuracy, unattemptedCount } = stat;
   const hasAttempts = accuracy !== null;
   const barValue = accuracy ?? 0;
+
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    // インデックスに応じてカスケード遅延（100ms × index）
+    const id = setTimeout(
+      () => requestAnimationFrame(() => setWidth(barValue)),
+      index * 100,
+    );
+    return () => clearTimeout(id);
+  }, [barValue, index]);
 
   const barColor =
     !hasAttempts
@@ -149,8 +163,8 @@ function CategoryBar({ stat }: { stat: CategoryStat }) {
       </div>
       <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-slate-800">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-          style={{ width: `${barValue}%` }}
+          className={`h-full rounded-full transition-[width] duration-700 ease-out ${barColor}`}
+          style={{ width: `${width}%` }}
         />
       </div>
     </div>
