@@ -15,14 +15,15 @@ html {
 
 body {
   min-height: 100vh;
-  font-family: var(--font-body), sans-serif;
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Yu Gothic", "Meiryo", system-ui, sans-serif;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-heading), sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 * {
