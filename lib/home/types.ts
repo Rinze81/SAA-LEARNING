@@ -31,6 +31,13 @@ export type FocusCheckpoint = {
   value: string;
 };
 
+export type CategoryStat = {
+  category: string;
+  accuracy: number | null;
+  totalAttempts: number;
+  unattemptedCount: number;
+};
+
 export type HomeSnapshot = {
   hero: {
     primaryLabel: string;
@@ -47,6 +54,7 @@ export type HomeSnapshot = {
     highlights: ProgressHighlight[];
     bars: ProgressBarItem[];
   };
+  categoryStats: CategoryStat[];
   paths: LearningPath[];
   weakCategories: {
     category: string;

@@ -32,7 +32,7 @@ function createFallbackAnalytics(): StudyAnalytics {
         recentAttempts: 0,
         accuracy: null,
         unattemptedCount: quizQuestions.filter(
-          (question) => question.category === defaultState.weakDomain,
+          (q) => q.category === defaultState.weakDomain,
         ).length,
         lastAttemptAt: null,
       },
@@ -97,6 +97,13 @@ export function buildHomeSnapshot(
     analytics.reviewedToday > 0 ? analytics.reviewedToday : merged.reviewedToday;
   const streakDays = analytics.streakDays > 0 ? analytics.streakDays : merged.streakDays;
   const weakDomain = topPriorities[0]?.category ?? merged.weakDomain;
+
+  const categoryStats = analytics.priorities.map((p) => ({
+    category: p.category,
+    accuracy: p.accuracy,
+    totalAttempts: p.recentAttempts,
+    unattemptedCount: p.unattemptedCount,
+  }));
 
   return {
     hero: {
@@ -236,6 +243,7 @@ export function buildHomeSnapshot(
         "まだ迷う場合は比較表に戻って、似たサービスとの違いを整理する",
       ],
     },
+    categoryStats,
   };
 }
 

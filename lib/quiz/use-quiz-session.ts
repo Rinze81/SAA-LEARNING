@@ -1,23 +1,36 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { readReviewRecords, removeReviewRecord, upsertReviewRecord } from "@/lib/review/storage";
 import { buildPrioritizedQuestionOrder } from "@/lib/study/analytics";
 import { appendQuizAttempt } from "@/lib/study/storage";
 
 type UseQuizSessionOptions = {
   initialQuestionId?: string;
+  categoryFilter?: string;
 };
 
 export function useQuizSession(options: UseQuizSessionOptions = {}) {
-  const orderedQuestions = useMemo(
-    () => buildPrioritizedQuestionOrder(options.initialQuestionId),
-    [options.initialQuestionId],
-  );
+  const orderedQuestions = useMemo(() => {
+    const all = buildPrioritizedQuestionOrder(options.initialQuestionId);
+    if (!options.categoryFilter || options.categoryFilter === "all") return all;
+    return all.filter((q) => q.category === options.categoryFilter);
+  }, [options.initialQuestionId, options.categoryFilter]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
+
+  const prevFilterRef = useRef(options.categoryFilter);
+  useEffect(() => {
+    if (prevFilterRef.current === options.categoryFilter) return;
+    prevFilterRef.current = options.categoryFilter;
+    setCurrentIndex(0);
+    setSelectedChoiceId(null);
+    setIsSubmitted(false);
+    setCorrectCount(0);
+  }, [options.categoryFilter]);
   const [reviewIds, setReviewIds] = useState<string[]>(() =>
     readReviewRecords().map((record) => record.questionId),
   );

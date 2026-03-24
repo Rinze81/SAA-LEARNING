@@ -47,7 +47,7 @@ export function HomeDashboard() {
           </section>
         )}
         <div className="grid gap-5 xl:grid-cols-[1.35fr_0.95fr]">
-          <ProgressOverview snapshot={snapshot} />
+          <ProgressOverview snapshot={snapshot} isHydrated={isHydrated} />
           <LearningPaths snapshot={snapshot} />
         </div>
         <TodayFocus snapshot={snapshot} isHydrated={isHydrated} />
