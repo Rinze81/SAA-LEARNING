@@ -16,6 +16,7 @@ export type QuizQuestion = {
   comparePoint: string;
   rememberAxis: string;
   modeLabel: string;
+  relatedTerms?: string[];
 };
 
 export type QuizAnswerState = {

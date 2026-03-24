@@ -12,10 +12,11 @@ import { useQuizSession } from "@/lib/quiz/use-quiz-session";
 
 type QuizExperienceProps = {
   initialQuestionId?: string;
+  initialCategory?: string;
 };
 
-export function QuizExperience({ initialQuestionId }: QuizExperienceProps) {
-  const [categoryFilter, setCategoryFilter] = useState("all");
+export function QuizExperience({ initialQuestionId, initialCategory }: QuizExperienceProps) {
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory ?? "all");
   const session = useQuizSession({ initialQuestionId, categoryFilter });
 
   const questionCounts = useMemo(

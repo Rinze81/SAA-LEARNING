@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useState } from "react";
+import { Suspense, useEffect, useId, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { TermCard } from "@/components/study/term-card";
 import { SectionFrame } from "@/components/ui/section-frame";
 import { studyTermCategories, studyTerms } from "@/lib/study/terms";
@@ -20,7 +21,10 @@ function buildSearchTarget(term: (typeof studyTerms)[number]) {
     .toLocaleLowerCase();
 }
 
-export default function TermsPage() {
+function TermsPageContent() {
+  const searchParams = useSearchParams();
+  const highlightedTermId = searchParams?.get("termId") ?? null;
+
   const searchInputId = useId();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORIES);
@@ -48,6 +52,18 @@ export default function TermsPage() {
   const resultSummary = hasActiveFilters
     ? `${studyTerms.length}件中 ${filteredTerms.length}件を表示`
     : `${studyTerms.length}件の用語を表示`;
+
+  useEffect(() => {
+    if (!highlightedTermId) return;
+    const el = document.getElementById(highlightedTermId);
+    if (el) {
+      // Small delay to allow render to settle
+      const id = setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+      return () => clearTimeout(id);
+    }
+  }, [highlightedTermId]);
 
   return (
     <main className="min-h-screen px-4 pb-16 pt-6 sm:px-6 lg:px-8">
@@ -164,7 +180,11 @@ export default function TermsPage() {
         {filteredTerms.length > 0 ? (
           <section className="grid gap-4">
             {filteredTerms.map((term) => (
-              <TermCard key={term.id} term={term} />
+              <TermCard
+                key={term.id}
+                term={term}
+                isHighlighted={term.id === highlightedTermId}
+              />
             ))}
           </section>
         ) : (
@@ -179,5 +199,13 @@ export default function TermsPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function TermsPage() {
+  return (
+    <Suspense fallback={null}>
+      <TermsPageContent />
+    </Suspense>
   );
 }

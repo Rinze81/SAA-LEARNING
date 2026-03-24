@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { SectionFrame } from "@/components/ui/section-frame";
 import { StatusChip } from "@/components/ui/status-chip";
+import { questionRelatedTerms } from "@/lib/quiz/related-terms";
+import { studyTerms } from "@/lib/study/terms";
 import type { useQuizSession } from "@/lib/quiz/use-quiz-session";
 
 type QuizFeedbackPanelProps = {
@@ -51,6 +54,10 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
   }
 
   const isCorrect = session.isCorrect;
+
+  const relatedTermList = (questionRelatedTerms[session.question.id] ?? [])
+    .map((id) => studyTerms.find((t) => t.id === id))
+    .filter((t): t is (typeof studyTerms)[number] => t !== undefined);
 
   return (
     <section
@@ -135,6 +142,24 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
             {session.question.rememberAxis}
           </p>
         </div>
+
+        {/* ── 関連用語（不正解時のみ） ── */}
+        {!isCorrect && relatedTermList.length > 0 ? (
+          <div className="rounded-[1.25rem] border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
+            <p className="text-[11px] tracking-[0.16em] text-slate-500">この用語を確認する</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {relatedTermList.map((term) => (
+                <Link
+                  key={term.id}
+                  href={`/terms?termId=${term.id}`}
+                  className="inline-flex min-h-[36px] items-center rounded-full border border-sky-900/45 bg-sky-950/30 px-3 py-1 text-xs text-sky-200 transition hover:border-sky-700 hover:text-sky-100"
+                >
+                  {term.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );

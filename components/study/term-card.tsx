@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { StatusChip } from "@/components/ui/status-chip";
 import type { StudyTerm } from "@/lib/study/terms";
 
+const TERM_TO_QUIZ_CATEGORY: Record<string, string> = {
+  ストレージ: "Storage",
+  コンピュート: "Compute",
+  ネットワーク: "Networking",
+  データベース: "Database",
+};
+
 type TermCardProps = {
   term: StudyTerm;
+  isHighlighted?: boolean;
 };
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -23,11 +32,23 @@ function ChevronIcon({ open }: { open: boolean }) {
   );
 }
 
-export function TermCard({ term }: TermCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function TermCard({ term, isHighlighted = false }: TermCardProps) {
+  const [isOpen, setIsOpen] = useState(isHighlighted);
+  const quizCategory = TERM_TO_QUIZ_CATEGORY[term.category];
+
+  useEffect(() => {
+    if (isHighlighted) setIsOpen(true);
+  }, [isHighlighted]);
 
   return (
-    <article className="rounded-[1.5rem] border border-slate-800/80 bg-slate-950/75 shadow-[0_18px_60px_rgba(2,6,23,0.28)]">
+    <article
+      id={term.id}
+      className={`rounded-[1.5rem] border bg-slate-950/75 shadow-[0_18px_60px_rgba(2,6,23,0.28)] transition-shadow ${
+        isHighlighted
+          ? "border-sky-600/60 ring-2 ring-sky-600/30"
+          : "border-slate-800/80"
+      }`}
+    >
       {/* ── ヘッダー（常時表示・タップで開閉） ── */}
       <button
         type="button"
@@ -95,6 +116,15 @@ export function TermCard({ term }: TermCardProps) {
                 </div>
               </section>
             </div>
+
+            {quizCategory ? (
+              <Link
+                href={`/quiz?category=${quizCategory}`}
+                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-slate-700 bg-slate-900/60 px-5 text-sm font-medium text-slate-200 transition hover:border-sky-700 hover:bg-sky-950/40 hover:text-sky-100"
+              >
+                この用語の関連問題を解く →
+              </Link>
+            ) : null}
           </div>
         </div>
       </div>
