@@ -741,4 +741,343 @@ export const quizQuestions: QuizQuestion[] = [
     rememberAxis:
       "インターネット不要で AWS サービスへ → VPC エンドポイント。S3/DynamoDB は Gateway 型、その他は Interface 型。",
   },
+
+  // ── Database ─────────────────────────────────────────────────────────────
+
+  {
+    id: "database-2",
+    category: "Database",
+    modeLabel: "使い分け重視",
+    prompt:
+      "本番 RDS データベースの障害時に自動フェイルオーバーして可用性を高めたい。最も適切な設定はどれですか。",
+    context:
+      "性能向上ではなく、障害への耐性を高めることが目的です。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "RDS Multi-AZ を有効化する", hint: "スタンバイへの自動フェイルオーバーで高可用性を実現" },
+      { id: "b", label: "B", text: "RDS リードレプリカを作成する", hint: "読み取りオフロードが目的・フェイルオーバーは自動でない" },
+      { id: "c", label: "C", text: "RDS のインスタンスクラスをアップグレードする", hint: "性能向上であり可用性対策ではない" },
+      { id: "d", label: "D", text: "RDS の自動バックアップを有効にする", hint: "データ復旧が目的・障害時の自動切り替えはしない" },
+    ],
+    explanation:
+      "Multi-AZ は別の AZ にスタンバイインスタンスを自動で同期レプリケーションし、プライマリ障害時に数分以内で自動フェイルオーバーします。リードレプリカは読み取り性能の向上が目的で、フェイルオーバーは自動ではありません。",
+    comparePoint:
+      "Multi-AZ：可用性向上・自動フェイルオーバー・同一リージョン。リードレプリカ：読み取りスケール・クロスリージョン可。",
+    rememberAxis:
+      "障害に強くしたい（HA）→ Multi-AZ。読み取り性能を上げたい → リードレプリカ。両方必要なら両方設定する。",
+  },
+  {
+    id: "database-3",
+    category: "Database",
+    modeLabel: "設計判断",
+    prompt:
+      "DynamoDB でユーザーの注文履歴を保存し、ユーザー ID で検索しつつ注文日時でソートして取得したい。最も適切なキー設計はどれですか。",
+    context:
+      "1 つのクエリで特定ユーザーの注文を日時順に効率よく取得できる設計が必要です。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "ユーザー ID のみをパーティションキーにする", hint: "ソートができない" },
+      { id: "b", label: "B", text: "ユーザー ID をパーティションキー、注文日時をソートキーにする", hint: "ユーザーごとに日時でソートして取得できる" },
+      { id: "c", label: "C", text: "注文日時のみをパーティションキーにする", hint: "特定ユーザーの絞り込みが非効率" },
+      { id: "d", label: "D", text: "注文 ID をパーティションキー、ユーザー ID をソートキーにする", hint: "ユーザー単位の検索に向かない" },
+    ],
+    explanation:
+      "DynamoDB では、パーティションキーで物理的なデータ分散先が決まり、ソートキーで同一パーティション内のデータを効率よく範囲検索・ソートできます。ユーザー ID + 注文日時の複合キーにすることで、1 クエリで特定ユーザーの注文を日時順に取得できます。",
+    comparePoint:
+      "パーティションキーのみ：点検索のみ。パーティション + ソートキー：範囲検索・ソートが可能。GSI：異なるキーパターンでの検索に使う。",
+    rememberAxis:
+      "「誰の」を絞るのがパーティションキー。「いつからいつまで」を絞るのがソートキー。",
+  },
+  {
+    id: "database-4",
+    category: "Database",
+    modeLabel: "使い分け重視",
+    prompt:
+      "頻繁に読み書きされるセッションデータをキャッシュして DB の負荷を下げたい。データの永続化は不要で、シンプルなキーバリューキャッシュが必要な場合、最も適切な ElastiCache エンジンはどれですか。",
+    context:
+      "高速なキャッシュが目的で、データ構造の複雑さや永続化は要件にありません。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "ElastiCache for Redis（スタンドアロン）", hint: "豊富なデータ構造と永続化が可能・シンプル用途には過剰" },
+      { id: "b", label: "B", text: "ElastiCache for Memcached", hint: "シンプルなキーバリュー・マルチスレッド・スケールアウト向き" },
+      { id: "c", label: "C", text: "Amazon DynamoDB", hint: "フルマネージド NoSQL・キャッシュ層としての設計ではない" },
+      { id: "d", label: "D", text: "Amazon RDS for MySQL", hint: "リレーショナル DB・キャッシュには不向き" },
+    ],
+    explanation:
+      "Memcached はシンプルなキーバリューキャッシュに特化し、マルチスレッドで高いスループットを実現します。永続化やレプリケーションは不要で水平スケールしたい場合に最適です。Redis はリスト・セット・ソートセットなど豊富なデータ構造・永続化・Pub/Sub が必要な場合に選びます。",
+    comparePoint:
+      "Memcached：シンプルなキャッシュ・マルチスレッド・永続化なし。Redis：豊富なデータ構造・永続化・レプリケーション・Pub/Sub あり。",
+    rememberAxis:
+      "シンプルキャッシュで高スループット → Memcached。永続化・複雑なデータ構造・フェイルオーバー → Redis。",
+  },
+  {
+    id: "database-5",
+    category: "Database",
+    modeLabel: "要件から選ぶ",
+    prompt:
+      "開発・テスト環境や使用頻度が低い本番環境向けに、DB が不要な間は自動停止してコストを最小化したい Aurora の利用形態はどれですか。",
+    context:
+      "常時稼働のプロビジョニングコストを避けたいケースです。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Aurora Standard（プロビジョニング）", hint: "常時インスタンスが稼働しコストがかかる" },
+      { id: "b", label: "B", text: "Aurora グローバルデータベース", hint: "マルチリージョンの高可用性・DR 向け" },
+      { id: "c", label: "C", text: "Aurora Serverless v2", hint: "需要に応じて自動スケール・アイドル時はほぼ 0 まで縮小" },
+      { id: "d", label: "D", text: "Aurora マルチマスター", hint: "複数のライターインスタンス構成" },
+    ],
+    explanation:
+      "Aurora Serverless v2 は ACU（Aurora Capacity Unit）を需要に応じて自動でスケールアップ・ダウンします。使用していない間は最小 ACU まで縮小されるため、開発・テスト環境やアクセス頻度が予測しにくいワークロードでコストを大幅に削減できます。",
+    comparePoint:
+      "Aurora Provisioned：安定した高負荷に最適・コスト予測しやすい。Aurora Serverless：変動が大きい・アイドルあり・コスト最小化。",
+    rememberAxis:
+      "アイドル時間がある・負荷が予測不能 → Aurora Serverless。安定した高負荷 → Aurora Provisioned。",
+  },
+  {
+    id: "database-6",
+    category: "Database",
+    modeLabel: "要件から選ぶ",
+    prompt:
+      "数十億件の販売データを格納し、複雑な集計クエリや BI レポートを高速に実行したい。最も適切なサービスはどれですか。",
+    context:
+      "OLAP（分析処理）ワークロードを想定しています。OLTP（トランザクション処理）とは要件が異なります。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "Amazon RDS for PostgreSQL", hint: "OLTP 向けリレーショナル DB・大規模分析には不向き" },
+      { id: "b", label: "B", text: "Amazon DynamoDB", hint: "キーバリュー/ドキュメント型 NoSQL・複雑な集計が苦手" },
+      { id: "c", label: "C", text: "Amazon Aurora", hint: "高性能 OLTP 向け・分析専用設計ではない" },
+      { id: "d", label: "D", text: "Amazon Redshift", hint: "列指向の分析専用 DWH・大規模 OLAP に最適" },
+    ],
+    explanation:
+      "Redshift は列指向ストレージとマッシブパラレル処理（MPP）により、ペタバイト規模のデータ分析を高速に実行できます。RDS や Aurora は行指向で OLTP に最適化されており、大規模な集計クエリには向いていません。",
+    comparePoint:
+      "RDS/Aurora：OLTP・行指向・高頻度の読み書きトランザクション。Redshift：OLAP・列指向・大規模集計・BI。",
+    rememberAxis:
+      "トランザクション処理・アプリ DB → RDS/Aurora。集計・分析・DWH → Redshift。",
+  },
+
+  // ── Security ──────────────────────────────────────────────────────────────
+
+  {
+    id: "security-1",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "EC2 インスタンスから S3 バケットへアクセスする際、認証情報をコード内やインスタンスに保存せず安全に権限を付与したい。最も適切な方法はどれですか。",
+    context:
+      "ハードコードされたアクセスキーはセキュリティリスクになります。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "IAM ユーザーを作成しアクセスキーを EC2 に設定する", hint: "キーの漏洩リスクがある・非推奨" },
+      { id: "b", label: "B", text: "S3 アクセス権限を持つ IAM ロールを作成し EC2 にアタッチする", hint: "認証情報不要で安全に権限付与できる" },
+      { id: "c", label: "C", text: "S3 バケットをパブリックに公開する", hint: "誰でもアクセスできてしまう" },
+      { id: "d", label: "D", text: "IAM グループに EC2 インスタンスを追加する", hint: "IAM グループはユーザーに適用するもの" },
+    ],
+    explanation:
+      "IAM ロールを EC2 にアタッチすると、インスタンスメタデータから一時的な認証情報が自動で取得・更新されます。アクセスキーをコードや設定ファイルに保存する必要がなく、漏洩リスクを排除できます。",
+    comparePoint:
+      "IAM ユーザー：人間の操作向け・長期認証情報。IAM ロール：AWS サービス・アプリ向け・一時認証情報・キー不要。",
+    rememberAxis:
+      "AWS サービスへのアクセス権限付与 → IAM ロール。人がコンソール/CLI を使う → IAM ユーザー。",
+  },
+  {
+    id: "security-2",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "RDS のデータを保存時に暗号化したい。暗号化キーの管理を AWS に委ねつつ、キーの使用履歴を監査できる仕組みはどれですか。",
+    context:
+      "コンプライアンス要件として暗号化キーの操作ログが必要なケースです。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "AWS KMS のカスタマーマネージドキー（CMK）を使用する", hint: "キーポリシー設定・CloudTrail で使用履歴を監査可能" },
+      { id: "b", label: "B", text: "AWS マネージドキー（aws/rds）を使用する", hint: "AWS が管理・監査ログはあるが細かいキー制御ができない" },
+      { id: "c", label: "C", text: "クライアントサイドで独自に暗号化する", hint: "アプリ側の実装が必要・KMS との統合なし" },
+      { id: "d", label: "D", text: "S3 サーバーサイド暗号化（SSE-S3）を使う", hint: "S3 向けの設定・RDS には適用されない" },
+    ],
+    explanation:
+      "KMS のカスタマーマネージドキーを使うと、キーポリシーで誰がキーを使えるかを細かく制御でき、CloudTrail と組み合わせてキーの使用履歴を監査できます。AWS マネージドキーは AWS が自動ローテーションしますが、キーポリシーのカスタマイズはできません。",
+    comparePoint:
+      "AWS マネージドキー：管理コスト低・監査は限定的。CMK：細かい制御・監査・ローテーション設定が可能。CloudHSM：専用 HSM が必要な規制対応向け。",
+    rememberAxis:
+      "キー制御・監査ログが必要 → CMK。シンプルに暗号化したい → AWS マネージドキー。専用 HSM 必須 → CloudHSM。",
+  },
+  {
+    id: "security-3",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "VPC 内の EC2 インスタンスへのアクセス制御について、インスタンス単位でステートフルなルールを設定する方法と、サブネット単位でステートレスなルールを設定する方法はそれぞれどれですか。",
+    context:
+      "Security Group と NACL の違いを理解しているかを確認する問題です。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "どちらも Security Group で設定する", hint: "Security Group はインスタンスレベル" },
+      { id: "b", label: "B", text: "どちらも NACL で設定する", hint: "NACL はサブネットレベル" },
+      { id: "c", label: "C", text: "インスタンス単位はSecurity Group、サブネット単位はNACL", hint: "正しい組み合わせ" },
+      { id: "d", label: "D", text: "インスタンス単位はNACL、サブネット単位はSecurity Group", hint: "逆の説明" },
+    ],
+    explanation:
+      "Security Group はインスタンス（ENI）レベルで動作するステートフルなファイアウォールです。インバウンドを許可するとリターントラフィックは自動で許可されます。NACL はサブネットレベルで動作するステートレスなファイアウォールで、インバウンドとアウトバウンドの両方を明示的に設定する必要があります。",
+    comparePoint:
+      "Security Group：インスタンスレベル・ステートフル・許可ルールのみ。NACL：サブネットレベル・ステートレス・許可と拒否ルール両方あり。",
+    rememberAxis:
+      "インスタンスへの細かいアクセス制御 → Security Group。サブネット全体の第二防衛線 → NACL。両方組み合わせて多層防御。",
+  },
+  {
+    id: "security-4",
+    category: "Security",
+    modeLabel: "要件から選ぶ",
+    prompt:
+      "ALB の前段で SQL インジェクションや XSS などの Web 攻撃をブロックし、特定 IP アドレスからのアクセスも拒否したい。最も適切なサービスはどれですか。",
+    context:
+      "アプリケーション層（L7）でのフィルタリングが必要なケースです。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "AWS Shield Standard", hint: "L3/L4 の DDoS 保護・L7 の Web 攻撃フィルタリングはしない" },
+      { id: "b", label: "B", text: "AWS WAF", hint: "L7 の Web 攻撃ルール・IP 制限・ALB や CloudFront にアタッチ可能" },
+      { id: "c", label: "C", text: "VPC Security Group", hint: "IP/ポートレベルの制御・HTTP リクエスト内容は見られない" },
+      { id: "d", label: "D", text: "Amazon GuardDuty", hint: "脅威検出・異常検知サービス・トラフィックブロックはしない" },
+    ],
+    explanation:
+      "AWS WAF は HTTP/HTTPS リクエストの内容を検査し、SQL インジェクション・XSS などの攻撃パターンや特定の IP アドレスをブロックできます。ALB・CloudFront・API Gateway にアタッチして使います。Shield Standard は L3/L4 の DDoS 保護が目的で Web 攻撃のフィルタリングはできません。",
+    comparePoint:
+      "WAF：L7 Web 攻撃フィルタリング・IP 制限。Shield：L3/L4 DDoS 保護。GuardDuty：ログ分析ベースの脅威検出（ブロックはしない）。",
+    rememberAxis:
+      "SQL インジェクション・XSS・IP ブロック → WAF。DDoS 対策 → Shield。異常検知・脅威ハンティング → GuardDuty。",
+  },
+  {
+    id: "security-5",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "アプリケーションが使用するデータベースのパスワードを安全に管理し、一定期間ごとに自動でローテーションしたい。最も適切なサービスはどれですか。",
+    context:
+      "平文のパスワードをコードや環境変数にハードコードすることを避けたいケースです。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "AWS Systems Manager パラメータストア（標準）", hint: "シークレット管理は可能だが自動ローテーション機能はない" },
+      { id: "b", label: "B", text: "S3 バケットに暗号化して保存する", hint: "手動管理・ローテーション機能なし" },
+      { id: "c", label: "C", text: "AWS Secrets Manager", hint: "シークレットの安全な保存・自動ローテーション・RDS 対応" },
+      { id: "d", label: "D", text: "AWS KMS", hint: "暗号化キーの管理サービス・パスワード管理は目的外" },
+    ],
+    explanation:
+      "Secrets Manager はデータベースの認証情報・API キーなどのシークレットを安全に保存・取得でき、RDS との統合により自動ローテーションを設定できます。アプリは Secrets Manager の API からシークレットを取得するため、コードに認証情報を埋め込む必要がありません。",
+    comparePoint:
+      "Secrets Manager：自動ローテーション・RDS 統合・高機能・有料。Parameter Store（SecureString）：KMS 暗号化可能・ローテーション機能なし・低コスト。",
+    rememberAxis:
+      "自動ローテーションが必要 → Secrets Manager。ローテーション不要の設定値管理 → Parameter Store。",
+  },
+
+  // ── Application Integration ───────────────────────────────────────────────
+
+  {
+    id: "appintegration-1",
+    category: "Application Integration",
+    modeLabel: "使い分け重視",
+    prompt:
+      "注文処理システムで、注文イベントを確実に 1 件ずつ処理したい。処理に失敗した場合はリトライし、順序を保証する必要はない。最も適切なサービスはどれですか。",
+    context:
+      "非同期で疎結合な処理キューが必要です。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Amazon SQS（スタンダードキュー）", hint: "非同期キュー・少なくとも1回の配信・スケール容易" },
+      { id: "b", label: "B", text: "Amazon SNS", hint: "Pub/Sub のファンアウト配信・キューイングは目的外" },
+      { id: "c", label: "C", text: "Amazon EventBridge", hint: "イベントのルーティング・複数ターゲットへの配信" },
+      { id: "d", label: "D", text: "AWS Step Functions", hint: "ワークフローのオーケストレーション" },
+    ],
+    explanation:
+      "SQS は非同期メッセージキューで、プロデューサーとコンシューマーを疎結合にし、処理失敗時のリトライや DLQ（デッドレターキュー）による失敗メッセージ管理ができます。SNS はプッシュ型のファンアウト配信が目的で、キューとしての蓄積機能はありません。",
+    comparePoint:
+      "SQS：プル型キュー・メッセージ蓄積・1 対 1 処理。SNS：プッシュ型 Pub/Sub・1 対多配信・蓄積なし。",
+    rememberAxis:
+      "1 件ずつ確実に処理したい → SQS。複数のシステムに同時通知したい → SNS。両方をつなぐ → SNS + SQS ファンアウト。",
+  },
+  {
+    id: "appintegration-2",
+    category: "Application Integration",
+    modeLabel: "設計判断",
+    prompt:
+      "SaaS アプリケーションのイベントや AWS サービスのイベントを受け取り、特定の条件に一致するイベントだけを複数の Lambda 関数や SQS キューへルーティングしたい。最も適切なサービスはどれですか。",
+    context:
+      "イベントの内容を見てルーティング先を動的に変えたいケースです。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Amazon SQS", hint: "キューイング・ルーティングルールの設定はできない" },
+      { id: "b", label: "B", text: "Amazon EventBridge", hint: "イベントバス・ルールベースのルーティング・SaaS 統合対応" },
+      { id: "c", label: "C", text: "Amazon SNS", hint: "フィルタリングは可能だが複雑なルール設定は限定的" },
+      { id: "d", label: "D", text: "Amazon Kinesis Data Streams", hint: "ストリーミングデータ処理・イベントルーティングは目的外" },
+    ],
+    explanation:
+      "EventBridge はイベントバスにイベントを受け取り、ルール（イベントパターンマッチング）に基づいて Lambda・SQS・SNS など複数のターゲットへルーティングします。AWS サービスや SaaS アプリとの統合が豊富で、複雑なイベントドリブンアーキテクチャを疎結合に構築できます。",
+    comparePoint:
+      "EventBridge：イベントのフィルタリング・ルーティング・スケジュール実行・SaaS 統合。SNS：シンプルなファンアウト配信。SQS：メッセージキューイング。",
+    rememberAxis:
+      "イベントの内容でルーティングを変えたい → EventBridge。同じ内容を全員に届けたい → SNS。確実にキューに溜めたい → SQS。",
+  },
+  {
+    id: "appintegration-3",
+    category: "Application Integration",
+    modeLabel: "設計判断",
+    prompt:
+      "注文受付・在庫確認・決済・発送通知という複数のステップを順番に実行し、各ステップの成功・失敗に応じて次の処理を分岐させたい。最も適切なサービスはどれですか。",
+    context:
+      "複数の Lambda 関数を順番につなぐワークフローを構築したいケースです。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "Amazon SQS で複数のキューをつなぐ", hint: "キューイングは可能だがステート管理・分岐が難しい" },
+      { id: "b", label: "B", text: "Lambda から Lambda を直接呼び出す", hint: "シンプルだがエラーハンドリングやリトライ管理が複雑になる" },
+      { id: "c", label: "C", text: "Amazon EventBridge でイベントをルーティングする", hint: "イベント駆動は向いているが複雑なステート管理が難しい" },
+      { id: "d", label: "D", text: "AWS Step Functions", hint: "ステートマシンでフロー・分岐・リトライ・エラー処理を一元管理" },
+    ],
+    explanation:
+      "Step Functions はステートマシンとして各ステップ（Lambda・ECS タスクなど）の実行順序・分岐・並列処理・リトライ・タイムアウト・エラーハンドリングをコードなしで視覚的に定義できます。複雑なビジネスプロセスを疎結合に管理するのに最適です。",
+    comparePoint:
+      "Step Functions：ステートマシン・複雑なフロー管理・視覚的なモニタリング。SQS + Lambda：シンプルな非同期処理向け。EventBridge：イベントドリブンルーティング。",
+    rememberAxis:
+      "複数ステップのフロー・分岐・エラーハンドリングを管理 → Step Functions。単純なイベント処理 → Lambda 単体。",
+  },
+  {
+    id: "appintegration-4",
+    category: "Application Integration",
+    modeLabel: "使い分け重視",
+    prompt:
+      "IoT デバイスから秒間数万件のセンサーデータをリアルタイムに収集し、後続の Lambda で即座に処理したい。最も適切なサービスはどれですか。",
+    context:
+      "高スループットのリアルタイムストリーム処理が必要です。S3 への保存だけが目的ではありません。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Amazon Kinesis Data Streams", hint: "リアルタイムストリーム・複数コンシューマーが同時読み取り可能" },
+      { id: "b", label: "B", text: "Amazon Kinesis Data Firehose", hint: "S3・Redshift・OpenSearch への配信専用・Lambda 処理は直接連携できない" },
+      { id: "c", label: "C", text: "Amazon SQS", hint: "メッセージキュー・超高スループットのストリームには限界がある" },
+      { id: "d", label: "D", text: "Amazon SNS", hint: "Pub/Sub 通知・ストリーミングデータ処理には向かない" },
+    ],
+    explanation:
+      "Kinesis Data Streams は大量のデータをリアルタイムにストリーミング処理でき、複数のコンシューマー（Lambda・Kinesis Analytics・カスタムアプリ）が同じデータを同時に読み取れます。Firehose はストリームデータをバッファリングして S3・Redshift などにバッチ配信するサービスで、リアルタイムな Lambda 処理には直接使えません。",
+    comparePoint:
+      "Kinesis Data Streams：リアルタイム・複数コンシューマー・Lambda 連携・データを保持（デフォルト24h）。Firehose：自動バッファリング・S3/Redshift/OpenSearch へ配信・変換処理は Lambda 経由で可能。",
+    rememberAxis:
+      "リアルタイム処理・複数コンシューマー → Kinesis Data Streams。S3 や Redshift へ自動配信 → Firehose。",
+  },
+  {
+    id: "appintegration-5",
+    category: "Application Integration",
+    modeLabel: "要件から選ぶ",
+    prompt:
+      "モバイルアプリのバックエンドとして、Lambda 関数を HTTPS エンドポイントで公開し、認証・スロットリング・ステージ管理を一元化したい。最も適切なサービスはどれですか。",
+    context:
+      "Lambda を直接 URL で公開する方法もありますが、API 管理機能が必要なケースです。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Application Load Balancer（ALB）", hint: "Lambda をターゲットにできるが API 管理機能はない" },
+      { id: "b", label: "B", text: "Amazon API Gateway", hint: "REST/HTTP/WebSocket API・認証・スロットリング・ステージ管理が揃う" },
+      { id: "c", label: "C", text: "Amazon CloudFront", hint: "CDN・API 管理機能はない" },
+      { id: "d", label: "D", text: "Lambda Function URL", hint: "シンプルな HTTPS エンドポイント・スロットリングやステージ管理はない" },
+    ],
+    explanation:
+      "API Gateway は REST API・HTTP API・WebSocket API を提供し、Lambda や HTTP バックエンドと連携します。Cognito や IAM による認証・API キー管理・スロットリング・使用量プラン・ステージ（dev/prod）管理などの API 管理機能がすべて揃っています。",
+    comparePoint:
+      "API Gateway：API 管理フル機能・認証・スロットリング・ステージ。ALB：L7 負荷分散・API 管理機能なし。Lambda URL：シンプル公開・管理機能なし。",
+    rememberAxis:
+      "API 認証・スロットリング・ステージ管理が必要 → API Gateway。シンプルな公開だけ → Lambda URL。",
+  },
 ];
