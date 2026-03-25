@@ -2,6 +2,34 @@ import type { HomeSnapshot, PersistedHomeState } from "@/lib/home/types";
 import { quizQuestions } from "@/lib/quiz/data";
 import { buildStudyAnalytics } from "@/lib/study/analytics";
 import type { StudyAnalytics } from "@/lib/study/types";
+import { ROADMAP_TERM_TOTAL } from "@/lib/study/roadmap-data";
+import { comparisonItems } from "@/lib/study/comparisons";
+
+const ROADMAP_READ_KEY = "saa-roadmap-read";
+const COMPARISON_READ_KEY = "saa-comparison-read";
+const COMPARISON_TOTAL = comparisonItems.length;
+
+function readTermsMastery(): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const raw = localStorage.getItem(ROADMAP_READ_KEY);
+    const ids: string[] = raw ? (JSON.parse(raw) as string[]) : [];
+    return Math.min(100, Math.round((ids.length / ROADMAP_TERM_TOTAL) * 100));
+  } catch {
+    return 0;
+  }
+}
+
+function readComparisonMastery(): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const raw = localStorage.getItem(COMPARISON_READ_KEY);
+    const ids: string[] = raw ? (JSON.parse(raw) as string[]) : [];
+    return Math.min(100, Math.round((ids.length / COMPARISON_TOTAL) * 100));
+  } catch {
+    return 0;
+  }
+}
 
 const STORAGE_KEY = "saa-home-state";
 
@@ -143,24 +171,24 @@ export function buildHomeSnapshot(
         {
           label: "用語理解",
           value: `${merged.termsMastery}%`,
-          caption: "サービスの役割を言葉で説明できる度合い",
+          caption: "ロードマップで既読にした用語の割合",
         },
         {
           label: "比較判断",
           value: `${merged.comparisonMastery}%`,
-          caption: "似たサービスの違いを整理できる度合い",
+          caption: "確認済みの比較テーマの割合",
         },
       ],
       bars: [
         {
           label: "用語理解",
           value: merged.termsMastery,
-          caption: "用語を一言で説明できる状態を目指す",
+          caption: "ロードマップで既読にした用語の割合",
         },
         {
           label: "比較判断",
           value: merged.comparisonMastery,
-          caption: "似た選択肢の違いを判断できるようにする",
+          caption: "確認済みの比較テーマの割合",
         },
         {
           label: "クイズ精度",
@@ -248,5 +276,10 @@ export function buildHomeSnapshot(
 }
 
 export function buildClientHomeSnapshot(state: PersistedHomeState): HomeSnapshot {
-  return buildHomeSnapshot(state, { analytics: buildStudyAnalytics() });
+  const termsMastery = readTermsMastery();
+  const comparisonMastery = readComparisonMastery();
+  return buildHomeSnapshot(
+    { ...state, termsMastery, comparisonMastery },
+    { analytics: buildStudyAnalytics() },
+  );
 }

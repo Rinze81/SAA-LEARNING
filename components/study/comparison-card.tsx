@@ -4,6 +4,22 @@ import { useState } from "react";
 import { StatusChip } from "@/components/ui/status-chip";
 import type { ComparisonItem } from "@/lib/study/comparisons";
 
+const COMPARISON_READ_KEY = "saa-comparison-read";
+
+function markComparisonRead(id: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(COMPARISON_READ_KEY);
+    const ids: string[] = raw ? (JSON.parse(raw) as string[]) : [];
+    if (!ids.includes(id)) {
+      ids.push(id);
+      localStorage.setItem(COMPARISON_READ_KEY, JSON.stringify(ids));
+    }
+  } catch {
+    // ignore
+  }
+}
+
 type ComparisonCardProps = {
   item: ComparisonItem;
 };
@@ -26,12 +42,17 @@ function ChevronIcon({ open }: { open: boolean }) {
 export function ComparisonCard({ item }: ComparisonCardProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  function handleToggle() {
+    if (!isOpen) markComparisonRead(item.id);
+    setIsOpen((v) => !v);
+  }
+
   return (
     <article className="rounded-[1.5rem] border border-slate-800/80 bg-slate-950/75 shadow-[0_18px_60px_rgba(2,6,23,0.28)]">
       {/* ── ヘッダー（常時表示・タップで開閉） ── */}
       <button
         type="button"
-        onClick={() => setIsOpen((v) => !v)}
+        onClick={handleToggle}
         className="flex w-full items-start justify-between gap-4 p-5 text-left sm:p-6"
         aria-expanded={isOpen}
       >
