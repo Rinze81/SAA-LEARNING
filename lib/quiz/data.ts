@@ -1080,4 +1080,54 @@ export const quizQuestions: QuizQuestion[] = [
     rememberAxis:
       "API 認証・スロットリング・ステージ管理が必要 → API Gateway。シンプルな公開だけ → Lambda URL。",
   },
+
+  // ── Cost Optimization ────────────────────────────────────────────────────
+
+  {
+    id: "cost-1",
+    category: "Cost Optimization",
+    modeLabel: "使い分け重視",
+    prompt:
+      "1年間継続して稼働する EC2 ワークロードのコストを削減したい。インスタンスタイプを柔軟に変更する可能性があり、将来的に Fargate や Lambda も使う予定がある。最も適切な購入オプションはどれですか。",
+    context:
+      "長期コミットメントで割引を受けつつ、サービスをまたいで割引を適用したいケースです。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "スタンダードリザーブドインスタンス（1年）", hint: "インスタンスファミリー・OS の変更不可。EC2 のみに適用" },
+      { id: "b", label: "B", text: "Compute Savings Plans（1年）", hint: "EC2・Fargate・Lambda に横断適用・インスタンスタイプ変更自由" },
+      { id: "c", label: "C", text: "スポットインスタンス", hint: "最大90%割引だが中断リスクあり・継続稼働には不向き" },
+      { id: "d", label: "D", text: "EC2 Instance Savings Plans（1年）", hint: "特定インスタンスファミリーに限定・Fargate/Lambda には不適用" },
+    ],
+    explanation:
+      "Compute Savings Plans は EC2・Fargate・Lambda に横断して適用される最も柔軟な割引プランです。インスタンスファミリー・サイズ・OS・リージョンを問わず適用されます。リザーブドインスタンス（RI）は EC2 専用で変更の柔軟性が低く、EC2 Instance Savings Plans は特定ファミリーに限定されます。",
+    comparePoint:
+      "Compute Savings Plans：EC2+Fargate+Lambda・最も柔軟・最大66%割引。EC2 Instance Savings Plans：EC2特定ファミリー・最大72%割引。スタンダード RI：最も高割引（最大72%）・変更不可。",
+    rememberAxis:
+      "サービスをまたいで柔軟に使いたい → Compute Savings Plans。EC2 のみ・ファミリー固定で最大割引 → スタンダード RI。インスタンスファミリーは固定・OS は変えたい → EC2 Instance Savings Plans。",
+  },
+
+  // ── Monitoring ────────────────────────────────────────────────────────────
+
+  {
+    id: "monitoring-1",
+    category: "Monitoring",
+    modeLabel: "使い分け重視",
+    prompt:
+      "「誰が・いつ・どの AWS API を呼び出したか」を記録・監査したい。最も適切なサービスはどれですか。",
+    context:
+      "セキュリティ監査・コンプライアンス対応のため API 操作の証跡を残す要件があります。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Amazon CloudWatch Metrics", hint: "CPU・メモリなどのリソースメトリクスを収集・可視化する" },
+      { id: "b", label: "B", text: "Amazon CloudWatch Logs", hint: "アプリケーションログ・システムログを収集・検索する" },
+      { id: "c", label: "C", text: "AWS CloudTrail", hint: "AWS API 呼び出しの操作ログ（誰が・いつ・何を）を記録する" },
+      { id: "d", label: "D", text: "AWS Config", hint: "リソースの設定変更履歴と準拠状況を評価する" },
+    ],
+    explanation:
+      "CloudTrail はすべての AWS API 呼び出しのログ（誰が・いつ・どのリージョンで・何のリソースに対して・何をしたか）を S3 に記録します。セキュリティ監査・コンプライアンス・不正操作の調査に使います。CloudWatch はメトリクス・ログ・アラームによる運用監視が目的です。",
+    comparePoint:
+      "CloudTrail：API 操作の監査ログ・誰が何をしたか。CloudWatch：メトリクス収集・ログ監視・アラーム・ダッシュボード。AWS Config：設定の準拠チェック・変更履歴。",
+    rememberAxis:
+      "API 操作の証跡・誰が何をしたか → CloudTrail。CPU/メモリなどの監視・アラーム → CloudWatch。設定変更の追跡・コンプライアンス → AWS Config。",
+  },
 ];
