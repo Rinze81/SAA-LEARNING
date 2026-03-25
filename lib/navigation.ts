@@ -1,5 +1,5 @@
 export type AppNavItem = {
-  href: "/" | "/terms" | "/comparisons" | "/quiz" | "/review";
+  href: "/" | "/terms" | "/comparisons" | "/quiz" | "/review" | "/roadmap";
   label: string;
   shortLabel: string;
   description: string;
@@ -35,6 +35,12 @@ export const appNavItems: AppNavItem[] = [
     label: "復習",
     shortLabel: "Review",
     description: "あとで見直すテーマを集める画面",
+  },
+  {
+    href: "/roadmap",
+    label: "地図",
+    shortLabel: "Map",
+    description: "どの順番で用語を学ぶかを示すロードマップ",
   },
 ];
 
