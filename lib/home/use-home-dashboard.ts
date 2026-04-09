@@ -8,6 +8,7 @@ import {
 } from "@/lib/home/home-data";
 import type { HomeSnapshot } from "@/lib/home/types";
 import { STUDY_SYNC_EVENT } from "@/lib/review/storage";
+import { getWeeklyTotalHours } from "@/lib/timer/storage";
 
 export function useHomeDashboard() {
   const [snapshot, setSnapshot] = useState<HomeSnapshot>(() =>
@@ -18,7 +19,10 @@ export function useHomeDashboard() {
   useEffect(() => {
     const sync = () => {
       try {
-        setSnapshot(buildClientHomeSnapshot(readPersistedHomeState()));
+        const snapshot = buildClientHomeSnapshot(readPersistedHomeState());
+        // 「学習時間」をタイマーの実データで上書き
+        snapshot.progress.studyHours = getWeeklyTotalHours();
+        setSnapshot(snapshot);
       } catch {
         // スナップショット生成が失敗しても初期値のまま継続
       } finally {

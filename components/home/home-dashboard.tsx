@@ -4,6 +4,7 @@ import { HomeHero } from "@/components/home/home-hero";
 import { LearningPaths } from "@/components/home/learning-paths";
 import { ProgressOverview } from "@/components/home/progress-overview";
 import { TodayFocus } from "@/components/home/today-focus";
+import { StudyTimer } from "@/components/timer/study-timer";
 import { useHomeDashboard } from "@/lib/home/use-home-dashboard";
 
 export function HomeDashboard() {
@@ -12,6 +13,7 @@ export function HomeDashboard() {
   return (
     <main className="min-h-screen px-4 pb-16 pt-6 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
+        <StudyTimer />
         <HomeHero snapshot={snapshot} isHydrated={isHydrated} />
         {isHydrated && snapshot.weakCategories.length > 0 ? (
           <section className="grid gap-3 rounded-[1.5rem] border border-slate-800 bg-slate-950/75 p-4 sm:grid-cols-3 sm:p-5">
