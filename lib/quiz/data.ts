@@ -1695,4 +1695,569 @@ export const quizQuestions: QuizQuestion[] = [
     rememberAxis:
       "TB 以上の大規模分析・DWH → Redshift。S3 データをアドホックにクエリ → Athena。リアルタイムの OLTP 処理 → RDS/Aurora。",
   },
+
+  // ── シナリオ: ストレージ ──────────────────────────────────────────────────
+
+  {
+    id: "scenario-storage-1",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が S3 に保存している画像ファイル（合計 10 TB）のストレージコストを削減したい。ファイルの 80% は作成から 30 日後にほとんどアクセスされなくなる。残り 20% は頻繁にアクセスされる。最もコスト効率の高い構成はどれか。",
+    context:
+      "現在はすべての画像を S3 Standard に保存しています。コスト削減が最優先です。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "すべてのファイルを S3 Glacier Instant Retrieval に移動する", hint: "頻繁にアクセスされるファイルを Glacier に移すとアクセスコストが高くなる" },
+      { id: "b", label: "B", text: "S3 ライフサイクルポリシーで 30 日後に S3 Standard-IA へ自動移行する", hint: "30 日後のアクセス頻度が低いファイルを Standard-IA に移すことでストレージコストを削減できる" },
+      { id: "c", label: "C", text: "S3 Intelligent-Tiering を有効化してすべてのオブジェクトを管理する", hint: "Intelligent-Tiering は自動で最適化するが、小さなオブジェクトにはモニタリング料金が割高になる場合がある" },
+      { id: "d", label: "D", text: "EFS に移行してコスト削減する", hint: "EFS は S3 より高価なファイルストレージ。画像保存用途では逆効果" },
+    ],
+    explanation:
+      "S3 ライフサイクルポリシーを使い、作成から 30 日後に自動的に S3 Standard-IA（Infrequent Access）へ移行するのが最適です。Standard-IA は Standard よりストレージ単価が約 40% 安く、アクセス頻度が低いデータに適しています。頻繁にアクセスされる 20% は Standard のままなので、アクセスコストも最適化されます。Intelligent-Tiering はアクセスパターンが読めない場合に有効ですが、定期的なアクセス低下がわかっているならライフサイクルポリシーの方がシンプルで確実です。",
+    comparePoint:
+      "S3 Standard：高頻度アクセス向け・高コスト。S3 Standard-IA：低頻度アクセス向け・約 40% 安。S3 Glacier：長期アーカイブ・取得に時間。S3 Intelligent-Tiering：自動最適化・モニタリング費用あり。",
+    rememberAxis:
+      "アクセスパターンが予測可能 → ライフサイクルポリシーで Standard → Standard-IA → Glacier と段階移行。アクセスパターン不明 → Intelligent-Tiering。",
+  },
+  {
+    id: "scenario-storage-2",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある動画配信企業が、EC2 上の動画変換バッチ処理で生成した大量の一時ファイルを保存している。これらのファイルはバッチ完了後に削除され、複数の EC2 インスタンスから同時にアクセスされる必要がある。最適なストレージはどれか。",
+    context:
+      "バッチ処理は複数の EC2 インスタンスで並列実行されます。ファイルは処理中のみ必要で、完了後は不要です。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "各 EC2 インスタンスの EBS ボリュームにファイルを保存する", hint: "EBS は単一 EC2 インスタンス専用（io1/io2 の Multi-Attach を除く）。複数インスタンスからの同時アクセスには不向き" },
+      { id: "b", label: "B", text: "S3 にファイルを保存し、各 EC2 から SDK でアクセスする", hint: "S3 は利用可能だがファイルシステムインターフェースが必要な場合は EFS の方が適切" },
+      { id: "c", label: "C", text: "EFS（Elastic File System）を使用し、複数 EC2 から同時マウントする", hint: "EFS は NFS プロトコルで複数 EC2 から同時にマウント・アクセスできる共有ファイルシステム" },
+      { id: "d", label: "D", text: "FSx for Windows File Server を使用する", hint: "FSx for Windows は Windows SMB プロトコル向け。Linux ベースの EC2 バッチ処理には EFS が適切" },
+    ],
+    explanation:
+      "EFS（Elastic File System）は NFS v4 プロトコルを使った完全マネージドの共有ファイルシステムです。複数の EC2 インスタンスから同時にマウントして読み書きでき、共有ストレージが必要な並列バッチ処理に最適です。EBS は原則として単一 EC2 専用、S3 はオブジェクトストレージで POSIX ファイルシステムのセマンティクスとは異なります。一時ファイルでストレージコストを抑えたい場合は EFS の Infrequent Access ティアも活用できます。",
+    comparePoint:
+      "EFS：複数 EC2 から同時共有・NFS・Linux 向け・スケーラブル。EBS：単一 EC2 専用（原則）・高 IOPS・ブロックストレージ。S3：オブジェクトストレージ・HTTP API。FSx for Windows：SMB・Windows 向け。",
+    rememberAxis:
+      "複数 EC2 から同時アクセスが必要な共有ファイルシステム → EFS。Windows 共有フォルダ（SMB） → FSx for Windows。高 IOPS な単一 EC2 ストレージ → EBS。",
+  },
+  {
+    id: "scenario-storage-3",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある会社が EC2 インスタンス上でデータベースを運用している。データベースのトランザクションログは高い IOPS（16,000 IOPS 以上）が必要で、ディスク障害に備えてデータを失いたくない。最適な EBS ボリューム構成はどれか。",
+    context:
+      "現在は gp2 ボリュームを使用しているが IOPS が不足しています。データの耐久性も確保したい。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "io2 ボリュームを使用し、RAID 1 構成で 2 本組み合わせる", hint: "io2 は最大 64,000 IOPS を提供し、RAID 1 でデータを冗長化できる" },
+      { id: "b", label: "B", text: "gp3 ボリュームを使用して IOPS をプロビジョニングする", hint: "gp3 は最大 16,000 IOPS まで設定可能。ちょうど境界値だが io2 の方が高 IOPS 要件には確実" },
+      { id: "c", label: "C", text: "st1（スループット最適化 HDD）を使用する", hint: "st1 は大きなシーケンシャル I/O 向け。高 IOPS のランダム I/O には不向き" },
+      { id: "d", label: "D", text: "sc1（コールドHDD）を使用する", hint: "sc1 は低コスト・低頻度アクセス向け。高 IOPS 要件には全く合わない" },
+    ],
+    explanation:
+      "io2（Provisioned IOPS SSD）は最大 64,000 IOPS をプロビジョニングでき、高い IOPS が必要なデータベースワークロードに最適です。耐久性は 99.999%（5 つの 9）で io1 より高く、重要なデータ保護にも適しています。gp3 は最大 16,000 IOPS まで設定可能ですが、16,000 超の要件には io2 が必要です。RAID 1 はミラーリングによりディスク障害からデータを保護します。ただし AWS では EBS 自体がリージョン内で冗長化されているため、RAID 1 は追加の保護層として使います。",
+    comparePoint:
+      "io2：最大 64,000 IOPS・高耐久性（99.999%）・ミッションクリティカル DB 向け。gp3：最大 16,000 IOPS・コスト効率が良い・一般的なワークロード。st1：HDD・高スループット・低 IOPS。",
+    rememberAxis:
+      "16,000 IOPS 超が必要 → io2。コスト効率重視で 16,000 IOPS 以内 → gp3。大量シーケンシャル読み書き（ログ収集など） → st1。",
+  },
+  {
+    id: "scenario-storage-4",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がオンプレミスのファイルサーバー（5 TB）を AWS に移行したい。移行後も社内のユーザーが Windows の共有フォルダ（\\\\server\\share）としてアクセスし続けられる必要がある。最適なソリューションはどれか。",
+    context:
+      "Active Directory と統合した認証が必要で、移行後も既存のアクセスパターンを変えたくない。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "S3 にファイルをアップロードし、S3 File Gateway でアクセスする", hint: "S3 File Gateway は NFS/SMB アクセスを S3 に変換するが、AD 統合や完全な Windows 互換性は FSx の方が優れている" },
+      { id: "b", label: "B", text: "EFS（Elastic File System）を使用する", hint: "EFS は NFS プロトコルで Linux/Unix 向け。Windows の SMB 共有フォルダには対応しない" },
+      { id: "c", label: "C", text: "EC2 に Windows Server を立て、ファイルサーバーを自己管理する", hint: "可能だが OS・ソフトウェアの管理が必要。マネージドサービスの FSx の方が運用コストが低い" },
+      { id: "d", label: "D", text: "Amazon FSx for Windows File Server を使用する", hint: "Windows ネイティブの SMB プロトコル・AD 統合・DFS 名前空間をサポートした完全マネージドサービス" },
+    ],
+    explanation:
+      "Amazon FSx for Windows File Server は Windows Server をベースにした完全マネージドのファイルシステムで、SMB プロトコル・Active Directory 統合・DFS（分散ファイルシステム）名前空間をネイティブにサポートします。既存の Windows ファイルサーバーとの互換性が最も高く、ユーザーはドライブ文字や UNC パス（\\\\server\\share）のまま移行後もアクセスできます。EC2 での自己管理は可能ですが、パッチ適用・バックアップなどの運用負担が増えます。",
+    comparePoint:
+      "FSx for Windows：SMB・AD 統合・完全マネージド・Windows ネイティブ互換。EFS：NFS・Linux 向け・マルチ AZ。S3 File Gateway：S3 バックエンドで NFS/SMB を提供・オンプレ向けキャッシュ。",
+    rememberAxis:
+      "Windows 共有フォルダ（SMB）・AD 統合が必要 → FSx for Windows File Server。Linux 共有ファイルシステム（NFS） → EFS。",
+  },
+  {
+    id: "scenario-storage-5",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が毎月 200 TB のデータをオンプレミスから S3 へ移行したい。現在のインターネット接続帯域は 1 Gbps で、他のトラフィックとの共有のため実質利用可能な帯域は限られている。転送を最短で完了させるには何を使うべきか。",
+    context:
+      "データの機密性が高く、インターネット経由での転送はセキュリティ上のリスクがある。1 回限りの大量移行です。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "AWS DataSync を使ってインターネット経由でデータを同期する", hint: "DataSync はデータ転送の自動化・高速化に優れるが、200 TB を 1 Gbps 回線で転送すると数日〜数週間かかる" },
+      { id: "b", label: "B", text: "AWS Snowball Edge を使ってデータを物理的に AWS に送る", hint: "Snowball Edge は 80 TB 容量の物理デバイスで、複数台使えば 200 TB を数日で移行できる" },
+      { id: "c", label: "C", text: "AWS Direct Connect を新規に開通してデータを転送する", hint: "Direct Connect の開通には数週間かかるため、急ぎの移行には不向き" },
+      { id: "d", label: "D", text: "マルチパートアップロードを使って S3 に並列アップロードする", hint: "マルチパートは大きなファイルの信頼性向上に有効だが、帯域の制約は変わらない" },
+    ],
+    explanation:
+      "200 TB のデータを 1 Gbps 回線で転送すると理論値でも約 18 日かかります（200 TB ÷ 125 MB/s）。実際の共有帯域ではさらに長くなります。AWS Snowball Edge は 80 TB 容量の物理デバイスで、3 台あれば 200 TB 以上を格納でき、宅配便で AWS のデータセンターへ送ることで数日以内に完了します。データは暗号化されて転送されるためセキュリティ要件も満たせます。さらに大規模（PB 以上）なら Snowball Edge 複数台を束ねる AWS Snowmobile も選択肢です。",
+    comparePoint:
+      "Snowball Edge：物理デバイス・80 TB/台・ネットワーク不要・大量一括移行に最適。DataSync：ネットワーク経由・継続的同期・100 TB 以下の差分同期向け。Direct Connect：専用線・レイテンシ低減・開通に時間。",
+    rememberAxis:
+      "TB 以上の一括移行でネットワーク転送が遅い → Snowball（Edge）。継続的な差分同期やオンプレ→AWSのレプリケーション → DataSync。専用帯域が必要 → Direct Connect。",
+  },
+
+  // ── シナリオ: ネットワーキング ────────────────────────────────────────────
+
+  {
+    id: "scenario-net-1",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が VPC 内のプライベートサブネットにある EC2 インスタンスから、インターネット上の外部 API（HTTPS）を呼び出したい。EC2 はインターネットから直接アクセスされてはならない。最も適切な構成はどれか。",
+    context:
+      "VPC にはパブリックサブネットとプライベートサブネットがあります。プライベートサブネットの EC2 には EIP がありません。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "パブリックサブネットに NAT Gateway を配置し、プライベートサブネットのルートテーブルに追加する", hint: "NAT Gateway はアウトバウンド通信を許可しつつインバウンド接続を遮断するマネージドサービス" },
+      { id: "b", label: "B", text: "EC2 に Elastic IP を付与してインターネットゲートウェイ経由で通信する", hint: "EIP を付与するとインターネットからも EC2 に直接アクセスできてしまう" },
+      { id: "c", label: "C", text: "VPC ピアリングを使って他の VPC 経由でインターネットにアクセスする", hint: "VPC ピアリングは VPC 間の接続であり、インターネットアクセスの手段ではない" },
+      { id: "d", label: "D", text: "プライベートサブネットのルートテーブルにインターネットゲートウェイを追加する", hint: "インターネットゲートウェイに直接ルーティングするとそのサブネットはパブリックになってしまう" },
+    ],
+    explanation:
+      "NAT Gateway（またはレガシーの NAT Instance）をパブリックサブネットに配置し、プライベートサブネットのルートテーブルのデフォルトルート（0.0.0.0/0）を NAT Gateway に向けることで、EC2 からのアウトバウンド通信（外部 API 呼び出しなど）が可能になります。NAT は IP アドレス変換を行うため、外部からプライベート EC2 への直接インバウンド接続は不可能で、セキュリティ要件を満たせます。",
+    comparePoint:
+      "NAT Gateway：プライベートサブネットからのアウトバウンドのみ・インバウンド不可・マネージド。インターネットゲートウェイ：双方向通信・パブリックサブネット専用。",
+    rememberAxis:
+      "プライベートサブネット EC2 からインターネットへのアウトバウンドのみ → NAT Gateway。双方向のインターネット通信が必要 → インターネットゲートウェイ + EIP。",
+  },
+  {
+    id: "scenario-net-2",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が AWS 上のシステムとオンプレミスのデータセンターを接続したい。接続には低レイテンシと安定した帯域が必要で、インターネット経由の VPN では品質が不安定だった。最適な接続方法はどれか。",
+    context:
+      "オンプレ〜AWS 間のデータ転送は月に数十 TB あります。VPN の帯域不足とレイテンシのばらつきが問題でした。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "AWS Site-to-Site VPN を 2 本に増やして冗長化する", hint: "VPN の数を増やしてもインターネット回線のレイテンシ・不安定さは解消されない" },
+      { id: "b", label: "B", text: "VPC ピアリングを使ってオンプレと接続する", hint: "VPC ピアリングは AWS アカウント間の VPC 接続。オンプレミスとの接続には使えない" },
+      { id: "c", label: "C", text: "AWS Direct Connect を使って専用の物理回線を確立する", hint: "Direct Connect は ISP 経由の専用回線で、安定した低レイテンシと高帯域を提供する" },
+      { id: "d", label: "D", text: "AWS Transit Gateway を使ってオンプレと接続する", hint: "Transit Gateway は複数 VPC とオンプレを集約接続するハブだが、物理回線は別途 Direct Connect か VPN が必要" },
+    ],
+    explanation:
+      "AWS Direct Connect は専用の物理回線（通信キャリア経由）でオンプレミスと AWS を接続するサービスです。インターネットを経由しないため安定した低レイテンシと一貫した帯域幅を提供します。月次の大量データ転送にもコスト的に有利な場合があります。冗長性のために 2 本の Direct Connect 回線を用意するか、バックアップとして VPN と組み合わせることが推奨されます。",
+    comparePoint:
+      "Direct Connect：専用回線・安定・低レイテンシ・高帯域・高コスト・開通に時間。Site-to-Site VPN：インターネット経由・暗号化・低コスト・簡単に開通・レイテンシ不安定。",
+    rememberAxis:
+      "安定した低レイテンシ・大量データ転送 → Direct Connect。コスト重視・許容できるレイテンシ → Site-to-Site VPN。両方の冗長構成 → Direct Connect + VPN バックアップ。",
+  },
+  {
+    id: "scenario-net-3",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が複数の AWS アカウント（10 個）にまたがる VPC を相互に接続したい。各 VPC 間で通信が必要で、将来的にオンプレミスとの接続も追加する予定がある。最もスケーラブルな構成はどれか。",
+    context:
+      "現在は VPC ピアリングで接続しているが、VPC が増えるたびに接続数が爆発的に増えることが問題になっています。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "すべての VPC 間で VPC ピアリングを張り続ける", hint: "N 個の VPC を相互接続するには N×(N-1)/2 本のピアリングが必要で管理が困難" },
+      { id: "b", label: "B", text: "AWS Transit Gateway を中央ハブとして全 VPC とオンプレを接続する", hint: "Transit Gateway は VPC・VPN・Direct Connect をスター型に集約し、N 本の接続で全通信を実現" },
+      { id: "c", label: "C", text: "VPC を 1 つに統合してサービスを移行する", hint: "VPC の統合はアカウント分離・セキュリティ境界の観点から現実的でない" },
+      { id: "d", label: "D", text: "AWS PrivateLink で各サービスを公開する", hint: "PrivateLink はサービスを VPC エンドポイント経由で公開する仕組み。汎用的な VPC 間ルーティングには不向き" },
+    ],
+    explanation:
+      "AWS Transit Gateway は複数の VPC・Site-to-Site VPN・Direct Connect をスター型のハブアンドスポーク構成で接続するサービスです。10 個の VPC をすべてピアリングするには 45 本の接続が必要ですが、Transit Gateway なら 10 本（各 VPC から TGW へ）で全通信が可能になります。また Direct Connect や VPN も同じ Transit Gateway に接続することで、将来のオンプレ接続の追加も容易です。ルートテーブルでトラフィックの分離・許可制御も細かく設定できます。",
+    comparePoint:
+      "Transit Gateway：ハブアンドスポーク・スケーラブル・複数 VPC + オンプレ接続を一元管理。VPC ピアリング：シンプル・少数 VPC 向け・推移的ルーティング不可。PrivateLink：サービス単位の公開・エンドポイントが必要。",
+    rememberAxis:
+      "多数の VPC を相互接続 → Transit Gateway。数個の VPC を簡単に接続 → VPC ピアリング。サービスを他 VPC へ安全に公開 → PrivateLink。",
+  },
+  {
+    id: "scenario-net-4",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業のウェブアプリが全世界のユーザーから利用されている。静的コンテンツ（画像・CSS・JS）の配信レイテンシを最小化し、オリジンサーバーの負荷を下げたい。また DDoS 攻撃への基本的な防御も必要。最適な構成はどれか。",
+    context:
+      "オリジンは ALB の背後にある EC2 クラスターです。グローバルに展開されたユーザーがいます。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Amazon CloudFront を ALB の前段に配置し、エッジロケーションからコンテンツを配信する", hint: "CloudFront は世界 450 以上のエッジロケーションでキャッシュ配信し、AWS Shield Standard で DDoS 対策も標準提供" },
+      { id: "b", label: "B", text: "各リージョンに ALB を立て Route 53 のジオルーティングで振り分ける", hint: "リージョン分散は可能だが、エッジキャッシュの代替にはならず静的コンテンツのレイテンシ改善も限定的" },
+      { id: "c", label: "C", text: "EC2 インスタンスを大幅にスケールアップしてオリジンの処理能力を高める", hint: "スケールアップはコスト増。グローバルなレイテンシ改善にはならない" },
+      { id: "d", label: "D", text: "S3 の静的ウェブサイトホスティングに移行する", hint: "S3 静的ホスティングだけではレイテンシはリージョン固定。CloudFront との組み合わせが必要" },
+    ],
+    explanation:
+      "Amazon CloudFront は世界 450 以上のエッジロケーション（POP）にコンテンツをキャッシュし、ユーザーに最寄りのエッジから高速配信します。キャッシュヒット時はオリジン（ALB/EC2）へのリクエストがなくなり負荷も大幅に減少します。AWS Shield Standard が自動的に有効化され、L3/L4 の DDoS 攻撃から保護されます。さらに WAF を組み合わせることで L7 の防御も追加できます。",
+    comparePoint:
+      "CloudFront：CDN・グローバルエッジキャッシュ・DDoS 対策（Shield Standard）・オリジン負荷軽減。ALB：リージョン内ロードバランシング・CDN ではない。Route 53 ジオルーティング：DNS レベルの地域振り分け・CDN ではない。",
+    rememberAxis:
+      "グローバルなレイテンシ最小化・静的コンテンツのキャッシュ → CloudFront。L7 の細かな攻撃フィルタリング → WAF + CloudFront。大規模 DDoS 対策 → Shield Advanced。",
+  },
+  {
+    id: "scenario-net-5",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が VPC 内の EC2 インスタンスから Amazon S3 へのアクセスをインターネット経由ではなく AWS 内部のネットワーク経由で行いたい。NAT Gateway のコストを削減しつつ、S3 へのアクセスをセキュアにしたい。最適な構成はどれか。",
+    context:
+      "現在はプライベートサブネットの EC2 が NAT Gateway 経由で S3 にアクセスしています。NAT Gateway のデータ処理料金が高くなっています。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "S3 バケットをパブリックアクセス可能にして EC2 から直接アクセスする", hint: "パブリックアクセスを許可するとセキュリティリスクが高くなる" },
+      { id: "b", label: "B", text: "S3 Transfer Acceleration を有効化する", hint: "Transfer Acceleration は S3 へのアップロード高速化機能でコスト削減や内部ルーティングには関係しない" },
+      { id: "c", label: "C", text: "Direct Connect を使って S3 にアクセスする", hint: "Direct Connect はオンプレ〜AWS の接続。VPC 内 EC2 から S3 へのアクセスには適していない" },
+      { id: "d", label: "D", text: "S3 用の VPC ゲートウェイエンドポイントを作成し、ルートテーブルに追加する", hint: "VPC ゲートウェイエンドポイントは無料で S3/DynamoDB へのプライベートアクセスを可能にする" },
+    ],
+    explanation:
+      "VPC ゲートウェイエンドポイント（Gateway Endpoint）を作成することで、EC2 インスタンスから S3 や DynamoDB への通信をインターネットや NAT Gateway を経由せず AWS の内部ネットワーク経由で行えます。ゲートウェイエンドポイント自体の料金は無料で、NAT Gateway のデータ処理料金（$0.045/GB 程度）を節約できます。エンドポイントポリシーで特定バケットへのアクセスのみに制限することも可能です。",
+    comparePoint:
+      "VPC ゲートウェイエンドポイント：無料・S3/DynamoDB 専用・ルートテーブルで設定・内部ネットワーク経由。VPC インターフェースエンドポイント（PrivateLink）：有料・多数の AWS サービス対応・ENI 経由。NAT Gateway：インターネット経由・有料（データ処理課金）。",
+    rememberAxis:
+      "S3 または DynamoDB への内部アクセス・NAT コスト削減 → VPC ゲートウェイエンドポイント（無料）。その他の AWS サービス（SQS・SSM 等）へのプライベートアクセス → インターフェースエンドポイント。",
+  },
+
+  // ── シナリオ: コンピューティング ─────────────────────────────────────────
+
+  {
+    id: "scenario-compute-1",
+    category: "Compute",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある EC サイトがトラフィックに大きな波がある（平時: 100 リクエスト/秒、ブラックフライデー: 10,000 リクエスト/秒）。コストを最小化しながらピーク時の需要に自動対応したい。最適な EC2 構成はどれか。",
+    context:
+      "現在は固定の EC2 インスタンス群を手動でスケールしています。ピーク時にキャパシティ不足が発生しています。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "ピーク時の 10,000 req/s に対応できる EC2 を常時起動しておく", hint: "平時に 100 倍のキャパシティを保有するのは大幅なコスト無駄" },
+      { id: "b", label: "B", text: "Auto Scaling グループを設定し、CPU 使用率などのメトリクスに基づいてスケールアウト/インする", hint: "需要に応じて自動的にインスタンスを追加・削除し、コストと可用性を最適化できる" },
+      { id: "c", label: "C", text: "Lambda に移行してサーバーレスで対応する", hint: "Lambda は有効だが、既存の EC2 ベースのアーキテクチャをすぐに移行するには大きな改修が必要" },
+      { id: "d", label: "D", text: "予約インスタンスを大量に購入してピークに備える", hint: "予約インスタンスは割引が大きいが、平時に余剰になり柔軟性がない" },
+    ],
+    explanation:
+      "Auto Scaling グループ（ASG）は CloudWatch メトリクス（CPU 使用率・カスタムメトリクスなど）に基づいてインスタンス数を自動調整します。平時は最小インスタンス数で運用し、トラフィック急増時には自動的にスケールアウトしてピークに対応します。コストは実際の使用量に比例するため、固定キャパシティよりも大幅に節約できます。ベースライン分は Reserved Instance、スパイク分は On-Demand または Spot Instance を使う混合戦略も有効です。",
+    comparePoint:
+      "Auto Scaling：需要に応じた自動調整・コスト最適化・可用性向上。固定キャパシティ：シンプルだが過剰コストまたはキャパシティ不足のリスク。Lambda：サーバーレス・無限スケール・既存 EC2 アーキテクチャからの移行が必要。",
+    rememberAxis:
+      "トラフィック変動に応じた EC2 の自動スケール → Auto Scaling グループ + CloudWatch。リクエスト駆動のイベント処理 → Lambda。固定ベースライン + スパイクの混合 → Reserved + On-Demand/Spot。",
+  },
+  {
+    id: "scenario-compute-2",
+    category: "Compute",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が EC2 上でバッチ処理ジョブ（機械学習モデルの学習）を実行している。ジョブは 8〜12 時間かかるが、途中で中断されても再実行できるようチェックポイントが実装されている。コストを大幅に削減したい。最適なインスタンス購入オプションはどれか。",
+    context:
+      "現在はオンデマンドインスタンスで実行しており、月あたりのコストが高い。ジョブは深夜〜早朝に実行されます。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "1 年の予約インスタンス（Standard RI）を購入する", hint: "バッチ処理は常時稼働ではないので、予約インスタンスの割引メリットを最大限活用できない" },
+      { id: "b", label: "B", text: "On-Demand インスタンスのまま使い続ける", hint: "コスト削減の余地がある。中断可能なバッチ処理には Spot が最適" },
+      { id: "c", label: "C", text: "Spot インスタンスを使用し、中断時はチェックポイントから再開する", hint: "Spot は On-Demand 比最大 90% 割引。中断耐性があるワークロードに最適" },
+      { id: "d", label: "D", text: "Dedicated Host を購入する", hint: "Dedicated Host はライセンス持ち込み（BYOL）や規制要件向け。コスト削減が目的なら不適切" },
+    ],
+    explanation:
+      "Spot インスタンスは AWS の余剰コンピューティングキャパシティを利用するため、On-Demand 比最大 90% の割引でインスタンスを使えます。中断（スポット中断）が発生する可能性がありますが、機械学習のチェックポイント実装により中断時に途中から再開できるため、Spot インスタンスに最適なワークロードです。AWS Batch や Amazon SageMaker でも Spot インスタンスを活用でき、さらに管理が楽になります。",
+    comparePoint:
+      "Spot インスタンス：最大 90% 割引・中断あり・中断耐性があるバッチ向け。On-Demand：中断なし・高コスト・予測不可能な需要向け。Reserved：常時稼働の安定ワークロード向け・最大 72% 割引。",
+    rememberAxis:
+      "中断耐性があるバッチ・ML 学習 → Spot インスタンス（最大 90% 割引）。常時稼働のベースライン → Reserved Instance。予測不可能な需要・短期 → On-Demand。",
+  },
+  {
+    id: "scenario-compute-3",
+    category: "Compute",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が API サーバーをコンテナで運用したい。インフラの管理（サーバーのパッチ適用・容量管理など）をできるだけ減らし、コンテナのオーケストレーションに集中したい。最適なサービスはどれか。",
+    context:
+      "Docker コンテナを使って開発しています。Kubernetes の運用経験はありませんが、コンテナのスケーリングは必要です。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Amazon ECS（Fargate 起動タイプ）を使用する", hint: "Fargate は EC2 を管理せずにコンテナを実行できるサーバーレスコンテナ環境" },
+      { id: "b", label: "B", text: "Amazon EKS（EC2 ノード）を使用する", hint: "EKS は Kubernetes のマネージドサービスだが、EC2 ノードの管理は依然として必要。Kubernetes 経験も必要" },
+      { id: "c", label: "C", text: "EC2 に Docker を直接インストールして Docker Compose で管理する", hint: "EC2 の管理・スケーリング・高可用性をすべて自前で実装する必要があり、運用負荷が高い" },
+      { id: "d", label: "D", text: "AWS Lambda にコンテナイメージをデプロイする", hint: "Lambda はコンテナイメージをサポートするが、常時起動の API サーバーより関数型・短時間処理向け" },
+    ],
+    explanation:
+      "Amazon ECS の Fargate 起動タイプは、サーバー（EC2）を一切管理せずにコンテナを実行できるサーバーレスなコンテナ実行環境です。CPU・メモリのリソースを指定するだけで Fargate がプロビジョニングを自動処理し、コンテナのスケーリング・ヘルスチェック・ローリングデプロイも ECS が管理します。Kubernetes（EKS）よりシンプルなため、Kubernetes 経験がない場合は ECS + Fargate が最適です。",
+    comparePoint:
+      "ECS Fargate：サーバーレス・EC2 管理不要・シンプル・AWS ネイティブ。EKS：Kubernetes・EC2 ノード管理が必要（Fargate 起動タイプもある）・複雑・高機能。EC2 + Docker：完全自己管理・高運用コスト。",
+    rememberAxis:
+      "インフラ管理を最小化したコンテナ実行 → ECS Fargate。Kubernetes が必要 → EKS（+ Fargate でもノード管理不要にできる）。短時間・イベント駆動の処理 → Lambda。",
+  },
+  {
+    id: "scenario-compute-4",
+    category: "Compute",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が Lambda 関数で画像処理（リサイズ・フォーマット変換）を行っている。処理には最大 8 GB のメモリと 10 分以上の実行時間が必要な場合がある。現在の Lambda 設定では制限に達してしまう。最適な解決策はどれか。",
+    context:
+      "Lambda の最大メモリは 10 GB、最大実行時間は 15 分です。8 GB で 10〜15 分の処理が必要です。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Lambda の設定をメモリ 10 GB・タイムアウト 15 分に設定する", hint: "Lambda の最大制限内には収まるが、15 分を超える可能性がある処理には対応できない" },
+      { id: "b", label: "B", text: "AWS Fargate（または ECS）でコンテナとして実行し、制限なく処理する", hint: "Fargate はタイムアウトがなく大容量メモリも設定可能。長時間・大容量処理に適切" },
+      { id: "c", label: "C", text: "Step Functions で Lambda を連鎖させて処理を分割する", hint: "有効な場合もあるが、画像処理の途中で Lambda を分割するのは複雑で状態管理が必要" },
+      { id: "d", label: "D", text: "EC2 Spot インスタンスで処理する専用サーバーを立てる", hint: "可能だが、Fargate の方がサーバー管理不要で適切" },
+    ],
+    explanation:
+      "Lambda には最大実行時間 15 分・最大メモリ 10 GB の制限があります。処理がこの制限に近づいている場合、AWS Fargate（ECS）でコンテナとして実行するのが適切です。Fargate には実行時間の制限がなく、vCPU・メモリも柔軟に設定できます。画像処理が確実に 15 分以内に収まるなら Lambda の設定変更で対応できますが、超過のリスクがある場合は Fargate や ECS が安全です。処理を並列化して Lambda で分割できる場合は Step Functions も有効です。",
+    comparePoint:
+      "Lambda：最大 15 分・10 GB・サーバーレス・短時間処理向け。Fargate：時間制限なし・大容量・サーバーレス・長時間バッチ処理向け。EC2：完全な制御・サーバー管理が必要。",
+    rememberAxis:
+      "15 分以内・10 GB 以内の処理 → Lambda。長時間または大容量の処理 → Fargate/ECS。細かく分割できる長い処理 → Step Functions + Lambda。",
+  },
+  {
+    id: "scenario-compute-5",
+    category: "Compute",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が Windows Server 2019 上で動作するカスタムアプリを EC2 に移行したい。ソフトウェアのライセンスはすでに所有しており（BYOL: Bring Your Own License）、ライセンスはソケット単位で課金される。ライセンスを最大限活用するための EC2 構成はどれか。",
+    context:
+      "ライセンスはソケット（物理 CPU）単位で課金。同じ物理ホストで安定して稼働させる必要があります。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "On-Demand インスタンスを使用する", hint: "On-Demand は物理ホストが共有されるため、ライセンスが物理ソケット単位の場合は過剰課金になる可能性" },
+      { id: "b", label: "B", text: "Reserved Instance を購入する", hint: "RI はコスト削減に有効だが、物理ホストは共有のまま。BYOL のライセンス管理には不向き" },
+      { id: "c", label: "C", text: "Spot インスタンスを使用する", hint: "Spot は中断されるため安定した稼働が必要なアプリには不適切" },
+      { id: "d", label: "D", text: "Dedicated Host を使用する", hint: "Dedicated Host は物理サーバー全体を占有でき、ソケット数を把握した BYOL が可能" },
+    ],
+    explanation:
+      "AWS Dedicated Host は物理サーバー全体をお客様専用に割り当てるサービスです。物理 CPU ソケット数・コア数が把握できるため、ソケット単位や vCPU 単位のライセンス（Windows Server・SQL Server・Oracle など）を BYOL で持ち込む場合に最適です。Dedicated Instance（物理ホストの専有だがホストレベルの制御なし）とは異なり、Dedicated Host ではホスト ID やソケット情報が取得でき、ライセンスコンプライアンスの管理に使えます。",
+    comparePoint:
+      "Dedicated Host：物理ホスト専有・ソケット/コア単位 BYOL 対応・最高コスト。Dedicated Instance：物理ホスト専有だがホスト詳細不可・中程度コスト。On-Demand/Reserved：物理ホスト共有・AWS ライセンス込み。",
+    rememberAxis:
+      "ソケット/コア単位の BYOL ライセンス → Dedicated Host。物理ホストの専有だけが目的（セキュリティ要件等） → Dedicated Instance。コスト重視の安定ワークロード → Reserved Instance。",
+  },
+
+  // ── シナリオ: アプリケーション統合 ───────────────────────────────────────
+
+  {
+    id: "scenario-ai-1",
+    category: "Application Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある EC サイトで、注文が入ったときに在庫管理・配送手配・メール通知の 3 つのシステムへ非同期に通知を送りたい。各システムは独立して動作しており、将来的にシステムが増える可能性がある。最適な疎結合アーキテクチャはどれか。",
+    context:
+      "現在は注文処理サービスが各システムに直接 API を呼び出す密結合構成。新しいシステムが増えるたびに注文サービスの改修が必要になっています。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "SQS キューを 1 つ作成し、すべてのシステムが同じキューをポーリングする", hint: "同じ SQS キューのメッセージは 1 つのコンシューマにのみ届く。全システムへのファンアウトには使えない" },
+      { id: "b", label: "B", text: "各システムへの同期 API 呼び出しを Lambda で並列化する", hint: "並列化は改善だが、システムが増えると Lambda の改修が必要。疎結合ではない" },
+      { id: "c", label: "C", text: "SNS トピックに注文イベントをパブリッシュし、各システムの SQS キューをサブスクライブさせる", hint: "SNS のファンアウトで 1 つのイベントが複数のサブスクライバーに届く。新システム追加はサブスクライブを追加するだけ" },
+      { id: "d", label: "D", text: "Kinesis Data Streams で注文イベントをストリーミングする", hint: "Kinesis はリアルタイム大量ストリーム処理向け。このユースケースには SNS + SQS がシンプル" },
+    ],
+    explanation:
+      "SNS（Simple Notification Service）のファンアウトパターンが最適です。注文サービスが SNS トピックにイベントをパブリッシュすると、サブスクライブしている複数の SQS キュー（在庫管理・配送・メール通知）それぞれにメッセージが届きます。新しいシステムが増えても SNS にサブスクリプションを追加するだけで注文サービスの改修は不要です。各システムは自分の SQS キューを独立してポーリングするため、一方のシステムの障害が他に影響しません。",
+    comparePoint:
+      "SNS + SQS ファンアウト：1 イベントを複数サブスクライバーへ・疎結合・拡張が容易。SQS のみ：メッセージは 1 コンシューマのみ・ファンアウト不可。Kinesis：大量ストリーム・リプレイ可能・複雑。",
+    rememberAxis:
+      "1 つのイベントを複数システムへファンアウト → SNS + SQS（ファンアウトパターン）。単一コンシューマへのキューイング → SQS のみ。時系列ストリームを複数ビューアが並行処理 → Kinesis。",
+  },
+  {
+    id: "scenario-ai-2",
+    category: "Application Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が注文処理ワークフロー（在庫確認 → 決済 → 配送登録 → 通知）を実装したい。各ステップは独立した Lambda 関数で実装されており、エラー時は前のステップへのロールバックが必要。ステップの実行順序と状態管理を簡素化したい。最適なサービスはどれか。",
+    context:
+      "現在は各 Lambda が次の Lambda を直接呼び出す連鎖構成で、エラーハンドリングが複雑になっています。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "SQS で各 Lambda をチェーンし、デッドレターキューでエラー処理する", hint: "SQS は非同期メッセージキュー。順序保証・状態管理・ロールバックロジックは自前で実装が必要" },
+      { id: "b", label: "B", text: "AWS Step Functions でワークフローを定義し、状態管理とエラーハンドリングを自動化する", hint: "Step Functions はワークフローの状態機械を管理し、リトライ・タイムアウト・補償トランザクションを宣言的に定義できる" },
+      { id: "c", label: "C", text: "EventBridge でイベントをルーティングして各 Lambda を起動する", hint: "EventBridge はイベント駆動のルーティングに優れるが、ステップ間の状態管理・ロールバックは自前実装が必要" },
+      { id: "d", label: "D", text: "SNS トピックで各 Lambda に通知して並列実行する", hint: "SNS は並列通知向け。順序制御・状態管理・ロールバックには不適切" },
+    ],
+    explanation:
+      "AWS Step Functions は Lambda 関数などのマイクロサービスをワークフローとして定義し、実行状態を管理するサービスです。JSON ベースの状態マシン定義（Amazon States Language）で各ステップの順序・分岐・並列化・リトライ・エラーキャッチを宣言的に記述できます。エラー時の補償トランザクション（Saga パターン）も実装しやすく、複雑なビジネスロジックのオーケストレーションに最適です。実行履歴も自動的に記録されるため、デバッグが容易です。",
+    comparePoint:
+      "Step Functions：状態マシン・順序制御・エラーハンドリング・ビジュアル化・オーケストレーション向け。SQS：非同期キュー・疎結合・状態管理なし。EventBridge：イベントルーティング・コレオグラフィー向け。",
+    rememberAxis:
+      "複数ステップのワークフロー・状態管理・エラーハンドリング → Step Functions。疎結合なイベント駆動 → EventBridge / SQS + SNS。",
+  },
+  {
+    id: "scenario-ai-3",
+    category: "Application Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がサードパーティの SaaS サービス（Stripe、GitHub 等）からの Webhook イベントを受け取り、AWS Lambda で処理したい。イベントの量は不定で、瞬間的に大量のイベントが来る場合もある。処理の失敗時には再試行が必要。最適な構成はどれか。",
+    context:
+      "Webhook はリトライ機能を持つが、AWS 側で受け取り確認を素早く返す必要があります。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "API Gateway → SQS → Lambda の構成にして、処理を非同期化する", hint: "API Gateway が即座に 200 を返し、SQS がバッファリングして Lambda が順番に処理。失敗時は DLQ に移動" },
+      { id: "b", label: "B", text: "API Gateway → Lambda（同期）でそのまま処理する", hint: "処理が遅れると Webhook タイムアウトが発生し、SaaS 側がリトライを繰り返してしまう" },
+      { id: "c", label: "C", text: "EC2 上の Webhook サーバーが直接処理する", hint: "サーバー管理が必要でスパイクへの対応も手動スケーリングになる" },
+      { id: "d", label: "D", text: "Kinesis Data Streams → Lambda で処理する", hint: "Kinesis は大量リアルタイムストリームに適するが、Webhook の量規模では SQS の方がシンプルで適切" },
+    ],
+    explanation:
+      "API Gateway で Webhook を受け取り、即座に SQS キューへメッセージを書き込んで 200 OK を返します。Lambda は SQS をポーリングして非同期に処理します。この構成のメリット：①API Gateway が素早く応答するため SaaS 側のタイムアウトが発生しない、②SQS がバッファリングするためスパイクにも対応、③処理失敗時はデッドレターキュー（DLQ）に移動してリトライや調査が可能です。",
+    comparePoint:
+      "API GW + SQS + Lambda：非同期・バッファリング・DLQ でリトライ・スパイク対応。API GW + Lambda（同期）：シンプルだが処理が遅いとタイムアウト・スパイクに弱い。",
+    rememberAxis:
+      "Webhook の即時応答 + 非同期処理 → API Gateway → SQS → Lambda。順序が重要なストリーム → Kinesis。単純な同期 API → API Gateway → Lambda（直接）。",
+  },
+  {
+    id: "scenario-ai-4",
+    category: "Application Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が異なる複数のシステム（社内システム・SaaS・AWS サービス）からのイベントを収集し、イベントのパターンに応じて異なる Lambda 関数やターゲットにルーティングしたい。ルールベースのイベントルーティングを実現する最適なサービスはどれか。",
+    context:
+      "イベントの種類によって異なるターゲット（Lambda・SNS・SQS・Step Functions 等）に振り分けたい。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "SNS でイベントをパブリッシュし、フィルターポリシーで振り分ける", hint: "SNS フィルターポリシーは有効だが、複雑なルールロジックや多数のターゲット種別は EventBridge の方が柔軟" },
+      { id: "b", label: "B", text: "SQS キューを複数作成し、プロデューサーが適切なキューを選んで送信する", hint: "ルーティングロジックをプロデューサーに持たせると密結合になる" },
+      { id: "c", label: "C", text: "Kinesis Data Streams でイベントをストリーミングし、Lambda でフィルタリングする", hint: "Kinesis は大量リアルタイムデータ向け。イベントルーティングには EventBridge が適切" },
+      { id: "d", label: "D", text: "Amazon EventBridge でイベントバスを作成し、ルールでターゲットに振り分ける", hint: "EventBridge は JSON パターンマッチングによるルールベースのルーティングで多数のターゲット種別に対応" },
+    ],
+    explanation:
+      "Amazon EventBridge（旧 CloudWatch Events）は、イベントバスを介してイベントを受信し、JSON パターンマッチングルールに基づいてターゲット（Lambda・SNS・SQS・Step Functions・API Gateway 等）にルーティングするサービスです。サードパーティの SaaS イベント（Stripe・GitHub 等）もパートナーイベントバスで直接受信できます。SNS のフィルターポリシーより複雑なルールが記述でき、AWS サービス全体のイベント統合ハブとして機能します。",
+    comparePoint:
+      "EventBridge：ルールベースルーティング・多数のターゲット種別・サードパーティ統合・イベント駆動アーキテクチャの中心。SNS：シンプルなファンアウト・フィルターポリシーあり。SQS：キューイング・順序処理。",
+    rememberAxis:
+      "パターンに基づく柔軟なイベントルーティング → EventBridge。1 対多のファンアウト → SNS。キューイングと非同期処理 → SQS。",
+  },
+  {
+    id: "scenario-ai-5",
+    category: "Application Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がレガシーシステムのメッセージブローカー（ActiveMQ）を AWS に移行したい。アプリケーションコードの変更を最小限にしつつ、JMS（Java Message Service）プロトコルを引き続き使いたい。最適なサービスはどれか。",
+    context:
+      "既存アプリケーションは JMS を使って ActiveMQ と通信しています。プロトコルの変更なしに移行したい。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Amazon SQS に移行する", hint: "SQS は JMS プロトコルをネイティブにサポートしない。アプリケーションコードの大幅な変更が必要" },
+      { id: "b", label: "B", text: "Amazon MQ（ActiveMQ ブローカー）を使用する", hint: "Amazon MQ は ActiveMQ・RabbitMQ をマネージドで提供し、JMS 等の既存プロトコルをそのまま使える" },
+      { id: "c", label: "C", text: "Amazon Kinesis Data Streams に移行する", hint: "Kinesis はリアルタイムストリーミング向けで、JMS プロトコルには対応していない" },
+      { id: "d", label: "D", text: "Amazon SNS に移行する", hint: "SNS は HTTP/HTTPS・SQS・Lambda 等への通知向けで、JMS プロトコルには対応していない" },
+    ],
+    explanation:
+      "Amazon MQ は Apache ActiveMQ と RabbitMQ のマネージドメッセージブローカーサービスです。JMS・AMQP・STOMP・MQTT・OpenWire といった標準プロトコルをサポートするため、既存の ActiveMQ を使ったアプリケーションをコードの変更最小限で移行できます。SQS や SNS は AWS ネイティブで高スケーラビリティを持ちますが、JMS プロトコルには対応しておらず、移行にはアプリケーションの大幅な改修が必要です。新規開発では SQS/SNS が推奨されます。",
+    comparePoint:
+      "Amazon MQ：ActiveMQ/RabbitMQ 互換・JMS 等の標準プロトコル・既存システムの移行向け。SQS：AWS ネイティブ・高スケーラブル・JMS 非対応・新規開発向け。SNS：パブリッシュ/サブスクライブ・JMS 非対応。",
+    rememberAxis:
+      "既存の JMS/AMQP アプリをそのまま移行 → Amazon MQ。新規開発で AWS ネイティブのキューが必要 → SQS。新規開発でファンアウトが必要 → SNS。",
+  },
+
+  // ── シナリオ: モニタリング ────────────────────────────────────────────────
+
+  {
+    id: "scenario-mon-1",
+    category: "Monitoring",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が EC2 上のアプリケーションのメモリ使用率を CloudWatch で監視したい。CloudWatch はデフォルトでは EC2 のメモリ使用率を収集しない。メモリ使用率のアラームを設定するにはどうすればよいか。",
+    context:
+      "CPU 使用率・ネットワーク I/O は標準メトリクスで監視できています。メモリだけが取れていません。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "CloudWatch エージェントを EC2 にインストールし、カスタムメトリクスとして収集する", hint: "CloudWatch エージェントはメモリ・ディスク等の OS レベルメトリクスをカスタムメトリクスとして送信できる" },
+      { id: "b", label: "B", text: "AWS Systems Manager でメモリ情報を取得する", hint: "SSM はパッチ管理・リモート実行等の機能。メトリクス収集は CloudWatch エージェントが担う" },
+      { id: "c", label: "C", text: "VPC フローログでメモリ使用率を収集する", hint: "VPC フローログはネットワークトラフィックのログ。メモリ使用率は収集できない" },
+      { id: "d", label: "D", text: "CloudWatch に詳細モニタリングを有効化する", hint: "詳細モニタリングは標準メトリクス（CPU・ネットワーク等）の収集間隔を 5 分→1 分に短縮するもの。メモリは収集対象外" },
+    ],
+    explanation:
+      "Amazon CloudWatch はデフォルトで EC2 のハイパーバイザーレベルのメトリクス（CPU 使用率・ネットワーク I/O・ディスク I/O など）を収集しますが、OS 内部のメモリ使用率・ディスク空き容量などは収集しません。これらを収集するには CloudWatch エージェント（統合 CloudWatch エージェント）を EC2 にインストールし、収集設定ファイル（JSON）でメトリクスを指定します。収集されたメトリクスはカスタムメトリクスとして CloudWatch に送信され、通常のメトリクスと同様にアラームを設定できます。",
+    comparePoint:
+      "標準メトリクス（エージェント不要）：CPUUtilization・NetworkIn/Out・DiskReadOps 等。カスタムメトリクス（エージェント必要）：メモリ使用率・ディスク空き容量・プロセス数等。",
+    rememberAxis:
+      "メモリ・ディスク空き容量など OS レベルのメトリクス → CloudWatch エージェントをインストールしてカスタムメトリクスとして収集。",
+  },
+  {
+    id: "scenario-mon-2",
+    category: "Monitoring",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の AWS 環境で、誰かが意図せず S3 バケットをパブリックアクセス可能な状態に変更した。このような設定変更をリアルタイムで検知してアラートを発報するには何を使うべきか。",
+    context:
+      "IAM ユーザーやロールの設定変更も監視したい。コンプライアンス要件として変更の証跡も必要です。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "CloudWatch メトリクスで S3 バケットポリシーの変更を監視する", hint: "CloudWatch は S3 設定変更のメトリクスを提供しない。CloudTrail ログを使う必要がある" },
+      { id: "b", label: "B", text: "GuardDuty を有効化する", hint: "GuardDuty は脅威検出（不審な API コール・マルウェア等）向け。設定変更のコンプライアンス監視は AWS Config が適切" },
+      { id: "c", label: "C", text: "AWS Config ルールで S3 のパブリックアクセス設定を監視し、EventBridge でアラートを発報する", hint: "AWS Config は設定変更を継続的に評価し、非準拠リソースを検出。EventBridge でリアルタイムアラートが可能" },
+      { id: "d", label: "D", text: "S3 アクセスログを CloudWatch Logs に送り、メトリクスフィルターでアラートする", hint: "S3 アクセスログはオブジェクトレベルのアクセス記録。バケット設定変更の検知には CloudTrail + Config が適切" },
+    ],
+    explanation:
+      "AWS Config は AWS リソースの設定変更を継続的に記録・評価します。S3 のパブリックアクセスブロック設定を監視する Config ルール（s3-bucket-public-access-prohibited など）を設定することで、非準拠状態を即座に検出できます。設定変更は CloudTrail がイベントとして記録し、EventBridge（CloudWatch Events）でリアルタイムに Lambda や SNS へ通知を発報できます。GuardDuty は不審な動作の検出、Config は設定のコンプライアンス評価という役割分担です。",
+    comparePoint:
+      "AWS Config：設定変更のコンプライアンス評価・変更履歴・継続的な評価。CloudTrail：API 操作の証跡・誰が何をしたかの記録。GuardDuty：脅威検出・不審な動作の機械学習ベース検出。",
+    rememberAxis:
+      "設定変更の検知・コンプライアンス監視 → AWS Config。API 操作の証跡・監査ログ → CloudTrail。不審な動作・脅威検出 → GuardDuty。",
+  },
+  {
+    id: "scenario-mon-3",
+    category: "Monitoring",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がマイクロサービスアーキテクチャを採用しており、10 個のサービスが相互に呼び合っている。本番環境でパフォーマンス問題が発生したとき、どのサービスがボトルネックになっているかを素早く特定したい。最適なサービスはどれか。",
+    context:
+      "各サービスは Lambda または EC2/ECS で動作しています。サービス間の呼び出しチェーンをトレースしたい。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "CloudWatch Logs に各サービスがリクエスト時間を出力し、ログインサイトで分析する", hint: "ログ分析でも可能だが、リクエストのトレースと依存関係の可視化は AWS X-Ray の方が圧倒的に優れている" },
+      { id: "b", label: "B", text: "AWS X-Ray でトレーシングを有効化し、サービスマップでボトルネックを特定する", hint: "X-Ray は分散トレーシングでリクエストの流れを可視化し、レイテンシのボトルネックを特定できる" },
+      { id: "c", label: "C", text: "CloudWatch メトリクスで各サービスの CPU 使用率を監視する", hint: "CPU 使用率はリソース監視に有効だが、サービス間の依存関係トレーシングには使えない" },
+      { id: "d", label: "D", text: "VPC フローログで通信量を分析する", hint: "フローログはネットワークレベルの通信量記録。アプリケーションレイヤーのトレースには使えない" },
+    ],
+    explanation:
+      "AWS X-Ray は分散トレーシングサービスで、マイクロサービス間のリクエストフローをエンドツーエンドで追跡します。サービスマップでは各サービスの依存関係・平均レイテンシ・エラー率が視覚化され、ボトルネックを一目で特定できます。各サービスに X-Ray SDK を組み込むか、Lambda・API Gateway の場合は設定で有効化するだけでトレースデータが収集されます。CloudWatch ServiceLens と組み合わせると、メトリクス・ログ・トレースを統合的に分析できます。",
+    comparePoint:
+      "X-Ray：分散トレーシング・サービスマップ・レイテンシ分析・マイクロサービスのボトルネック特定。CloudWatch：メトリクス・ログ・アラーム。CloudTrail：API 操作の証跡。",
+    rememberAxis:
+      "マイクロサービスのボトルネック特定・分散トレーシング → AWS X-Ray。メトリクス監視・アラーム → CloudWatch。API 操作の監査 → CloudTrail。",
+  },
+  {
+    id: "scenario-mon-4",
+    category: "Monitoring",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が本番環境の ALB のアクセスログを長期保存し、攻撃パターンの分析やデバッグに使いたい。ログは毎日 GB 単位で生成される。低コストで保存しつつ、必要なときに SQL でクエリできるようにしたい。最適な構成はどれか。",
+    context:
+      "ログは 1 年間保持する必要があります。頻繁にクエリするわけではありませんが、調査が必要なときに素早く検索したい。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "CloudWatch Logs にアクセスログを送信し、インサイトで分析する", hint: "CloudWatch Logs は高価。GB 単位のログを 1 年間保存するとコストが高くなる" },
+      { id: "b", label: "B", text: "Elasticsearch（OpenSearch）クラスターに格納してリアルタイム分析する", hint: "OpenSearch は強力だが常時稼働のクラスターコストが高く、低頻度クエリには過剰" },
+      { id: "c", label: "C", text: "RDS に ALB ログを格納して SQL でクエリする", hint: "GB 単位の非構造化ログを RDS に格納するのはコスト・パフォーマンス面で非効率" },
+      { id: "d", label: "D", text: "S3 に ALB ログを保存し、Amazon Athena で SQL クエリする", hint: "S3 は低コストストレージ、Athena はクエリした分だけ課金のサーバーレス分析。長期保存 + 必要時クエリに最適" },
+    ],
+    explanation:
+      "ALB はアクセスログを直接 S3 バケットに出力できます（S3 アクセスログ機能）。S3 は非常に低コスト（$0.023/GB 程度）で長期保存に最適です。Amazon Athena は S3 上のデータを直接 SQL でクエリできるサーバーレスサービスで、クエリしたデータ量に対してのみ課金（$5/TB 程度）されます。頻繁にクエリしない場合はほぼコストがかかりません。ログを Parquet 形式や Gzip 圧縮で保存すると、クエリコストと速度がさらに改善します。",
+    comparePoint:
+      "S3 + Athena：低コスト長期保存・サーバーレス SQL・スキャン課金・低頻度クエリに最適。CloudWatch Logs：高コスト・常時インデックス。OpenSearch：高コスト常時稼働・リアルタイム検索向け。",
+    rememberAxis:
+      "大量ログの低コスト長期保存 + 必要時 SQL クエリ → S3 + Athena。リアルタイムの全文検索・ダッシュボード → OpenSearch。構造化データの細かな分析 → CloudWatch Logs Insights（中規模まで）。",
+  },
+  {
+    id: "scenario-mon-5",
+    category: "Monitoring",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が AWS 環境全体のセキュリティ状態を把握したい。IAM の設定ミス・S3 の公開バケット・セキュリティグループの不適切な設定など、セキュリティベストプラクティスへの適合状況を一元的に確認したい。最適なサービスはどれか。",
+    context:
+      "複数の AWS アカウント（10 個）を使用しています。各アカウントの設定を一元的に確認したい。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "AWS Config で各リソースの設定を個別に監視する", hint: "Config は個別のルール設定監視に優れるが、セキュリティ全体の包括的な評価には Security Hub の方が適切" },
+      { id: "b", label: "B", text: "Amazon GuardDuty を有効化して脅威を検出する", hint: "GuardDuty は実際の脅威（不審なアクセス・マルウェア等）の検出。設定ミスの予防的評価は Security Hub" },
+      { id: "c", label: "C", text: "AWS Security Hub で CIS ベンチマークや AWS 基礎セキュリティのベストプラクティスを評価する", hint: "Security Hub は複数アカウントのセキュリティ状態を集約し、標準フレームワークに基づいてスコア化する" },
+      { id: "d", label: "D", text: "AWS Trusted Advisor でセキュリティチェックを実行する", hint: "Trusted Advisor はセキュリティ・コスト・パフォーマンスの推奨事項を提供するが、Security Hub ほど詳細でない" },
+    ],
+    explanation:
+      "AWS Security Hub は複数の AWS アカウント・リージョンのセキュリティ状態を集約して一元管理するサービスです。CIS AWS Foundations Benchmark・AWS 基礎セキュリティのベストプラクティス・PCI DSS などの標準フレームワークに基づいて自動的にセキュリティスコアを計算します。GuardDuty・Inspector・Macie・Config などの検出結果も Security Hub に集約でき、SIEM のような統合ダッシュボードとして機能します。Organizations と統合することで複数アカウントを一元管理できます。",
+    comparePoint:
+      "Security Hub：セキュリティ態勢の一元管理・コンプライアンス評価・複数アカウント集約。GuardDuty：脅威検出（実際の攻撃・不審な動作）。Config：設定変更の追跡・個別ルール評価。Trusted Advisor：全般的な推奨事項（コスト・パフォーマンス・セキュリティ）。",
+    rememberAxis:
+      "セキュリティ態勢の全体評価・コンプライアンス → Security Hub。実際の脅威・攻撃の検出 → GuardDuty。設定変更のコンプライアンス監視 → AWS Config。",
+  },
 ];
