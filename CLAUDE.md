@@ -181,3 +181,13 @@ npm run dev
 - SSR時はlocalStorageにアクセスできないため、`isBrowser()` チェックが必要
 - `STUDY_SYNC_EVENT` カスタムイベントでタブ間・コンポーネント間のデータ同期を実現している
 - Tailwindクラスは `dark:` prefix不使用（全画面ダークモード固定）
+
+---
+
+## 注意事項（過去のトラブルから）
+
+- `next.config.js` の CSP 設定を変更するときは開発モードで動作確認してからコミットすること
+  （`unsafe-eval` がないと開発モードで webpack の eval() がブロックされ、クリックが一切効かなくなる）
+- UI の大きな変更はコミットしてからマージすること
+  （未コミットのまま `git restore` や `git reset --hard` すると変更がすべて消える）
+- 機能変更後は必ず `/roadmap`・`/quiz`・`/terms` の 3 画面で動作確認してからマージすること
