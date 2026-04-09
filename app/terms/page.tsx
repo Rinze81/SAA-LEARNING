@@ -70,8 +70,7 @@ function TermsPageContent() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
         <SectionFrame
           eyebrow="AWS 用語"
-          title="比較とクイズの理解を支える、基礎用語を整理する"
-          description="SAA で頻出の基本用語を、短い定義と試験での出方と一緒にまとめています。比較学習や問題演習の前に目を通すと、選択肢の意味をつかみやすくなります。"
+          title="用語集"
           aside={
             <Link
               href="/comparisons"
@@ -81,36 +80,16 @@ function TermsPageContent() {
             </Link>
           }
         >
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-[1.15rem] border border-slate-800 bg-slate-900/55 p-4">
-              <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs">
-                収録用語数
-              </p>
-              <p className="mt-2 text-2xl font-semibold text-slate-100">
-                {studyTerms.length}
-              </p>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
-                頻出の設計原則と AWS 基礎用語を優先しています。
-              </p>
-            </div>
-
-            <div className="rounded-[1.15rem] border border-slate-800 bg-slate-900/55 p-4">
-              <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs">
-                読み方
-              </p>
-              <p className="mt-2 text-sm leading-7 text-slate-300">
-                まず一言定義で意味をつかみ、そのあと試験での出方と関連概念を見ると定着しやすくなります。
-              </p>
-            </div>
-
-            <div className="rounded-[1.15rem] border border-slate-800 bg-slate-900/55 p-4">
-              <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs">
-                次の学習
-              </p>
-              <p className="mt-2 text-sm leading-7 text-slate-300">
-                用語を整理したあとに比較やクイズへ進むと、似た選択肢の違いをつかみやすくなります。
-              </p>
-            </div>
+          <div className="rounded-[1.15rem] border border-slate-800 bg-slate-900/55 p-4">
+            <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs">
+              収録用語数
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-slate-100">
+              {studyTerms.length}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-slate-400">
+              頻出の設計原則と AWS 基礎用語を優先しています。
+            </p>
           </div>
         </SectionFrame>
 

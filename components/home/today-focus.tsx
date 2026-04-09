@@ -15,11 +15,7 @@ export function TodayFocus({ snapshot, isHydrated }: TodayFocusProps) {
     <SectionFrame
       eyebrow="今日の重点ポイント"
       title={`今日は ${focus.title}`}
-      description={
-        isHydrated
-          ? focus.description
-          : "学習状況の読み込み後に、今日優先したいカテゴリと比較ポイントを反映します。"
-      }
+      description={focus.description}
       aside={
         <Link
           href={focus.href}

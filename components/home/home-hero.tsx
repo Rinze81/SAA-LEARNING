@@ -20,9 +20,6 @@ export function HomeHero({ snapshot, isHydrated }: HomeHeroProps) {
               <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl lg:text-5xl">
                 迷わず次の学習に進める、実践重視の学習導線
               </h1>
-              <p className="max-w-xl text-sm leading-6 text-slate-400 sm:text-[15px] sm:leading-7">
-                復習リストの誤答カテゴリと直近の学習状況をもとに、今やるべき 1 問と学習の優先順位をすぐに確認できます。
-              </p>
             </div>
           </div>
 
@@ -35,9 +32,7 @@ export function HomeHero({ snapshot, isHydrated }: HomeHeroProps) {
                 {snapshot.hero.primaryLabel}
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                {isHydrated
-                  ? snapshot.hero.primaryDescription
-                  : "保存済みの学習状況を読み込み後に反映します。まずは次の 1 問から始めましょう。"}
+                {snapshot.hero.primaryDescription}
               </p>
             </div>
             <div className="grid gap-3 sm:min-w-[11rem]">

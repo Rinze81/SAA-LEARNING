@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 type SectionFrameProps = {
   eyebrow?: string;
-  title: string;
+  title?: string;
   description?: string;
   children: ReactNode;
   aside?: ReactNode;
@@ -29,16 +29,18 @@ export function SectionFrame({
                 {eyebrow}
               </p>
             ) : null}
-            <div className="space-y-2">
-              <h2 className="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl lg:text-3xl">
-                {title}
-              </h2>
-              {description ? (
-                <p className="max-w-2xl text-sm leading-6 text-slate-400 sm:text-[15px] sm:leading-7">
-                  {description}
-                </p>
-              ) : null}
-            </div>
+            {title ? (
+              <div className="space-y-2">
+                <h2 className="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl lg:text-3xl">
+                  {title}
+                </h2>
+                {description ? (
+                  <p className="max-w-2xl text-sm leading-6 text-slate-400 sm:text-[15px] sm:leading-7">
+                    {description}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
           {aside}
         </div>

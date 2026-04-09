@@ -28,26 +28,9 @@ function XCircleIcon() {
 export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
   if (!session.isSubmitted) {
     return (
-      <SectionFrame
-        eyebrow="解説"
-        title="解答後に、正誤と判断軸をまとめて確認します"
-        description="回答すると、正誤だけでなく解説、比較ポイント、覚える軸までまとめて表示します。"
-      >
-        <div className="grid gap-4">
-          <div className="rounded-[1.25rem] border border-slate-800 bg-slate-900/55 p-4 sm:p-5">
-            <p className="text-[11px] tracking-[0.16em] text-slate-500">解答後に確認できること</p>
-            <ul className="mt-3 grid gap-2 text-sm leading-6 text-slate-300">
-              <li>正解かどうか</li>
-              <li>自分の回答と正答の違い</li>
-              <li>なぜその選択肢になるのかの解説</li>
-              <li>次に使える比較ポイント</li>
-            </ul>
-          </div>
-          <div className="rounded-[1.25rem] border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
-            <p className="text-sm leading-6 text-slate-400">
-              まずは一度選んでから回答すると、解説の理解がはっきり深まります。
-            </p>
-          </div>
+      <SectionFrame eyebrow="解説">
+        <div className="rounded-[1.25rem] border border-dashed border-slate-800 bg-slate-950/60 p-6 text-center text-sm text-slate-500">
+          選択肢を選んで回答すると、解説・比較ポイント・覚える軸が表示されます。
         </div>
       </SectionFrame>
     );

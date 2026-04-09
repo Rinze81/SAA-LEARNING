@@ -10,8 +10,7 @@ export function LearningPaths({ snapshot }: LearningPathsProps) {
   return (
     <SectionFrame
       eyebrow="学習ルート"
-      title="今の理解に合わせて、学ぶ順番を選ぶ"
-      description="用語の整理、比較での判断、優先クイズのどこからでも始められます。今の課題に合う流れを選んで学習を進めましょう。"
+      title="学習ルート"
     >
       <div className="grid gap-4">
         {snapshot.paths.map((path, index) => (

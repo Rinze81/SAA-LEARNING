@@ -9,8 +9,7 @@ export default function ComparisonsPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
         <SectionFrame
           eyebrow="サービス比較"
-          title="似た AWS サービスの違いを、使いどころで理解する"
-          description="SAA で迷いやすい比較テーマを、試験での見分け方まで含めてカードで整理しています。まずは違いを読み、そのあと問題演習で判断軸を確かめる流れに向いています。"
+          title="サービス比較"
           aside={
             <Link
               href="/quiz"
@@ -20,36 +19,16 @@ export default function ComparisonsPage() {
             </Link>
           }
         >
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-[1.15rem] border border-slate-800 bg-slate-900/55 p-4">
-              <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs">
-                比較テーマ数
-              </p>
-              <p className="mt-2 text-2xl font-semibold text-slate-100">
-                {comparisonItems.length}
-              </p>
-              <p className="mt-1 text-sm leading-6 text-slate-400">
-                SAA で頻出の使い分けを優先しています。
-              </p>
-            </div>
-
-            <div className="rounded-[1.15rem] border border-slate-800 bg-slate-900/55 p-4">
-              <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs">
-                読み方
-              </p>
-              <p className="mt-2 text-sm leading-7 text-slate-300">
-                まず要約、次にサービスごとの差分、最後に試験での見分け方を見ると理解しやすくなります。
-              </p>
-            </div>
-
-            <div className="rounded-[1.15rem] border border-slate-800 bg-slate-900/55 p-4">
-              <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs">
-                次の学習
-              </p>
-              <p className="mt-2 text-sm leading-7 text-slate-300">
-                比較で整理したあとにクイズへ進むと、選択肢を切る理由が言語化しやすくなります。
-              </p>
-            </div>
+          <div className="rounded-[1.15rem] border border-slate-800 bg-slate-900/55 p-4">
+            <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs">
+              比較テーマ数
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-slate-100">
+              {comparisonItems.length}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-slate-400">
+              SAA で頻出の使い分けを優先しています。
+            </p>
           </div>
         </SectionFrame>
 

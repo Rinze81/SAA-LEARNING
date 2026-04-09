@@ -15,8 +15,6 @@ export function QuizQuestionCard({
   return (
     <SectionFrame
       eyebrow="問題"
-      title="設問から判断材料を拾い、最適な選択肢を選ぶ"
-      description="正答だけでなく、なぜ他の選択肢ではないのかも意識して考えると、解説の理解が深まりやすくなります。"
       aside={<StatusChip label={question.category} tone="accent" />}
     >
       <div className="grid gap-4">
@@ -32,15 +30,6 @@ export function QuizQuestionCard({
             {question.prompt}
           </p>
         </div>
-
-        {session.isSubmitted ? (
-          <div className="rounded-[1.2rem] border border-slate-800 bg-slate-900/45 p-4">
-            <p className="text-[11px] tracking-[0.16em] text-slate-500">提出後の見方</p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">
-              正解の選択肢だけでなく、選ばなかった選択肢が外れる理由まで一緒に確認すると、次の問題に強くなります。
-            </p>
-          </div>
-        ) : null}
       </div>
     </SectionFrame>
   );

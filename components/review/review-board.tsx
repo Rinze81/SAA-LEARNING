@@ -57,8 +57,7 @@ export function ReviewBoard() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
         <SectionFrame
           eyebrow="復習リスト"
-          title="間違えた問題を、判断軸ごとに見直す"
-          description="復習リストに追加した問題をまとめて確認できます。解き直しと比較ポイントの確認を行いながら、サービス選定の視点を整理しましょう。"
+          title="間違えた問題"
           aside={
             <Link
               href="/quiz"
@@ -68,51 +67,31 @@ export function ReviewBoard() {
             </Link>
           }
         >
-          <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-[1.35rem] border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
-              <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs sm:tracking-[0.22em]">
-                弱点カテゴリ
+          <div className="rounded-[1.35rem] border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
+            <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs sm:tracking-[0.22em]">
+              弱点カテゴリ
+            </p>
+            {categorySummary.length > 0 ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {categorySummary.map(([category, count]) => (
+                  <StatusChip
+                    key={category}
+                    label={`${category} ${count}件`}
+                    tone={count > 1 ? "danger" : "accent"}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="mt-3 text-sm leading-6 text-slate-400">
+                まだ復習リストに問題はありません。
               </p>
-              {categorySummary.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {categorySummary.map(([category, count]) => (
-                    <StatusChip
-                      key={category}
-                      label={`${category} ${count}件`}
-                      tone={count > 1 ? "danger" : "accent"}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="mt-3 text-sm leading-6 text-slate-400">
-                  まだ復習リストに問題はありません。問題演習で間違えた問題を追加すると、ここから確認できます。
-                </p>
-              )}
-            </div>
-
-            <div className="rounded-[1.35rem] border border-slate-800 bg-slate-900/50 p-4 sm:p-5">
-              <p className="text-[11px] tracking-[0.18em] text-slate-500 sm:text-xs sm:tracking-[0.22em]">
-                今日の進め方
-              </p>
-              <ol className="mt-4 grid gap-3">
-                <li className="rounded-[1.1rem] border border-slate-800 bg-slate-950/60 p-4 text-sm leading-6 text-slate-300">
-                  1. 件数の多いカテゴリから見て、どこで判断がぶれているかを確認する
-                </li>
-                <li className="rounded-[1.1rem] border border-slate-800 bg-slate-950/60 p-4 text-sm leading-6 text-slate-300">
-                  2. 解き直して正答を取るよりも、外した理由と比較ポイントを言葉にする
-                </li>
-                <li className="rounded-[1.1rem] border border-slate-800 bg-slate-950/60 p-4 text-sm leading-6 text-slate-300">
-                  3. 比較表に戻って、似たサービスとの違いを整理する
-                </li>
-              </ol>
-            </div>
+            )}
           </div>
         </SectionFrame>
 
         <SectionFrame
           eyebrow="復習キュー"
           title="あとで見直す問題"
-          description="演習中に保存した誤答を一覧で確認できます。問題文の流れを思い出しながら、順番に解き直していきましょう。"
           className="bg-slate-900/60"
         >
           {enrichedRecords.length > 0 ? (
