@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 
+const isDev = process.env.NODE_ENV === "development";
+
 const securityHeaders = [
   // クリックジャッキング対策: iframe での埋め込みを全面禁止
   {
@@ -30,15 +32,18 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Next.js のハイドレーションスクリプト・Tailwind のため unsafe-inline が必要
-      "script-src 'self' 'unsafe-inline'",
+      // 開発モード: webpack が eval() ベースのソースマップを使用するため unsafe-eval が必要
+      // 本番モード: eval() 不要なので unsafe-eval は外す
+      isDev
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+        : "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
       // data: は SVG の img src 等に対応
       "img-src 'self' data:",
       // システムフォントのみ（Google Fonts は使用していない）
       "font-src 'self'",
-      // 外部 API 通信なし
-      "connect-src 'self'",
+      // 開発モード: HMR の WebSocket 接続を許可
+      isDev ? "connect-src 'self' ws:" : "connect-src 'self'",
       // Flash 等のプラグインを全面禁止
       "object-src 'none'",
       // base タグインジェクション対策

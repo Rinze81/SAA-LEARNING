@@ -17,8 +17,13 @@ export function useHomeDashboard() {
 
   useEffect(() => {
     const sync = () => {
-      setSnapshot(buildClientHomeSnapshot(readPersistedHomeState()));
-      setIsHydrated(true);
+      try {
+        setSnapshot(buildClientHomeSnapshot(readPersistedHomeState()));
+      } catch {
+        // スナップショット生成が失敗しても初期値のまま継続
+      } finally {
+        setIsHydrated(true);
+      }
     };
 
     sync();

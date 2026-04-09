@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { readReviewRecords, removeReviewRecord, upsertReviewRecord } from "@/lib/review/storage";
 import { buildPrioritizedQuestionOrder } from "@/lib/study/analytics";
 import { appendQuizAttempt } from "@/lib/study/storage";
+import { quizQuestions } from "@/lib/quiz/data";
 
 type UseQuizSessionOptions = {
   initialQuestionId?: string;
@@ -11,10 +12,22 @@ type UseQuizSessionOptions = {
 };
 
 export function useQuizSession(options: UseQuizSessionOptions = {}) {
-  const orderedQuestions = useMemo(() => {
-    const all = buildPrioritizedQuestionOrder(options.initialQuestionId);
+  // SSR/クライアントのハイドレーションミスマッチを防ぐため、
+  // 初期値はlocalStorageに依存しない静的な並び順にする。
+  // マウント後にuseEffectでlocalStorage参照の優先順位付き並び順へ切り替える。
+  const [orderedQuestions, setOrderedQuestions] = useState(() => {
+    const all = quizQuestions;
     if (!options.categoryFilter || options.categoryFilter === "all") return all;
     return all.filter((q) => q.category === options.categoryFilter);
+  });
+
+  useEffect(() => {
+    const all = buildPrioritizedQuestionOrder(options.initialQuestionId);
+    const filtered =
+      !options.categoryFilter || options.categoryFilter === "all"
+        ? all
+        : all.filter((q) => q.category === options.categoryFilter);
+    setOrderedQuestions(filtered);
   }, [options.initialQuestionId, options.categoryFilter]);
 
   const [currentIndex, setCurrentIndex] = useState(0);

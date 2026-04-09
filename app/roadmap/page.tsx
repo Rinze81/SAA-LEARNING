@@ -207,19 +207,21 @@ function StudyMode({
 }) {
   const router = useRouter();
   const roadmapStep = ROADMAP_STEPS.find((s) => s.step === stepNum);
-  if (!roadmapStep) {
-    router.replace("/roadmap");
-    return null;
-  }
 
-  const validIds = getValidIds(roadmapStep);
+  const validIds = roadmapStep ? getValidIds(roadmapStep) : [];
   const safeIndex = Math.max(0, Math.min(index, validIds.length - 1));
   const termId = validIds[safeIndex];
   const term = studyTerms.find((t) => t.id === termId);
   const isLast = safeIndex === validIds.length - 1;
 
-  if (!term) {
-    router.replace("/roadmap");
+  // render中にrouterを呼ぶのはReactエラーになるため、useEffectで処理する
+  useEffect(() => {
+    if (!roadmapStep || !term) {
+      router.replace("/roadmap");
+    }
+  }, [roadmapStep, term, router]);
+
+  if (!roadmapStep || !term) {
     return null;
   }
 
@@ -460,9 +462,9 @@ function RoadmapContent() {
   const indexParam = searchParams?.get("index");
   const isStudyMode = stepParam !== null && indexParam !== null;
 
-  if (!mounted) return null;
-
+  // StudyModはマウント後にのみ描画（URLパラメータが確定してから）
   if (isStudyMode) {
+    if (!mounted) return null;
     return (
       <StudyMode
         stepNum={parseInt(stepParam ?? "1", 10)}
@@ -473,6 +475,7 @@ function RoadmapContent() {
     );
   }
 
+  // リスト表示はサーバーレンダリング可能（mounted=falseでも空のreadIdsで表示）
   return (
     <RoadmapList readIds={readIds} onRead={handleRead} mounted={mounted} />
   );
