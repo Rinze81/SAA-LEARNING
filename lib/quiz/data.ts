@@ -2260,4 +2260,569 @@ export const quizQuestions: QuizQuestion[] = [
     rememberAxis:
       "セキュリティ態勢の全体評価・コンプライアンス → Security Hub。実際の脅威・攻撃の検出 → GuardDuty。設定変更のコンプライアンス監視 → AWS Config。",
   },
+
+  // ── シナリオ: 移行・転送 ──────────────────────────────────────────────────
+
+  {
+    id: "migration-1",
+    category: "Migration & Transfer",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がオンプレミスの Oracle データベース（500 GB）を Amazon Aurora PostgreSQL へ移行したい。移行中も本番 DB を稼働させ続け、カットオーバー時のダウンタイムを 30 分以内に収めたい。スキーマの変換も必要。最も適切な移行手順はどれか。",
+    context:
+      "Oracle 固有の構文（プロシージャ・トリガー）が多数あり、そのまま PostgreSQL へ移行できない箇所がある。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "exp/imp ユーティリティでダンプを取得し、Aurora へ手動インポートする", hint: "ダウンタイム中にインポートが必要で 30 分以内は困難。スキーマ変換も手動になる" },
+      { id: "b", label: "B", text: "AWS SCT でスキーマを変換し、AWS DMS の CDC で差分をリアルタイム同期したあとカットオーバーする", hint: "SCT がスキーマ変換を自動化し、DMS CDC で本番稼働中のデータを継続同期。カットオーバーは DNS 切替のみ" },
+      { id: "c", label: "C", text: "AWS Snowball でデータをエクスポートし Aurora へインポートする", hint: "Snowball はネットワーク転送が困難な大容量データ向け。500 GB は DMS の方が適切" },
+      { id: "d", label: "D", text: "Aurora の S3 インポート機能でデータを一括ロードする", hint: "S3 インポートは静止点が必要で継続的な差分同期ができない" },
+    ],
+    explanation:
+      "AWS Schema Conversion Tool（SCT）は Oracle の DDL・ストアドプロシージャ・トリガーなどを PostgreSQL 互換の構文に自動変換します。変換できない箇所は手動修正ガイドを出力します。AWS DMS はスキーマ変換後に Full Load + CDC（Change Data Capture）で本番 Oracle が稼働中のままリアルタイムに Aurora へ差分を同期します。カットオーバー時はアプリの接続先 DSN を切り替えるだけで、ダウンタイムを最小化できます。",
+    comparePoint:
+      "SCT：スキーマ変換（DDL・コード）担当。DMS：データ転送（Full Load + CDC）担当。Snowball：ネットワーク帯域が不足する大容量オフライン移行向け。",
+    rememberAxis:
+      "異種 DB 移行でスキーマ変換が必要 → SCT + DMS。同種 DB のダウンタイム最小移行 → DMS CDC のみ。ネットワーク経由が困難な大容量データ → Snowball。",
+  },
+  {
+    id: "migration-2",
+    category: "Migration & Transfer",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が 2 PB のアーカイブデータをオンプレミスのテープライブラリから S3 Glacier へ移行したい。専用線は引いていないため通常のインターネット回線（1 Gbps）しかない。移行は 3 か月以内に完了させたい。最適な転送方法はどれか。",
+    context:
+      "インターネット帯域は他業務と共用のため実効帯域は約 200 Mbps。データは機密性が高い。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "AWS DataSync を使ってインターネット経由で転送する", hint: "200 Mbps で 2 PB を転送すると約 926 日かかり、3 か月では完了しない" },
+      { id: "b", label: "B", text: "AWS Direct Connect を新規開通して転送する", hint: "Direct Connect の開通には 1〜3 か月かかり、間に合わない可能性が高い" },
+      { id: "c", label: "C", text: "AWS Snowball Edge を複数台同時に使ってデータを物理輸送する", hint: "Snowball Edge は 80 TB/台。2 PB なら約 25 台で並列輸送し数週間で完了できる" },
+      { id: "d", label: "D", text: "AWS Snowmobile を使って一括輸送する", hint: "Snowmobile は 100 PB 規模向け。2 PB は Snowball Edge 複数台で対応可能" },
+    ],
+    explanation:
+      "1 Gbps 回線の実効帯域 200 Mbps で 2 PB を転送すると単純計算で 926 日以上かかり現実的ではありません。AWS Snowball Edge は 80 TB の暗号化ストレージを持つ物理デバイスで、複数台を並列利用することで短期間に大量データを移行できます。2 PB なら約 25 台を一度に発注・データ書き込み・返送することで数週間以内に完了可能です。データは AES-256 で暗号化されるためセキュリティ要件も満たせます。Snowmobile は 10 PB 以上の超大規模移行向けのトラック型デバイスです。",
+    comparePoint:
+      "Snowball Edge：80 TB/台・複数台並列・TB〜PB 規模・暗号化済み。Snowmobile：最大 100 PB・超大規模一括輸送。DataSync：ネットワーク経由・継続的同期・中小規模。",
+    rememberAxis:
+      "ネットワーク転送が現実的でない大容量データ → Snowball Edge（複数台並列）。10 PB 以上の超大規模 → Snowmobile。継続的な差分同期 → DataSync。",
+  },
+  {
+    id: "migration-3",
+    category: "Migration & Transfer",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が VMware vSphere 上で動作する仮想マシン（約 200 台）を AWS に移行したい。各 VM は Windows Server または Linux で動作しており、できるだけ現在の構成を変えずに移行（リフト&シフト）したい。移行の進捗を一元管理できるサービスはどれか。",
+    context:
+      "アプリケーションのコード変更は最小限にしたい。移行後は EC2 として稼働させる予定。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "AWS Application Migration Service（MGN）を使って VM を EC2 へ自動的にリプラットフォームする", hint: "MGN はエージェントベースで継続レプリケーションし、カットオーバー時に EC2 として起動する AWS 推奨の移行サービス" },
+      { id: "b", label: "B", text: "AWS Server Migration Service（SMS）を使って VMware の VM を AMI に変換する", hint: "SMS は現在は非推奨（MGN への移行を推奨）" },
+      { id: "c", label: "C", text: "VM Import/Export で OVF ファイルを手動でインポートする", hint: "VM Import/Export は可能だが手動作業が多く、200 台の管理には向かない" },
+      { id: "d", label: "D", text: "AWS DataSync で VM のディスクデータを S3 にコピーする", hint: "DataSync はファイルデータの同期ツール。VM の移行には対応していない" },
+    ],
+    explanation:
+      "AWS Application Migration Service（MGN）は VM へエージェントをインストールし、ストレージを継続的に AWS へレプリケーションします。本番移行時（カットオーバー）にはわずか数分のダウンタイムで EC2 インスタンスとして起動できます。AWS Migration Hub と連携することで 200 台の移行状況を一元管理できます。旧サービスの SMS は非推奨となり、現在は MGN が AWS 公式推奨のリフト&シフト移行ツールです。VMware Cloud on AWS を使えばさらにシームレスな移行も可能です。",
+    comparePoint:
+      "MGN：エージェントベース・継続レプリケーション・カットオーバー数分・AWS 推奨。SMS：非推奨・VMware 専用。VM Import/Export：手動・少数台向け。",
+    rememberAxis:
+      "VM のリフト&シフト移行（推奨） → AWS MGN。データベースの移行 → DMS。大量データ移行 → Snowball Edge。",
+  },
+  {
+    id: "migration-4",
+    category: "Migration & Transfer",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がオンプレミスで動作する三層 Web アプリケーション（Web / AP / DB）を AWS に移行したい。アプリケーションの改修は行わず、現行の構成のままインフラだけ AWS に移す（リフト&シフト）。移行前に TCO 分析とサーバーの依存関係を把握したい。最適なアプローチはどれか。",
+    context:
+      "移行するサーバーは約 50 台。どのサーバーがどのサーバーと通信しているかが不明。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "手動でサーバーの構成情報を収集し、スプレッドシートで管理する", hint: "50 台のサーバーを手動管理するのは漏れが発生しやすく非効率" },
+      { id: "b", label: "B", text: "AWS Pricing Calculator でコスト見積もりだけ実施する", hint: "コスト計算はできるが依存関係の把握には使えない" },
+      { id: "c", label: "C", text: "AWS Config でオンプレミスの構成情報を収集する", hint: "AWS Config は AWS リソース向けのサービス。オンプレミスの情報収集には使えない" },
+      { id: "d", label: "D", text: "AWS Application Discovery Service でエージェントを導入し、サーバー情報と依存関係を自動収集する", hint: "Application Discovery Service はサーバーの構成・パフォーマンス・ネットワーク依存関係を自動収集し Migration Hub へ連携する" },
+    ],
+    explanation:
+      "AWS Application Discovery Service はオンプレミスサーバーにエージェントをインストールし、CPU・メモリ・ディスク・ネットワーク通信先などを自動収集します。収集したデータは AWS Migration Hub へ送られ、どのサーバーがどのサーバーと通信しているかの依存関係マップが作成されます。この情報をもとに移行グループ（Wave）を決定し、依存関係を壊さない順序で計画的に移行できます。TCO 分析には Migration Evaluator（旧 TSO Logic）を組み合わせると精度の高い試算が可能です。",
+    comparePoint:
+      "Application Discovery Service：依存関係の自動収集・Migration Hub 連携。Migration Evaluator：TCO 分析・コスト比較。AWS MGN：実際の移行実施ツール。",
+    rememberAxis:
+      "移行前の依存関係把握・インベントリ収集 → Application Discovery Service。TCO 分析 → Migration Evaluator。リフト&シフト実施 → MGN。",
+  },
+  {
+    id: "migration-5",
+    category: "Migration & Transfer",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がオンプレミスのファイルサーバー（NFS）上のデータを Amazon S3 に継続的に同期したい。毎晩バッチでオンプレのファイルと S3 を比較し、追加・更新されたファイルだけを効率的に転送したい。また転送中のデータは暗号化したい。最適なサービスはどれか。",
+    context:
+      "ファイル総量は 10 TB。毎日の差分は数十 GB 程度。専用線（Direct Connect）は既に開通済み。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "AWS Snowball Edge でデータを定期的に物理転送する", hint: "Snowball は一括移行向け。毎日の差分同期には不向き" },
+      { id: "b", label: "B", text: "AWS DataSync を使って差分を自動検出・暗号化転送する", hint: "DataSync はファイルの差分を自動検出し、TLS 暗号化でスケジュール転送できる" },
+      { id: "c", label: "C", text: "rsync スクリプトを EC2 上で実行して差分転送する", hint: "技術的には可能だが、EC2 の管理・監視・エラーハンドリングを自前で実装する必要がある" },
+      { id: "d", label: "D", text: "S3 Transfer Acceleration を使って転送を高速化する", hint: "Transfer Acceleration は S3 へのアップロード高速化機能。差分検出や自動スケジュール機能はない" },
+    ],
+    explanation:
+      "AWS DataSync はオンプレミスのストレージ（NFS・SMB）と AWS ストレージ（S3・EFS・FSx）間のデータ転送を自動化するサービスです。ファイルのメタデータ（タイムスタンプ・チェックサム）を比較して差分のみを転送し、転送は TLS で暗号化されます。スケジュール転送（毎日・毎時など）を設定でき、転送速度は Direct Connect の帯域を最大限活用します。専用のエージェントをオンプレにデプロイするだけで設定でき、EC2 の管理は不要です。",
+    comparePoint:
+      "DataSync：差分自動検出・スケジュール転送・TLS 暗号化・マネージド。rsync：手動管理・スクリプト・エラーハンドリングが必要。Snowball：物理デバイス・大容量一括移行。",
+    rememberAxis:
+      "オンプレ〜AWS 間のファイル差分同期・スケジュール転送 → DataSync。大容量の一括移行 → Snowball Edge。DB の継続レプリケーション → DMS。",
+  },
+
+  // ── シナリオ: 分析・データ処理 ──────────────────────────────────────────
+
+  {
+    id: "analytics-1",
+    category: "Analytics",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある IoT 企業がセンサーから毎秒 100,000 件のデータを収集し、リアルタイムでダッシュボードに表示したい。また生データは S3 に保存して後続の分析にも活用したい。最適なアーキテクチャはどれか。",
+    context:
+      "データは JSON 形式でセンサーから送信されます。1 秒以内のリアルタイム表示が要件です。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Kinesis Data Streams でリアルタイム処理し、Kinesis Data Firehose で S3 に保存する", hint: "Data Streams は低レイテンシのリアルタイム処理、Firehose は S3/Redshift への自動配信を担う" },
+      { id: "b", label: "B", text: "SQS キューにデータを入れて Lambda で処理し、RDS に保存する", hint: "SQS + Lambda でも処理は可能だが、毎秒 10 万件の大量ストリームには Kinesis の方が適している" },
+      { id: "c", label: "C", text: "API Gateway → Lambda → DynamoDB の構成でリアルタイム処理する", hint: "API Gateway のスロットリング制限や Lambda のコールドスタートが 1 秒以内の要件を満たせない可能性がある" },
+      { id: "d", label: "D", text: "Amazon MSK（Managed Streaming for Apache Kafka）を使う", hint: "MSK は有効だが Kinesis より運用が複雑。既存の Kafka スキルがなければ Kinesis の方がシンプル" },
+    ],
+    explanation:
+      "Amazon Kinesis Data Streams は大量のリアルタイムストリームデータを低レイテンシで処理するサービスです。シャード数を調整することでスループットを柔軟にスケールできます。処理したデータは Kinesis Data Analytics でリアルタイム集計し、Amazon Kinesis Data Firehose を使って自動的に S3 へ保存できます（圧縮・変換も可能）。この構成はリアルタイム処理とデータレイクへの保存を同時に実現できる標準的なパターンです。",
+    comparePoint:
+      "Kinesis Data Streams：リアルタイム・低レイテンシ・複数コンシューマ・シャードでスケール。SQS：非同期キュー・順序保証はFIFOのみ・大量ストリームには不向き。MSK：Kafka 互換・高機能だが運用が複雑。",
+    rememberAxis:
+      "大量リアルタイムデータの収集・処理 → Kinesis Data Streams。処理済みデータの S3/Redshift への自動配信 → Kinesis Data Firehose。既存 Kafka 環境の移行 → Amazon MSK。",
+  },
+  {
+    id: "analytics-2",
+    category: "Analytics",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある金融機関が複数のデータソース（トランザクション DB・CRM・ログ）からデータを統合し、毎日バッチで集計レポートを生成したい。データ量は合計 100 TB 以上で、SQL で複雑なビジネス分析クエリを実行する必要がある。最適なデータウェアハウス構成はどれか。",
+    context:
+      "現在は各システムのデータが分散しており、統合した分析ができていません。レポートは毎朝 9 時までに完成する必要があります。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Aurora MySQL に全データを統合して分析クエリを実行する", hint: "Aurora は OLTP 向けで 100 TB の大規模分析クエリには不向き" },
+      { id: "b", label: "B", text: "S3 にデータを保存して Athena でクエリする", hint: "Athena は中規模の分析に適するが、毎日 100 TB の複雑集計クエリでは Redshift の方が速い" },
+      { id: "c", label: "C", text: "Redshift をデータウェアハウスとし、各ソースから AWS Glue で ETL してロードする", hint: "Redshift は列指向 MPP で大規模 OLAP に最適。Glue が ETL を自動化する" },
+      { id: "d", label: "D", text: "DynamoDB にデータを格納して Lambda で集計処理する", hint: "DynamoDB は NoSQL でアクセスパターンが固定化される。複雑な JOIN を伴う分析には不向き" },
+    ],
+    explanation:
+      "Amazon Redshift は列指向の MPP（大規模並列処理）データウェアハウスで、100 TB 以上の大規模データの SQL 分析クエリに特化しています。各ソースのデータは AWS Glue の ETL ジョブで抽出・変換し、Redshift の COPY コマンドで高速にロードします。Glue のジョブはスケジュール実行できるため、毎朝のバッチ処理を自動化できます。Redshift Spectrum を使えば S3 のデータを直接クエリすることも可能です。",
+    comparePoint:
+      "Redshift：列指向 MPP・大規模 OLAP・定期バッチ集計向け。Athena：サーバーレス・S3 直接クエリ・中規模アドホック分析向け。Glue：サーバーレス ETL・データカタログ。",
+    rememberAxis:
+      "100 TB 超の定期バッチ集計・DWH → Redshift。S3 データのアドホック SQL クエリ → Athena。データ変換・統合（ETL） → AWS Glue。",
+  },
+  {
+    id: "analytics-3",
+    category: "Analytics",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が ALB・CloudFront・Lambda のアクセスログを S3 に集約している。セキュリティインシデント調査時に「特定 IP からのアクセス」や「エラーレスポンスのパターン」をアドホックに SQL で検索したい。サーバーレスで低コストな分析基盤を構築したい。最適な構成はどれか。",
+    context:
+      "ログは毎日 50 GB 増加します。調査は月数回程度で、常時稼働のクラスターは不要です。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "OpenSearch（Elasticsearch）クラスターを常時起動してログを格納する", hint: "OpenSearch は強力だが、月数回の調査向けに常時稼働させるとコストが高い" },
+      { id: "b", label: "B", text: "S3 にログを保存し Amazon Athena でサーバーレス SQL クエリする", hint: "Athena はサーバーレスで S3 を直接クエリし、スキャンしたデータ量のみ課金。常時稼働コストがない" },
+      { id: "c", label: "C", text: "CloudWatch Logs Insights でログを分析する", hint: "CloudWatch Logs Insights は有効だが、S3 に保存済みのログを直接クエリできない。また大量ログは高コスト" },
+      { id: "d", label: "D", text: "Redshift にログをロードして分析する", hint: "Redshift は継続的な大規模集計向け。月数回のアドホック調査には Athena の方がコスト効率が良い" },
+    ],
+    explanation:
+      "Amazon Athena は S3 上のデータを標準 SQL でクエリできるサーバーレス分析サービスです。クラスターの管理が不要で、クエリしたデータ量（$5/TB）のみ課金されます。AWS Glue Data Catalog でテーブル定義を登録すると、ALB ログや CloudFront ログを構造化されたテーブルとして SQL でクエリできます。Parquet 形式や列指向圧縮（Snappy）に変換するとスキャン量が大幅に減りコストも速度も改善します。月数回の調査では OpenSearch の常時稼働コストと比べ大幅にコストを削減できます。",
+    comparePoint:
+      "Athena：サーバーレス・S3 直接クエリ・スキャン課金・アドホック調査向け。OpenSearch：常時稼働・全文検索・リアルタイムダッシュボード向け。CloudWatch Logs Insights：CloudWatch Logs 専用・S3 には不可。",
+    rememberAxis:
+      "S3 ログのアドホック SQL 分析・低コスト → Athena。リアルタイム全文検索・ダッシュボード → OpenSearch。構造化ログのリアルタイム集計 → Kinesis Data Analytics。",
+  },
+  {
+    id: "analytics-4",
+    category: "Analytics",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がオンプレミスの様々なデータソース（RDS・S3・DynamoDB・REST API）からデータを抽出し、データウェアハウス（Redshift）へロードするための ETL パイプラインを構築したい。コードの管理を最小化しサーバーレスで実装したい。最適なサービスはどれか。",
+    context:
+      "データ変換ロジックは複雑で、スキーマのマッピングや NULL 値の処理が必要です。エンジニアは Python が得意です。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "AWS Glue を使いサーバーレスの ETL ジョブを Python（PySpark）で実装する", hint: "Glue はサーバーレスの ETL サービスで PySpark または Python Shell で変換ロジックを記述できる" },
+      { id: "b", label: "B", text: "EC2 上に Apache Spark クラスターを構築して ETL を実装する", hint: "Spark は高性能だが EC2 クラスターの管理コストが高く、サーバーレス要件に反する" },
+      { id: "c", label: "C", text: "Lambda で ETL スクリプトを実装する", hint: "Lambda は最大 15 分・10 GB メモリの制限があり、大規模な ETL には不向き" },
+      { id: "d", label: "D", text: "AWS Data Pipeline を使って ETL を実装する", hint: "Data Pipeline は機能が限定的で現在は Glue の利用が推奨されている" },
+    ],
+    explanation:
+      "AWS Glue はサーバーレスの ETL（Extract, Transform, Load）サービスで、DynamicFrame という Glue 独自のデータ構造を使って PySpark または Python Shell でデータ変換を記述できます。Glue Crawler がデータソースを自動スキャンしてスキーマを推測し、Glue Data Catalog にメタデータを登録します。ETL ジョブはスケジュール実行・トリガー実行が可能で、実行時のみ課金されます。複数のデータソースに対応し、Redshift・S3・RDS・DynamoDB などへの書き込みに対応しています。",
+    comparePoint:
+      "AWS Glue：サーバーレス ETL・PySpark/Python・複数ソース対応・Data Catalog 付き。EMR：Apache Spark/Hadoop クラスター・大規模処理・クラスター管理必要。Lambda：短時間処理向け・ETL には制限あり。",
+    rememberAxis:
+      "サーバーレス ETL・スキーマ変換・複数ソースの統合 → AWS Glue。大規模なカスタム Spark/Hadoop 処理 → Amazon EMR。リアルタイムストリーム処理 → Kinesis Data Analytics。",
+  },
+  {
+    id: "analytics-5",
+    category: "Analytics",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある小売企業が Redshift のデータウェアハウスを使って売上分析を行っている。経営陣がブラウザから視覚的なダッシュボードでデータを確認したい。IT 部門のリソースが少ないため、BI ツールのサーバー管理は行いたくない。最適なサービスはどれか。",
+    context:
+      "経営陣は技術的知識がなく、ドラッグ&ドロップでグラフを作れる操作性が必要。Redshift との連携がシームレスであることが重要。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "EC2 に Tableau Server をインストールして社内公開する", hint: "Tableau は強力だが EC2・ライセンス管理が必要でサーバーレス要件に反する" },
+      { id: "b", label: "B", text: "EC2 に Grafana をインストールしてダッシュボードを構築する", hint: "Grafana は主にメトリクス監視向け。BI レポート用途は限定的でサーバー管理も必要" },
+      { id: "c", label: "C", text: "Lambda で定期的にレポートを PDF 生成してメール送信する", hint: "静的レポートはインタラクティブなダッシュボードの代替にならない" },
+      { id: "d", label: "D", text: "Amazon QuickSight を使ってサーバーレスの BI ダッシュボードを構築する", hint: "QuickSight は AWS のサーバーレス BI サービスで Redshift とネイティブに連携し、ドラッグ&ドロップでダッシュボードを作成できる" },
+    ],
+    explanation:
+      "Amazon QuickSight は AWS のフルマネージドな BI（Business Intelligence）サービスです。サーバーの管理が不要で、Redshift・S3・RDS・Athena などの AWS データソースとネイティブに接続できます。SPICE（超高速並列インメモリ計算エンジン）によりクエリを高速化し、ドラッグ&ドロップでグラフ・ダッシュボードを作成できます。ユーザー数やセッション数に応じた従量課金のため、アクセスが少ない場合はコストも低く抑えられます。ML Insights 機能で異常検知や予測分析も可能です。",
+    comparePoint:
+      "QuickSight：AWS ネイティブ BI・サーバーレス・Redshift 連携・従量課金。Tableau：高機能 BI・サーバー管理必要・ライセンス高価。Grafana：メトリクス監視向け・BI には不向き。",
+    rememberAxis:
+      "AWS データソースとのサーバーレス BI → Amazon QuickSight。高度なビジュアライゼーション・既存 Tableau 環境 → Tableau on EC2。メトリクス・ログ監視 → Grafana/CloudWatch。",
+  },
+
+  // ── シナリオ: コンテナ ────────────────────────────────────────────────────
+
+  {
+    id: "containers-1",
+    category: "Containers",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が新規の Web API をコンテナで開発・運用したい。チームは Kubernetes の経験がなく、なるべくシンプルに始めたい。一方、将来的に Kubernetes が必要になる可能性があるため、移行パスも確保しておきたい。最適なサービスはどれか。",
+    context:
+      "コンテナオーケストレーションは初めて。インフラの管理工数を最小化したい。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Amazon EKS（Kubernetes）で始める", hint: "EKS は強力だが、Kubernetes 未経験チームにはラーニングコストが高い" },
+      { id: "b", label: "B", text: "Amazon ECS（Fargate 起動タイプ）で始め、必要なら EKS へ移行する", hint: "ECS はシンプルで学習コストが低く、Fargate でサーバー管理も不要。EKS への移行パスも確保できる" },
+      { id: "c", label: "C", text: "EC2 に Docker Compose をインストールして運用する", hint: "Docker Compose は本番運用向けの冗長化・スケーリングが難しい" },
+      { id: "d", label: "D", text: "AWS Lambda のコンテナイメージサポートを使う", hint: "Lambda は短時間処理向け。常時起動の Web API サーバーには不向き" },
+    ],
+    explanation:
+      "Amazon ECS は AWS 独自のコンテナオーケストレーションサービスで、Kubernetes より学習コストが低くシンプルです。Fargate 起動タイプを選択するとサーバー（EC2）の管理が不要になり、インフラ運用の負荷が最小化されます。ECS の Task Definition は Kubernetes の Pod spec に概念的に近く、将来 EKS に移行する際の概念理解にも繋がります。チームが Kubernetes の必要性を感じたタイミングで EKS へ段階的に移行できます。",
+    comparePoint:
+      "ECS：AWS ネイティブ・シンプル・Fargate 対応・学習コスト低。EKS：Kubernetes 互換・高機能・学習コスト高・マルチクラウド対応。Fargate：EC2 管理不要のサーバーレスコンテナ実行環境（ECS/EKS 両対応）。",
+    rememberAxis:
+      "シンプルなコンテナ管理・AWS ネイティブ → ECS + Fargate。Kubernetes が必要・マルチクラウド → EKS。短時間・イベント駆動 → Lambda（コンテナイメージ対応）。",
+  },
+  {
+    id: "containers-2",
+    category: "Containers",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が ECS で複数の API コンテナを運用している。夜間は利用者がほぼいないが、日中は急激にトラフィックが増える。コストを最適化しながら、日中のピーク時でも応答速度を維持したい。最適な構成はどれか。",
+    context:
+      "現在は固定の ECS タスク数（常時 10 タスク）で運用しており、夜間にリソースが無駄になっている。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "夜間に手動でタスク数を減らし、朝に増やすオペレーションを実施する", hint: "手動操作は運用ミスのリスクがあり、スケールアップが遅れる可能性がある" },
+      { id: "b", label: "B", text: "タスクを Spot インスタンスで起動してコスト削減する", hint: "Spot インスタンスは中断リスクがある。API サービスには予備プランが必要" },
+      { id: "c", label: "C", text: "ECS Service Auto Scaling を設定し、CPU/リクエスト数に応じてタスクをスケールする", hint: "ECS Service Auto Scaling は CloudWatch メトリクスに基づいてタスク数を自動調整する" },
+      { id: "d", label: "D", text: "ECS タスクを Lambda 関数に変換する", hint: "API のコンテナを Lambda に変換するには大幅な改修が必要" },
+    ],
+    explanation:
+      "ECS Service Auto Scaling は AWS Application Auto Scaling を利用して、ECS サービスのタスク数を自動的に増減させます。CPU 使用率・メモリ使用率・ALB のリクエスト数などの CloudWatch メトリクスをトリガーとして、最小・最大タスク数の範囲内でスケールします。夜間は最小タスク数（例：2 タスク）まで縮小し、日中のピーク時には自動的にスケールアウトするため、コストと性能を両立できます。スケジュールに基づいた Scheduled Scaling も組み合わせると予測可能なピークに対応できます。",
+    comparePoint:
+      "ECS Service Auto Scaling：タスク数を CloudWatch メトリクスで自動調整。EC2 Auto Scaling：インスタンス数を調整（Fargate では不要）。Scheduled Scaling：時刻ベースの事前スケール。",
+    rememberAxis:
+      "ECS タスクの自動スケール → ECS Service Auto Scaling。予測可能な日次ピーク → Scheduled Scaling と組み合わせ。EC2 ノードのスケール（ECS EC2 起動タイプ）→ EC2 Auto Scaling。",
+  },
+  {
+    id: "containers-3",
+    category: "Containers",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がマイクロサービスのコンテナイメージを安全に保管・管理したい。CI/CD パイプラインから自動でイメージをプッシュし、ECS へのデプロイ時にプルできる環境を構築したい。また、脆弱性スキャンも自動で実施したい。最適なサービスはどれか。",
+    context:
+      "現在は Docker Hub を使用しているが、セキュリティ要件でプライベートレジストリが必要になった。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Amazon ECR（Elastic Container Registry）を使いプライベートレジストリを構築し、プッシュ時に脆弱性スキャンを有効にする", hint: "ECR は ECS/EKS と緊密に統合され、IAM でアクセス制御。プッシュ時スキャン（Inspector V2 連携）で脆弱性を自動検出できる" },
+      { id: "b", label: "B", text: "S3 バケットにコンテナイメージ（tar 形式）を保存する", hint: "S3 はオブジェクトストレージであり、コンテナレジストリとしては使用できない" },
+      { id: "c", label: "C", text: "EC2 に GitLab Container Registry を構築してセルフホストする", hint: "可能だが EC2・GitLab の管理コストが発生し、マネージドサービスの ECR の方が運用負荷が低い" },
+      { id: "d", label: "D", text: "AWS CodeArtifact を使ってコンテナイメージを管理する", hint: "CodeArtifact はパッケージ（npm・Maven・PyPI 等）管理サービス。コンテナイメージの管理には使えない" },
+    ],
+    explanation:
+      "Amazon ECR（Elastic Container Registry）は AWS のフルマネージドなコンテナイメージレジストリです。IAM ポリシーでリポジトリへのアクセスを制御でき、ECS・EKS・CodeBuild から IAM ロールで安全にプル/プッシュできます。プッシュ時スキャン設定を有効にすると、Amazon Inspector V2 がイメージの OS パッケージや言語ライブラリの脆弱性を自動スキャンし、ECR コンソールと Security Hub に結果を表示します。ライフサイクルポリシーで古いイメージを自動削除することでコスト管理もできます。",
+    comparePoint:
+      "ECR：AWS ネイティブ・IAM 統合・ECS/EKS と緊密連携・脆弱性スキャン（Inspector）。Docker Hub：パブリック/プライベート・外部サービス・AWS IAM 統合なし。CodeArtifact：ソフトウェアパッケージ管理（npm 等）・コンテナレジストリではない。",
+    rememberAxis:
+      "ECS/EKS 用のプライベートコンテナレジストリ → Amazon ECR。脆弱性スキャン自動化 → ECR + Amazon Inspector V2。npm/Maven 等のパッケージ管理 → CodeArtifact。",
+  },
+  {
+    id: "containers-4",
+    category: "Containers",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が EKS でマイクロサービスを運用している。外部からのトラフィックを各サービスへ適切にルーティングし、TLS 終端・認証・レートリミットを一元管理したい。また、サービス間通信の可視化も行いたい。最適な構成はどれか。",
+    context:
+      "現在はサービスごとに ALB を立てているが、管理が煩雑になっています。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "各サービスに NLB を追加し、サービスごとに TLS 設定を管理する", hint: "NLB を増やすと管理の煩雑さが増す。一元管理には API ゲートウェイかサービスメッシュが適切" },
+      { id: "b", label: "B", text: "AWS Load Balancer Controller で Ingress を管理し、AWS App Mesh でサービスメッシュを構築する", hint: "Ingress で外部トラフィックのルーティングを一元化し、App Mesh でサービス間通信を可視化できる" },
+      { id: "c", label: "C", text: "Amazon API Gateway を全サービスの前段に配置する", hint: "API Gateway は有効だが、Kubernetes ネイティブのワークロードには Ingress の方が自然な統合方法" },
+      { id: "d", label: "D", text: "Route 53 でサービスごとに DNS レコードを管理する", hint: "DNS だけでは TLS 終端・認証・レートリミットは実現できない" },
+    ],
+    explanation:
+      "EKS では AWS Load Balancer Controller を使うと Kubernetes の Ingress リソースが自動的に ALB（Application Load Balancer）として作成されます。1 つの ALB でパスベース・ホストベースのルーティングを設定でき、ACM 証明書による TLS 終端も一元管理できます。AWS App Mesh（または Istio などのサービスメッシュ）を組み合わせると、サービス間通信にサイドカープロキシ（Envoy）が注入され、通信の可視化・トレーシング・サーキットブレーカーなどを実現できます。",
+    comparePoint:
+      "AWS Load Balancer Controller + Ingress：外部トラフィックのルーティング一元化。App Mesh：サービス間通信の制御・可視化・サービスメッシュ。API Gateway：REST/HTTP API の管理・認証・スロットリング。",
+    rememberAxis:
+      "EKS の外部トラフィック一元管理 → Ingress + AWS Load Balancer Controller。サービス間通信の可視化・制御 → App Mesh（サービスメッシュ）。API の認証・スロットリング → API Gateway。",
+  },
+  {
+    id: "containers-5",
+    category: "Containers",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がモノリシックなアプリケーションをマイクロサービスアーキテクチャに移行したい。移行は段階的に行い、まず一部の機能を切り出してコンテナ化する。既存のモノリスと新しいマイクロサービスが共存できる構成を設計したい。最適なアプローチはどれか。",
+    context:
+      "既存のモノリスは EC2 で動作しています。最初に「注文処理」機能を切り出す予定です。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "モノリスを一括でマイクロサービスに分解してから移行する（ビッグバン移行）", hint: "ビッグバン移行はリスクが高く、移行中に機能が使えなくなる可能性がある" },
+      { id: "b", label: "B", text: "モノリスを完全に停止してから段階的に移行する", hint: "停止期間中はサービスが利用不可になりビジネスに影響がある" },
+      { id: "c", label: "C", text: "Lambda でマイクロサービスを実装し、モノリスを即座に廃止する", hint: "Lambda への移行にはコードの大幅な改修が必要で即座の廃止は困難" },
+      { id: "d", label: "D", text: "ストラングラーフィグパターンを採用し、ALB でリクエストを新旧システムに段階的に振り分ける", hint: "新機能を徐々にマイクロサービスに移し、ALB のパスベースルーティングで振り分けることでモノリスと共存できる" },
+    ],
+    explanation:
+      "ストラングラーフィグ（Strangler Fig）パターンは、モノリスを一括置換するのではなく、新機能をマイクロサービスとして実装しながら古いコードを徐々に廃止していく移行戦略です。ALB のパスベースルーティング（/orders/* → 新しいコンテナサービス、それ以外 → 既存 EC2）を使うことで、モノリスと新しいマイクロサービスを同時に稼働させながら段階的に移行できます。リスクが低く、各ステップで動作確認しながら進められます。API Gateway を使ってルーティングを管理する方法もあります。",
+    comparePoint:
+      "ストラングラーフィグパターン：段階的移行・リスク低・モノリスと共存・ALB/API GW でルーティング。ビッグバン移行：一括置換・リスク高・テスト困難。",
+    rememberAxis:
+      "モノリスからマイクロサービスへの段階的移行 → ストラングラーフィグパターン + ALB パスルーティング。新規のマイクロサービス開発 → ECS/EKS + Fargate。",
+  },
+
+  // ── シナリオ: エッジ・グローバル ─────────────────────────────────────────
+
+  {
+    id: "edge-1",
+    category: "Edge & Global",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある動画配信企業がグローバルのユーザーに高画質動画（最大 4K）を低レイテンシで配信したい。動画ファイルは S3 に保存されており、ユーザーはアジア・欧米・中南米から利用する。コンテンツに対するアクセス制御（有料会員のみ視聴可）も必要。最適な構成はどれか。",
+    context:
+      "現在は S3 の静的ウェブサイトホスティングで配信しているが、海外ユーザーの再生品質が低い。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "CloudFront を S3 オリジンとして設定し、署名付き URL で有料会員のアクセスを制御する", hint: "CloudFront はグローバルのエッジロケーションで動画をキャッシュし、署名付き URL でアクセス制御を実現できる" },
+      { id: "b", label: "B", text: "各リージョンに S3 バケットを作成し Route 53 ジオルーティングで振り分ける", hint: "ジオルーティングは可能だが、エッジキャッシュがなくレイテンシ改善は限定的" },
+      { id: "c", label: "C", text: "EC2 にメディアサーバーを構築してグローバルに展開する", hint: "各リージョンに EC2 を管理する運用コストが高く、CloudFront より効率が悪い" },
+      { id: "d", label: "D", text: "Global Accelerator を使って動画を配信する", hint: "Global Accelerator はレイテンシ改善に有効だが動画キャッシュ機能がない。CDN としての利用には CloudFront が適切" },
+    ],
+    explanation:
+      "Amazon CloudFront は世界 450 以上のエッジロケーション（POP）に動画をキャッシュし、ユーザーの最寄りエッジから配信するため低レイテンシを実現します。S3 をオリジンとする場合、OAC（Origin Access Control）を設定することで S3 バケットをパブリックにせず CloudFront 経由のアクセスのみを許可できます。CloudFront の署名付き URL または署名付き Cookie を使うと、有料会員にのみコンテンツへのアクセスを許可できます。AWS Elemental MediaConvert と組み合わせてアダプティブビットレートストリーミング（HLS/DASH）も構成できます。",
+    comparePoint:
+      "CloudFront：CDN・エッジキャッシュ・動画配信・署名付き URL でアクセス制御。Global Accelerator：TCP/UDP の高速化・キャッシュなし・動的コンテンツ向け。S3 静的ホスティング：単一リージョン・エッジキャッシュなし。",
+    rememberAxis:
+      "グローバルな静的/動画コンテンツのキャッシュ配信 → CloudFront。アクセス制御が必要なプレミアムコンテンツ → CloudFront 署名付き URL/Cookie。グローバルなアプリの TCP 高速化 → Global Accelerator。",
+  },
+  {
+    id: "edge-2",
+    category: "Edge & Global",
+    modeLabel: "シナリオ",
+    prompt:
+      "あるゲーム企業がグローバルのプレイヤーに対してリアルタイムのゲームサーバー（UDP 通信）を提供している。東京・バージニア・フランクフルトにサーバーがある。プレイヤーが最も近いリージョンのゲームサーバーに自動的に接続され、レイテンシを最小化したい。最適なサービスはどれか。",
+    context:
+      "ゲームは UDP プロトコルを使用しており、固定 IP アドレスが必要。レイテンシが 50ms を超えるとプレイヤー体験が悪化する。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "CloudFront を使って最寄りのサーバーへルーティングする", hint: "CloudFront は HTTP/HTTPS の CDN であり、UDP プロトコルには対応していない" },
+      { id: "b", label: "B", text: "AWS Global Accelerator を使い、Anycast IP で最寄りの AWS エッジへ接続させる", hint: "Global Accelerator は TCP/UDP 対応で固定 Anycast IP を提供し、AWS バックボーンで最寄りリージョンへルーティングする" },
+      { id: "c", label: "C", text: "Route 53 レイテンシーベースルーティングで最寄りリージョンへ振り分ける", hint: "DNS ベースのルーティングはキャッシュ TTL があり切り替えが遅い。固定 IP も提供できない" },
+      { id: "d", label: "D", text: "各リージョンの ELB に Elastic IP を付与してユーザーに直接 IP を配布する", hint: "ELB に直接 Elastic IP は付与できない。また最寄りリージョンへの自動ルーティングも実現できない" },
+    ],
+    explanation:
+      "AWS Global Accelerator は 2 つの静的 Anycast IP アドレスをエントリポイントとして提供し、インターネット上のユーザーを最寄りの AWS エッジロケーションへ誘導します。その後は AWS のプライベートグローバルネットワーク（バックボーン）を通じてターゲットリージョンのエンドポイント（NLB・ALB・EC2 等）に転送するため、インターネット経由より安定した低レイテンシを実現できます。UDP プロトコルにも対応しており、ゲームや VoIP などのリアルタイムアプリに適しています。固定 IP はファイアウォールホワイトリストにも使えます。",
+    comparePoint:
+      "Global Accelerator：固定 Anycast IP・TCP/UDP 対応・AWS バックボーン経由・動的コンテンツ向け。CloudFront：CDN・HTTP/HTTPS・静的/動的コンテンツのキャッシュ。Route 53：DNS・TTL によるルーティング遅延あり。",
+    rememberAxis:
+      "固定 IP・TCP/UDP の低レイテンシ・グローバルルーティング → Global Accelerator。HTTP/HTTPS コンテンツのキャッシュ配信 → CloudFront。",
+  },
+  {
+    id: "edge-3",
+    category: "Edge & Global",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がプライマリリージョン（us-east-1）の ALB を使った Web アプリを運用している。プライマリが障害になったとき、バックアップリージョン（ap-northeast-1）へ自動的にフェイルオーバーしたい。DNSのTTLを活用した最適な構成はどれか。",
+    context:
+      "バックアップリージョンには最小限のインフラ（パイロットライト）が稼働中。フェイルオーバー時の RTO は 5 分以内。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Route 53 の重み付けルーティングで 90:10 に振り分け、障害時に手動で 0:100 に変更する", hint: "手動変更はヒューマンエラーリスクがあり、5 分以内の自動フェイルオーバーを保証できない" },
+      { id: "b", label: "B", text: "Route 53 のジオロケーションルーティングで地域ごとにリージョンを振り分ける", hint: "ジオルーティングは地域によるルーティング分離。障害時の自動フェイルオーバーには対応していない" },
+      { id: "c", label: "C", text: "Route 53 のフェイルオーバールーティングで、ヘルスチェックが失敗したらセカンダリへ自動切替する", hint: "Route 53 のアクティブ/パッシブフェイルオーバーはヘルスチェックと組み合わせて自動切替が可能" },
+      { id: "d", label: "D", text: "ELB のクロスリージョン機能でフェイルオーバーする", hint: "ELB はリージョン内のロードバランサーで、クロスリージョンフェイルオーバー機能はない" },
+    ],
+    explanation:
+      "Route 53 のフェイルオーバールーティングポリシーを使うと、プライマリレコードにヘルスチェックを設定し、ヘルスチェックが失敗した場合にセカンダリ（バックアップリージョンの ALB）へ自動的に DNS を切り替えられます。Route 53 のヘルスチェックは 10〜30 秒間隔で確認し、3 回連続失敗でフェイルオーバーが実行されます。TTL を短く（60 秒以下）設定しておくことで、DNS キャッシュのクリアも早く、5 分以内のフェイルオーバーを実現できます。",
+    comparePoint:
+      "Route 53 フェイルオーバールーティング：自動フェイルオーバー・ヘルスチェック連動・アクティブ/パッシブ。重み付けルーティング：A/B テスト・比率制御・手動変更。ジオルーティング：地域別振り分け・障害フェイルオーバーなし。",
+    rememberAxis:
+      "自動フェイルオーバー → Route 53 フェイルオーバールーティング + ヘルスチェック。段階的なトラフィック移行 → 重み付けルーティング。地域ごとのエンドポイント → ジオロケーションルーティング。",
+  },
+  {
+    id: "edge-4",
+    category: "Edge & Global",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある EC サイトが CloudFront を使って静的コンテンツを配信している。ユーザーが古いコンテンツを参照しないよう、デプロイ直後にエッジキャッシュを即座に無効化したい。また、ユーザーの国によって表示言語を変えるため、リクエストのヘッダー情報を参照してリダイレクトしたい。最適な構成はどれか。",
+    context:
+      "キャッシュの TTL は 24 時間に設定されています。ユーザーの Accept-Language ヘッダーで言語を振り分けたい。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "CloudFront のキャッシュ無効化は TTL が切れるまで待つ", hint: "TTL 24 時間では新機能のデプロイ後にユーザーへの反映が遅すぎる" },
+      { id: "b", label: "B", text: "CloudFront ディストリビューションを削除・再作成してキャッシュをクリアする", hint: "ディストリビューションの削除・再作成は設定も含めてリセットされ、ダウンタイムが発生する" },
+      { id: "c", label: "C", text: "Route 53 の TTL を短くしてキャッシュを制御する", hint: "Route 53 は DNS サービスであり、CloudFront のコンテンツキャッシュの制御はできない" },
+      { id: "d", label: "D", text: "CloudFront のキャッシュ無効化 API でパスを指定してパージし、言語振り分けは Lambda@Edge で実装する", hint: "Invalidation API でエッジキャッシュを即座に無効化。Lambda@Edge でリクエストヘッダーを参照したリダイレクトが可能" },
+    ],
+    explanation:
+      "CloudFront の Invalidation（キャッシュ無効化）API を使うと、特定のパス（例：/index.html や /*）のキャッシュを即座に全エッジロケーションから削除できます（最大 3,000 パスを無料で月次無効化可能）。Lambda@Edge は CloudFront のエッジロケーションで Lambda 関数を実行する機能で、ビューワーリクエスト・オリジンリクエスト・オリジンレスポンス・ビューワーレスポンスの 4 つのイベントをフックできます。Accept-Language ヘッダーを参照して言語別 URL にリダイレクトする処理をビューワーリクエストイベントで実装できます。",
+    comparePoint:
+      "CloudFront Invalidation：エッジキャッシュの即時無効化。Lambda@Edge：エッジでのリクエスト/レスポンス操作・A/B テスト・認証・リダイレクト。CloudFront Functions：超軽量な処理向け・Lambda@Edge より安価・高速。",
+    rememberAxis:
+      "エッジキャッシュの即時クリア → CloudFront Invalidation API。エッジでのリクエスト操作（ヘッダー変換・リダイレクト） → Lambda@Edge または CloudFront Functions。",
+  },
+  {
+    id: "edge-5",
+    category: "Edge & Global",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある金融系企業が複数リージョン（us-east-1・eu-west-1・ap-northeast-1）で Active-Active 構成のアプリを運用したい。ユーザーは最寄りのリージョンへ接続し、各リージョンのデータは DynamoDB Global Tables で同期する。リージョン障害時は他のリージョンへ自動フェイルオーバーさせたい。最適な構成はどれか。",
+    context:
+      "99.99% の可用性が求められます。リージョン障害は年に数回発生する可能性があります。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Route 53 の重み付けルーティングで 3 リージョンに均等に振り分ける", hint: "重み付けルーティングはフェイルオーバー機能がないため、障害リージョンへもトラフィックが流れ続ける" },
+      { id: "b", label: "B", text: "Route 53 のレイテンシーベースルーティング + ヘルスチェックを組み合わせる", hint: "レイテンシーベースで最寄りリージョンへ接続し、ヘルスチェック失敗時に他のリージョンへ自動フェイルオーバーする" },
+      { id: "c", label: "C", text: "CloudFront で 3 リージョンのオリジンをオリジングループに設定する", hint: "CloudFront のオリジングループはプライマリ/セカンダリのフェイルオーバーが目的でActive-Activeには不向き" },
+      { id: "d", label: "D", text: "Global Accelerator のエンドポイントに 3 リージョンの ALB を登録する", hint: "Global Accelerator も有効だが、レイテンシーベースルーティングは Route 53 で実現する方が柔軟性が高い" },
+    ],
+    explanation:
+      "Route 53 のレイテンシーベースルーティングはユーザーの位置から最もレイテンシーが低いリージョンへトラフィックを誘導します。各リージョンの ALB にヘルスチェックを設定することで、リージョン障害時に自動的に正常なリージョンへフェイルオーバーします。DynamoDB Global Tables はマルチリージョンのマルチマスター構成でデータを自動同期するため、どのリージョンで書き込んでも他のリージョンに秒以内に反映されます。この構成により Active-Active でのマルチリージョン運用と自動フェイルオーバーを実現できます。",
+    comparePoint:
+      "Route 53 レイテンシーベース + ヘルスチェック：Active-Active・最寄りリージョン接続・フェイルオーバー。DynamoDB Global Tables：マルチリージョン同期・マルチマスター書き込み。Global Accelerator：固定 IP・TCP/UDP・バックボーン経由。",
+    rememberAxis:
+      "Active-Active マルチリージョン + 最寄りリージョンへの接続 → Route 53 レイテンシーベース + ヘルスチェック。DB のマルチリージョン同期 → DynamoDB Global Tables。固定 IP + グローバルルーティング → Global Accelerator。",
+  },
+
+  // ── シナリオ: ハイブリッドアーキテクチャ ─────────────────────────────────
+
+  {
+    id: "hybrid-1",
+    category: "Hybrid Architecture",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がオンプレミスのデータセンターと AWS を接続しており、通常時は Direct Connect を使って低レイテンシな接続を維持している。Direct Connect に障害が発生した場合にも接続を維持したい。コストを抑えつつ冗長性を確保する最適な構成はどれか。",
+    context:
+      "Direct Connect の月額費用は高いため、同じ帯域の回線を 2 本引くのはコスト的に難しい。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Direct Connect をプライマリとし、Site-to-Site VPN をバックアップとして構成する", hint: "Direct Connect 障害時に VPN へ自動フェイルオーバーする標準的な冗長構成。VPN のコストは Direct Connect より大幅に安い" },
+      { id: "b", label: "B", text: "Direct Connect を 2 本引いてデュアル接続にする", hint: "最も可用性が高いが、同じ帯域の回線を 2 本引くとコストが 2 倍になる" },
+      { id: "c", label: "C", text: "VPN のみに変更してコストを削減する", hint: "VPN はインターネット経由でレイテンシが不安定。Direct Connect の低レイテンシの利点を失う" },
+      { id: "d", label: "D", text: "Transit Gateway のみで冗長化する", hint: "Transit Gateway は複数の VPC・VPN・Direct Connect を集約するハブだが、それ自体は物理回線の冗長化手段ではない" },
+    ],
+    explanation:
+      "Direct Connect と Site-to-Site VPN のハイブリッド冗長構成は AWS が推奨するベストプラクティスです。Direct Connect は通常の業務に低レイテンシ・安定した帯域を提供し、障害時にはインターネット経由の VPN へ自動フェイルオーバーします（BGP のルートで自動切替）。VPN の費用は Direct Connect の 1/10 以下のため、コストを抑えた冗長化が可能です。最高の可用性が必要な場合は Direct Connect を異なるロケーションで 2 本引くデュアル DX 構成が推奨されます。",
+    comparePoint:
+      "Direct Connect：専用回線・低レイテンシ・安定帯域・高コスト。Site-to-Site VPN：インターネット経由・低コスト・レイテンシ変動あり・バックアップに最適。Direct Connect + VPN：コスト効率の高い推奨冗長構成。",
+    rememberAxis:
+      "コスト効率の良いオンプレ〜AWS 冗長接続 → Direct Connect（プライマリ）+ VPN（バックアップ）。最高可用性 → デュアル Direct Connect。低コスト重視・レイテンシ許容 → VPN のみ。",
+  },
+  {
+    id: "hybrid-2",
+    category: "Hybrid Architecture",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある製造業企業が工場のエッジで機械学習推論（品質検査の画像判定）をリアルタイムで実行したい。工場内の通信は閉鎖的でインターネットには接続できない環境。AWS のサービスをオンプレミス環境に持ち込んで使いたい。最適なサービスはどれか。",
+    context:
+      "レイテンシ要件は 100ms 以内。機械学習モデルは定期的に AWS で再学習し、デプロイする。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "EC2 インスタンスをオンプレに設置して推論サーバーを構築する", hint: "AWS のマネージドサービスとの統合が難しく、モデル更新の自動化も自前で実装が必要" },
+      { id: "b", label: "C", text: "AWS IoT Greengrass をエッジデバイスにインストールしてローカル推論を実行する", hint: "IoT Greengrass はエッジデバイスで Lambda や ML 推論を実行できるが、AWS Outposts よりスケールは小さい" },
+      { id: "c", label: "C", text: "AWS Outposts を工場に設置し、AWS のインフラとサービスをオンプレミスで実行する", hint: "Outposts は AWS のラックをオンプレに設置し、EC2・ECS・RDS・S3 等を AWS と同じ API でオンプレ環境で利用できる" },
+      { id: "d", label: "D", text: "Amazon SageMaker のみで推論を AWS クラウド上で実行する", hint: "インターネット非接続環境では AWS クラウドへのリアルタイム推論リクエストができない" },
+    ],
+    explanation:
+      "AWS Outposts は AWS のラック型ハードウェアをお客様のオンプレミス施設に設置するサービスです。EC2・ECS・EKS・RDS・ElastiCache・S3 などの AWS サービスを AWS と全く同じ API・ツール・コンソールで利用できます。インターネット非接続環境でもローカルに処理できるため、工場内の低レイテンシ要件を満たせます。モデルの再学習は AWS クラウドの SageMaker で行い、更新したモデルを Outposts にデプロイするハイブリッド ML パイプラインが構築できます。小規模デバイスには AWS IoT Greengrass が適しています。",
+    comparePoint:
+      "AWS Outposts：ラック型・フルの AWS サービス・低レイテンシ・大規模インフラ向け。IoT Greengrass：軽量・エッジデバイス（Raspberry Pi 等）・Lambda/ML 実行・センサー向け。Local Zones：AWS が管理する低レイテンシ拠点（オンプレではない）。",
+    rememberAxis:
+      "オンプレに AWS フルサービスを持ち込む → AWS Outposts。軽量エッジデバイスで Lambda/ML 推論 → IoT Greengrass。都市部の低レイテンシ AWS インフラ → Local Zones。",
+  },
+  {
+    id: "hybrid-3",
+    category: "Hybrid Architecture",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がオンプレミスの Active Directory（AD）を使って社内ユーザーを管理している。AWS 環境でも同じ AD アカウントで EC2 や AWS Management Console へのアクセスを可能にしたい。オンプレ AD とのシームレスな認証統合を実現するには何を使うべきか。",
+    context:
+      "ユーザーは社内 PC から AWS リソースへアクセスします。パスワードの二重管理は避けたい。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "AWS IAM ユーザーを全員分作成し、オンプレ AD のパスワードと同期する", hint: "手動同期は管理コストが高く、パスワードの二重管理になる" },
+      { id: "b", label: "B", text: "Amazon Cognito を使ってオンプレ AD と連携する", hint: "Cognito は主に外部ユーザー（アプリのエンドユーザー）向け。社内 AD 連携には IAM Identity Center の方が適切" },
+      { id: "c", label: "C", text: "AWS Directory Service の Simple AD を作成し、オンプレ AD の代替にする", hint: "Simple AD はスタンドアロンの LDAP 互換 AD。既存のオンプレ AD との信頼関係（トラスト）は設定できない" },
+      { id: "d", label: "D", text: "AWS IAM Identity Center とオンプレ AD（Directory Service AD Connector 経由）を連携させる", hint: "IAM Identity Center（旧 SSO）は AD Connector でオンプレ AD に接続し、既存の AD 認証で AWS Console や EC2 にアクセスできる" },
+    ],
+    explanation:
+      "AWS IAM Identity Center（旧 AWS SSO）はシングルサインオン機能を提供するサービスです。AWS Directory Service の AD Connector を使ってオンプレミスの Active Directory に接続すると、既存の AD ユーザー・グループをそのまま利用して AWS Management Console へのアクセス権を割り当てられます。ユーザーは社内 AD のパスワードで AWS Console にサインインでき、パスワードの二重管理が不要です。EC2 への AD 参加（Domain Join）は AWS Managed Microsoft AD を使う方法もあります。",
+    comparePoint:
+      "IAM Identity Center + AD Connector：既存 AD でシングルサインオン・Console アクセス。AWS Managed Microsoft AD：完全な AD 機能（Group Policy 等）・オンプレ AD とのトラスト設定可能。AD Connector：オンプレ AD へのプロキシ・AD を AWS 上に複製しない。",
+    rememberAxis:
+      "オンプレ AD で AWS Console SSO → IAM Identity Center + AD Connector。完全な AD 機能が必要 → AWS Managed Microsoft AD。外部ユーザー（顧客）の認証 → Amazon Cognito。",
+  },
+  {
+    id: "hybrid-4",
+    category: "Hybrid Architecture",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がオンプレミスと AWS のハイブリッドな DNS 環境を構築したい。AWS の VPC 内のリソース（EC2・RDS）はオンプレのサーバーから内部 DNS 名で名前解決したい。逆に、AWS からオンプレの内部 DNS 名も解決したい。最適な構成はどれか。",
+    context:
+      "オンプレの内部ドメインは example.local。AWS VPC の内部ドメインは example.aws.internal。Direct Connect で接続済み。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Route 53 Resolver のインバウンド/アウトバウンドエンドポイントを作成し、条件付きフォワーダーを設定する", hint: "Inbound Endpoint でオンプレ→AWS の名前解決を受け付け、Outbound Endpoint + Forwarding Rule でAWS→オンプレに転送できる" },
+      { id: "b", label: "B", text: "オンプレの DNS サーバーをプライマリとし、AWS の DNS をセカンダリに設定する", hint: "AWS Route 53 はセカンダリ DNS として外部ゾーン転送を受けることができない構成になっている" },
+      { id: "c", label: "C", text: "EC2 上に BIND サーバーを立てて全ての DNS クエリを中継する", hint: "可能だが EC2 の管理・単一障害点のリスクがある。Route 53 Resolver のマネージド機能の方が適切" },
+      { id: "d", label: "D", text: "AWS Global Accelerator で DNS を統合管理する", hint: "Global Accelerator はトラフィックルーティングサービスで DNS サーバーではない" },
+    ],
+    explanation:
+      "Route 53 Resolver は VPC 内の DNS リゾルバーで、インバウンドエンドポイントとアウトバウンドエンドポイントで双方向のハイブリッド DNS 解決を実現します。インバウンドエンドポイントは VPC 内に ENI を作成し、オンプレの DNS サーバーがこの IP アドレスに AWS 内部 DNS クエリを転送します（オンプレ → AWS の名前解決）。アウトバウンドエンドポイントと Forwarding Rules を設定すると、VPC 内からオンプレのドメイン（example.local）へのクエリをオンプレの DNS サーバーに転送できます（AWS → オンプレの名前解決）。",
+    comparePoint:
+      "Route 53 Resolver インバウンドエンドポイント：オンプレ→AWS の名前解決受付。Route 53 Resolver アウトバウンドエンドポイント + Forwarding Rule：AWS→オンプレの名前解決転送。Route 53 プライベートホストゾーン：VPC 内部の DNS 管理。",
+    rememberAxis:
+      "ハイブリッド双方向 DNS 解決 → Route 53 Resolver インバウンド/アウトバウンドエンドポイント。VPC 内部の DNS 名前解決 → Route 53 プライベートホストゾーン。",
+  },
+  {
+    id: "hybrid-5",
+    category: "Hybrid Architecture",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がオンプレミスのファイルサーバー（数十 TB）を引き続き使いながら、AWS S3 をバックエンドストレージとして活用したい。オンプレのサーバーやアプリケーションは NFS・SMB でファイルにアクセスし続けられるようにしつつ、S3 へのデータ保存・バックアップも自動化したい。最適なサービスはどれか。",
+    context:
+      "アプリケーションの変更なしで既存の NFS マウントを使い続けることが条件。頻繁にアクセスするデータはオンプレにキャッシュしたい。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "AWS DataSync でオンプレのファイルを S3 に定期同期する", hint: "DataSync は差分同期に優れるが、既存の NFS マウントを維持しながらリアルタイムに S3 をバックエンドにする機能はない" },
+      { id: "b", label: "B", text: "Amazon EFS をオンプレにマウントしてファイルサーバーを置き換える", hint: "EFS は VPC 内の NFS サービスで、オンプレから Direct Connect 経由でマウントできるが、S3 バックエンドではない" },
+      { id: "c", label: "C", text: "AWS Storage Gateway（ファイルゲートウェイ）をオンプレに設置し、S3 をバックエンドに NFS/SMB を提供する", hint: "File Gateway はオンプレに仮想アプライアンスをデプロイし、NFS/SMB を提供しながら S3 に自動保存・キャッシュも管理する" },
+      { id: "d", label: "D", text: "AWS Snowball Edge をオンプレに常時設置してストレージとして利用する", hint: "Snowball Edge は移行・エッジコンピューティング向けで、常時設置のストレージサービスではない" },
+    ],
+    explanation:
+      "AWS Storage Gateway のファイルゲートウェイモードは、オンプレミスに仮想アプライアンス（VM または Hardware Appliance）をデプロイし、NFS または SMB インターフェースを提供します。アプリケーションは従来通り NFS マウントでファイルにアクセスでき、ファイルゲートウェイが自動的に S3 オブジェクトとして保存します。頻繁にアクセスするデータはローカルキャッシュから高速に返し、キャッシュにないデータは S3 から取得します。S3 に保存されたデータは S3 のライフサイクルポリシーで自動的に Glacier にアーカイブすることもできます。",
+    comparePoint:
+      "Storage Gateway ファイルゲートウェイ：NFS/SMB 維持・S3 バックエンド・ローカルキャッシュ・ハイブリッドストレージ。DataSync：差分同期・スケジュール転送・ゲートウェイ不要。EFS：NFS・VPC 内・S3 バックエンドではない。",
+    rememberAxis:
+      "既存 NFS/SMB を維持しながら S3 にデータ保存 → Storage Gateway ファイルゲートウェイ。オンプレ↔S3 の差分同期 → DataSync。VPC 内の共有ファイルシステム → EFS。",
+  },
 ];
