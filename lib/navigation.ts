@@ -1,5 +1,5 @@
 export type AppNavItem = {
-  href: "/" | "/terms" | "/comparisons" | "/quiz" | "/review" | "/roadmap";
+  href: "/" | "/terms" | "/comparisons" | "/quiz" | "/review" | "/roadmap" | "/mock-exam";
   label: string;
   shortLabel: string;
   description: string;
@@ -41,6 +41,12 @@ export const appNavItems: AppNavItem[] = [
     label: "地図",
     shortLabel: "Map",
     description: "どの順番で用語を学ぶかを示すロードマップ",
+  },
+  {
+    href: "/mock-exam",
+    label: "模試",
+    shortLabel: "Exam",
+    description: "65問・130分の本番形式模擬試験",
   },
 ];
 
