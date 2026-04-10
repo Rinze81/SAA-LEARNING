@@ -1141,6 +1141,570 @@ export const studyTerms: StudyTerm[] = [
       "「EC2 のサイズが適切か確認したい」「リソースの過剰プロビジョニングを削減したい」という要件で選びます。Trusted Advisor も似たチェックをしますが、Compute Optimizer は ML ベースでより詳細な推奨を出します。",
     related: ["EC2", "Lambda", "EBS", "Trusted Advisor", "Cost Explorer"],
   },
+
+  // ── セキュリティ（追加）────────────────────────────────────────────────
+  {
+    id: "control-tower",
+    name: "AWS Control Tower",
+    category: "セキュリティ",
+    shortDefinition: "マルチアカウント環境を安全・標準的に構築・管理するサービスです。",
+    description:
+      "AWS Organizations と統合し、ガードレール（必須・推奨のポリシーセット）を適用してアカウントを一元管理します。新しい AWS アカウントをランディングゾーンと呼ばれる標準構成で自動プロビジョニングできます。",
+    examTip:
+      "「マルチアカウントのガバナンスを自動化したい」「ランディングゾーンを構成したい」というキーワードで選びます。Organizations との違いは、Control Tower はベストプラクティスの適用と自動化まで担う点です。",
+    related: ["AWS Organizations", "Service Control Policy", "Security Hub", "Config"],
+  },
+  {
+    id: "security-hub",
+    name: "AWS Security Hub",
+    category: "セキュリティ",
+    shortDefinition: "複数の AWS セキュリティサービスの検出結果を一元集約・可視化するサービスです。",
+    description:
+      "GuardDuty・Inspector・Macie・Firewall Manager などのセキュリティ検出結果を集約し、CSPM（クラウドセキュリティ姿勢管理）として CIS AWS Foundations Benchmark などのコンプライアンスチェックも提供します。",
+    examTip:
+      "「複数のセキュリティサービスの結果を一か所で確認したい」という要件で選びます。Detective（調査）・GuardDuty（脅威検出）との役割の違いを整理しましょう。",
+    related: ["GuardDuty", "Inspector", "Macie", "AWS Config", "Detective"],
+  },
+  {
+    id: "macie",
+    name: "Amazon Macie",
+    category: "セキュリティ",
+    shortDefinition: "S3 内の機密データ（PII など）を機械学習で自動検出するサービスです。",
+    description:
+      "S3 バケットを継続的にスキャンし、個人情報（氏名・クレジットカード番号など）を自動検出します。バケットのアクセス設定が過剰に公開されていないかも評価します。",
+    examTip:
+      "「S3 内の個人情報を自動検出したい」「PII の漏洩リスクを評価したい」という要件で選びます。GDPR・HIPAA 対応の文脈で頻出です。",
+    related: ["S3", "Security Hub", "KMS", "CloudTrail"],
+  },
+  {
+    id: "detective",
+    name: "Amazon Detective",
+    category: "セキュリティ",
+    shortDefinition: "セキュリティインシデントの根本原因を視覚的に調査するサービスです。",
+    description:
+      "VPC Flow Logs・CloudTrail・GuardDuty の検出結果をグラフ化し、攻撃の経路や影響範囲を視覚的に分析できます。GuardDuty が脅威を検出した後の深掘り調査に使います。",
+    examTip:
+      "「GuardDuty の検出結果をさらに調査したい」「セキュリティインシデントの影響範囲を特定したい」という要件で選びます。Detective = 調査、GuardDuty = 検出、Security Hub = 集約と役割を整理しましょう。",
+    related: ["GuardDuty", "Security Hub", "CloudTrail", "VPC Flow Logs"],
+  },
+  {
+    id: "firewall-manager",
+    name: "AWS Firewall Manager",
+    category: "セキュリティ",
+    shortDefinition: "WAF・Shield・Network Firewall のルールを複数アカウントに一元適用するサービスです。",
+    description:
+      "AWS Organizations と統合し、組織内のすべてのアカウントに WAF ルール・Shield Advanced・Security Group ポリシー・Network Firewall ポリシーを一括で適用・管理できます。",
+    examTip:
+      "「複数アカウントに WAF ポリシーを統一適用したい」という要件で選びます。Firewall Manager = ポリシーの一元管理、WAF = 個別リソースの保護と使い分けましょう。",
+    related: ["WAF", "Shield", "Network Firewall", "AWS Organizations", "Security Hub"],
+  },
+  {
+    id: "network-firewall",
+    name: "AWS Network Firewall",
+    category: "セキュリティ",
+    shortDefinition: "VPC 内のトラフィックをステートフルに検査・フィルタリングするマネージドファイアウォールです。",
+    description:
+      "Suricata 互換のルールエンジンを使い、VPC の境界でネットワークトラフィックを深層パケット検査（DPI）できます。悪意のある IP・ドメインへの通信ブロックや IDS/IPS 機能を提供します。",
+    examTip:
+      "「VPC 内の通信を DPI・IDS/IPS で保護したい」という要件で選びます。Security Group・NACL はポート単位の制御、Network Firewall はパケット内容まで検査できる点が違いです。",
+    related: ["VPC", "Security Group", "WAF", "Firewall Manager", "Transit Gateway"],
+  },
+  {
+    id: "iam-identity-center",
+    name: "IAM Identity Center",
+    category: "セキュリティ",
+    shortDefinition: "複数の AWS アカウントやアプリへのシングルサインオン（SSO）を一元管理するサービスです。",
+    description:
+      "旧称 AWS SSO。Microsoft AD・Okta などの外部 IdP と連携し、組織内のユーザーが単一の認証でマルチアカウント環境に SSO できます。許可セット（Permission Set）で各アカウントへの権限を管理します。",
+    examTip:
+      "「複数 AWS アカウントへの SSO を実現したい」「従業員が社内 AD で AWS にログインしたい」という要件で選びます。IAM ユーザーを個別アカウントに作らずに済む点が重要です。",
+    related: ["IAM Role", "AWS Organizations", "Control Tower", "Active Directory"],
+  },
+  {
+    id: "verified-access",
+    name: "AWS Verified Access",
+    category: "セキュリティ",
+    shortDefinition: "VPN なしで企業アプリへのゼロトラストアクセスを実現するサービスです。",
+    description:
+      "ユーザーのデバイス状態・ID・場所などを継続的に検証し、条件を満たした場合のみ社内アプリへのアクセスを許可します。AWS IAM Identity Center や外部 IdP と統合して動作します。",
+    examTip:
+      "「VPN レスのゼロトラストアクセスを実現したい」という要件で選びます。ClientVPN が IP レベルのトンネルを提供するのに対し、Verified Access はアプリ単位のアクセス制御を行います。",
+    related: ["IAM Identity Center", "Client VPN", "WAF", "CloudFront"],
+  },
+  {
+    id: "resource-access-manager",
+    name: "AWS Resource Access Manager (RAM)",
+    category: "セキュリティ",
+    shortDefinition: "AWS リソースを別アカウントや Organization 内で安全に共有するサービスです。",
+    description:
+      "Transit Gateway・Subnet・License Manager の設定・Route 53 Resolver Rule などを別の AWS アカウントや Organization 内のアカウントと共有できます。リソースの重複作成を防ぎコストを削減できます。",
+    examTip:
+      "「Transit Gateway を複数アカウントで共有したい」「VPC サブネットをアカウントをまたいで使いたい」という要件で選びます。VPC Peering との違いは、RAM は Transit Gateway など VPC 以外のリソースも共有できる点です。",
+    related: ["Transit Gateway", "AWS Organizations", "VPC", "Route 53"],
+  },
+  {
+    id: "artifact",
+    name: "AWS Artifact",
+    category: "セキュリティ",
+    shortDefinition: "AWS のコンプライアンスレポートや規約文書をオンデマンドでダウンロードできるサービスです。",
+    description:
+      "SOC・PCI DSS・ISO などの第三者監査レポートや、AWS との BAA（Business Associate Agreement）などの規約文書を提供します。コンプライアンス審査での証跡提出に使います。",
+    examTip:
+      "「AWS の SOC レポートを取得したい」「HIPAA の BAA を締結したい」という要件で選びます。AWS の責任範囲のコンプライアンス証跡が必要なときに Artifact を使います。",
+    related: ["Security Hub", "AWS Config", "Control Tower", "Trusted Advisor"],
+  },
+
+  // ── 移行・転送（追加）────────────────────────────────────────────────
+  {
+    id: "datasync",
+    name: "AWS DataSync",
+    category: "移行・転送",
+    shortDefinition: "オンプレミスと AWS ストレージ間のデータ転送を高速・自動化するサービスです。",
+    description:
+      "NFS・SMB・HDFS などのオンプレミスファイルシステムから S3・EFS・FSx へのデータ転送を最大 10 倍高速化します。スケジュール転送・増分転送・整合性チェックもサポートします。",
+    examTip:
+      "「オンプレから S3/EFS へのファイル転送を自動化したい」という要件で選びます。Storage Gateway（継続的ハイブリッドアクセス）との違いは、DataSync は一時的な移行・同期に適している点です。",
+    related: ["S3", "EFS", "FSx", "Storage Gateway", "Snowball Edge"],
+  },
+  {
+    id: "transfer-family",
+    name: "AWS Transfer Family",
+    category: "移行・転送",
+    shortDefinition: "SFTP・FTPS・FTP で S3 や EFS にファイルを転送できるマネージドサービスです。",
+    description:
+      "既存の SFTP/FTP クライアントやワークフローをそのまま使って S3・EFS にファイルをアップロード・ダウンロードできます。サーバー管理不要で、IAM・Cognito・カスタム Lambda での認証に対応します。",
+    examTip:
+      "「既存の SFTP ワークフローを変更せずに S3 に移行したい」という要件で選びます。FTP/SFTP クライアントとの互換性を保ちながら AWS に移行する典型的なシナリオです。",
+    related: ["S3", "EFS", "IAM", "Route 53"],
+  },
+  {
+    id: "migration-hub",
+    name: "AWS Migration Hub",
+    category: "移行・転送",
+    shortDefinition: "AWS への移行プロジェクト全体の進捗を一元追跡するダッシュボードです。",
+    description:
+      "Application Discovery Service・MGN・DMS などの移行ツールの進捗を一か所に集約して可視化します。移行対象のサーバー・アプリの状況・依存関係を追跡できます。",
+    examTip:
+      "「複数の移行ツールの進捗を一元管理したい」という要件で選びます。Migration Hub 自身は移行を実行せず、他ツールの進捗を追跡するハブの役割です。",
+    related: ["Application Discovery Service", "MGN", "DMS", "DataSync"],
+  },
+  {
+    id: "application-discovery-service",
+    name: "AWS Application Discovery Service",
+    category: "移行・転送",
+    shortDefinition: "オンプレミスのサーバー情報・依存関係を自動収集して移行計画を支援するサービスです。",
+    description:
+      "エージェント型（詳細な依存関係マップ）またはエージェントレス型（基本情報のみ）でオンプレミスのサーバーのスペック・ネットワーク依存関係・アプリ利用状況を収集します。Migration Hub と連携して移行計画を立てます。",
+    examTip:
+      "「移行前にオンプレのサーバー依存関係を把握したい」「移行計画の根拠データを収集したい」という要件で選びます。移行の第一歩として Discovery → Migration Hub で計画立案というフローを覚えましょう。",
+    related: ["Migration Hub", "MGN", "DMS", "DataSync"],
+  },
+  {
+    id: "mgn",
+    name: "AWS MGN（Application Migration Service）",
+    category: "移行・転送",
+    shortDefinition: "物理・仮想・クラウドのサーバーを AWS EC2 にリフト＆シフト移行するサービスです。",
+    description:
+      "旧称 CloudEndure Migration。エージェントをインストールしてソースサーバーのブロックレベルレプリケーションを行い、カットオーバー時に最小ダウンタイムで EC2 に切り替えます。OS・アプリの変更なしに移行できます。",
+    examTip:
+      "「オンプレの仮想マシンを変更せずに EC2 に移行したい」「リフト＆シフト移行」というキーワードで選びます。データベースの移行は DMS、アプリサーバーの移行は MGN と使い分けましょう。",
+    related: ["Migration Hub", "DMS", "EC2", "Application Discovery Service"],
+  },
+  {
+    id: "sct",
+    name: "AWS Schema Conversion Tool (SCT)",
+    category: "移行・転送",
+    shortDefinition: "異種データベース間のスキーマを自動変換してデータベース移行を支援するツールです。",
+    description:
+      "Oracle・SQL Server から Aurora MySQL・Aurora PostgreSQL・Redshift などへのスキーマ・ストアドプロシージャ・ビューを自動変換します。変換できない部分はレポートとして出力します。DMS とセットで使います。",
+    examTip:
+      "「Oracle から Aurora に移行する際のスキーマ変換」という要件で選びます。同種 DB 間（MySQL → MySQL）の移行では SCT は不要で DMS のみで対応できます。",
+    related: ["DMS", "Aurora", "RDS", "Migration Hub"],
+  },
+  {
+    id: "snowcone",
+    name: "AWS Snowcone",
+    category: "移行・転送",
+    shortDefinition: "小型・軽量なエッジコンピューティング・データ転送デバイスです。",
+    description:
+      "Snowball Edge より小型（2.1 kg）で、8 TB（HDD）または 14 TB（SSD）のストレージを持ちます。インターネット接続がない場所でデータを収集し、AWS に物理発送するか DataSync でオンライン転送できます。",
+    examTip:
+      "「ネットワーク接続がない辺境地でデータを収集したい」「少量データを AWS に物理転送したい」という要件で選びます。大容量は Snowball Edge・Snowmobile との使い分けを整理しましょう。",
+    related: ["Snowball Edge", "DataSync", "S3", "Edge Computing"],
+  },
+
+  // ── 分析（追加）──────────────────────────────────────────────────────
+  {
+    id: "glue",
+    name: "AWS Glue",
+    category: "分析",
+    shortDefinition: "サーバーレスの ETL（抽出・変換・ロード）サービスです。",
+    description:
+      "S3・RDS・DynamoDB などのデータソースからデータを抽出・変換し、S3・Redshift・RDS などに書き込みます。Glue Data Catalog はメタデータリポジトリとして Athena・EMR・Redshift Spectrum から参照できます。",
+    examTip:
+      "「S3 のデータを変換して Redshift にロードしたい」「データカタログでスキーマを一元管理したい」という要件で選びます。サーバーレス ETL = Glue、大規模 Hadoop/Spark = EMR と使い分けましょう。",
+    related: ["Athena", "Redshift", "S3", "Lake Formation", "EMR"],
+  },
+  {
+    id: "athena",
+    name: "Amazon Athena",
+    category: "分析",
+    shortDefinition: "S3 のデータを SQL でアドホックにクエリできるサーバーレス分析サービスです。",
+    description:
+      "S3 上の CSV・JSON・Parquet・ORC などのファイルを、サーバー管理なしで標準 SQL でクエリできます。Glue Data Catalog と統合してテーブルのスキーマ情報を管理します。スキャンしたデータ量に応じた課金です。",
+    examTip:
+      "「S3 のログデータを SQL で分析したい」「サーバーレスでアドホッククエリしたい」という要件で選びます。継続的な高速クエリは Redshift、アドホック・不定期クエリは Athena が経済的です。",
+    related: ["S3", "Glue", "QuickSight", "Lake Formation", "Redshift"],
+  },
+  {
+    id: "quicksight",
+    name: "Amazon QuickSight",
+    category: "分析",
+    shortDefinition: "BI ツールとしてデータを可視化・ダッシュボード化するサーバーレスサービスです。",
+    description:
+      "S3・Athena・Redshift・RDS・Salesforce など多様なデータソースに接続してインタラクティブなダッシュボードを作成できます。SPICE（インメモリエンジン）で高速クエリが可能です。",
+    examTip:
+      "「データをグラフやダッシュボードで可視化したい」「BI レポートを作成したい」という要件で選びます。Athena はクエリ実行、QuickSight は可視化と役割を整理しましょう。",
+    related: ["Athena", "Redshift", "S3", "Glue"],
+  },
+  {
+    id: "opensearch",
+    name: "Amazon OpenSearch Service",
+    category: "分析",
+    shortDefinition: "全文検索・ログ分析・リアルタイムモニタリングに使うマネージド検索エンジンです。",
+    description:
+      "旧称 Amazon Elasticsearch Service。ログデータのリアルタイム検索・集計・可視化（OpenSearch Dashboards）に使います。Kinesis Data Firehose や CloudWatch Logs との統合でログ分析パイプラインを構築できます。",
+    examTip:
+      "「ログを全文検索したい」「ELK スタックをマネージドで使いたい」という要件で選びます。Athena は SQL でのバッチ分析、OpenSearch は全文検索・リアルタイム分析に向いています。",
+    related: ["Kinesis Firehose", "CloudWatch Logs", "Athena", "QuickSight"],
+  },
+  {
+    id: "emr",
+    name: "Amazon EMR",
+    category: "分析",
+    shortDefinition: "Hadoop・Spark・Hive などのビッグデータフレームワークを実行するマネージドクラスターサービスです。",
+    description:
+      "大規模なバッチデータ処理・機械学習・インタラクティブ分析を、EC2 スポットインスタンスなどを活用してコスト効率よく実行できます。EMR Serverless で EC2 管理不要の運用も可能です。",
+    examTip:
+      "「大規模な Spark ジョブを実行したい」「Hadoop エコシステムをマネージドで使いたい」という要件で選びます。Glue はサーバーレス ETL、EMR はより複雑・大規模な Spark/Hadoop ワークロードに向いています。",
+    related: ["Glue", "S3", "Athena", "Redshift", "Kinesis Data Streams"],
+  },
+  {
+    id: "data-pipeline",
+    name: "AWS Data Pipeline",
+    category: "分析",
+    shortDefinition: "異なる AWS サービス間でのデータ移動・変換をスケジュール実行するサービスです。",
+    description:
+      "S3・RDS・DynamoDB・Redshift 間のデータ移動と変換をワークフローとして定義し、定期的に自動実行できます。現在は Step Functions + Glue の組み合わせが推奨されることが多くなっています。",
+    examTip:
+      "SAA 試験では古いサービスとして出題されることがあります。「データ移動のスケジュール実行」なら Glue・Step Functions・Glue Workflows が現在の推奨です。",
+    related: ["Glue", "Step Functions", "S3", "Redshift", "DynamoDB"],
+  },
+  {
+    id: "lake-formation",
+    name: "AWS Lake Formation",
+    category: "分析",
+    shortDefinition: "S3 ベースのデータレイクの構築・セキュリティ・アクセス制御を一元管理するサービスです。",
+    description:
+      "Glue Data Catalog と統合し、テーブル・列・行レベルの細粒度アクセス制御をデータレイク全体に適用できます。データのインジェスト・クリーニング・カタログ化を自動化し、Athena・Redshift Spectrum・EMR からのアクセスを一元制御します。",
+    examTip:
+      "「データレイクのアクセス制御を一元管理したい」「テーブル・列レベルの権限管理をしたい」という要件で選びます。Glue はデータ変換、Lake Formation はアクセス制御・ガバナンスと役割が違います。",
+    related: ["Glue", "Athena", "S3", "Redshift", "EMR"],
+  },
+  {
+    id: "clean-rooms",
+    name: "AWS Clean Rooms",
+    category: "分析",
+    shortDefinition: "生データを共有せずに複数企業がデータを安全に共同分析できるサービスです。",
+    description:
+      "パートナー企業と生データを見せ合わずに、SQL クエリの結果のみを共有する「クリーンルーム」を構築できます。GDPR・プライバシー規制対応の共同マーケティング分析などに使います。",
+    examTip:
+      "「複数社のデータを生データ非共有で共同分析したい」という要件で選びます。SAA では新しめのサービスですが、プライバシー保護のデータコラボレーションというキーワードで覚えましょう。",
+    related: ["Athena", "Glue", "Lake Formation", "S3"],
+  },
+
+  // ── コンテナ・開発（追加）────────────────────────────────────────────
+  {
+    id: "ecr",
+    name: "Amazon ECR",
+    category: "コンテナ",
+    shortDefinition: "Docker コンテナイメージを保存・管理するフルマネージドレジストリです。",
+    description:
+      "ECS・EKS・Lambda で使うコンテナイメージを安全に保存・バージョン管理できます。イメージスキャン（脆弱性検出）・ライフサイクルポリシー（古いイメージの自動削除）・クロスリージョンレプリケーションもサポートします。",
+    examTip:
+      "「コンテナイメージを AWS で管理したい」という要件で選びます。ECR = Docker Hub の AWS 版と捉えると分かりやすいです。ECS・EKS のデプロイと必ずセットで出てきます。",
+    related: ["ECS", "EKS", "Fargate", "CodePipeline", "CodeBuild"],
+  },
+  {
+    id: "app-mesh",
+    name: "AWS App Mesh",
+    category: "コンテナ",
+    shortDefinition: "マイクロサービス間の通信を可視化・制御するサービスメッシュです。",
+    description:
+      "Envoy プロキシを各サービスにサイドカーとして注入し、サービス間トラフィックのルーティング・リトライ・タイムアウト・サーキットブレーカーを一元管理します。ECS・EKS・EC2 で動作します。",
+    examTip:
+      "「マイクロサービス間の通信制御・可視化をしたい」「サービスメッシュを構築したい」という要件で選びます。App Mesh はサービス間通信の制御、Cloud Map はサービスディスカバリと役割が違います。",
+    related: ["ECS", "EKS", "Cloud Map", "X-Ray"],
+  },
+  {
+    id: "cloud-map",
+    name: "AWS Cloud Map",
+    category: "コンテナ",
+    shortDefinition: "マイクロサービスの場所（IP・エンドポイント）を登録・検索するサービスディスカバリです。",
+    description:
+      "ECS タスク・EKS Pod・EC2 インスタンスのエンドポイントを自動的に登録し、アプリが DNS または API でサービスを動的に検索できるようにします。ヘルスチェックと連携して不健全なインスタンスを自動除外します。",
+    examTip:
+      "「マイクロサービスのエンドポイントを動的に検索したい」「サービスディスカバリを実装したい」という要件で選びます。Route 53 がグローバルな DNS 解決、Cloud Map はアプリ内サービス検索と使い分けましょう。",
+    related: ["ECS", "EKS", "App Mesh", "Route 53"],
+  },
+  {
+    id: "codepipeline",
+    name: "AWS CodePipeline",
+    category: "開発者ツール",
+    shortDefinition: "ソースからデプロイまでの CI/CD パイプラインを自動化するサービスです。",
+    description:
+      "GitHub・CodeCommit のソース変更をトリガーに、CodeBuild でビルド・テストし、CodeDeploy・ECS・Elastic Beanstalk・Lambda にデプロイするまでのパイプラインをノーコードで定義できます。",
+    examTip:
+      "「CI/CD パイプラインを構築したい」という要件で選びます。CodePipeline = パイプライン全体のオーケストレーション、CodeBuild = ビルド実行、CodeDeploy = デプロイ実行と役割を整理しましょう。",
+    related: ["CodeBuild", "CodeDeploy", "ECR", "Elastic Beanstalk", "ECS"],
+  },
+  {
+    id: "codebuild",
+    name: "AWS CodeBuild",
+    category: "開発者ツール",
+    shortDefinition: "コードのビルド・テストをサーバーレスで実行するマネージドビルドサービスです。",
+    description:
+      "buildspec.yml でビルドコマンドを定義し、Docker イメージのビルド・ユニットテスト・静的解析などを実行します。使用した分だけ課金でき、ビルドサーバーの管理が不要です。ECR への Docker イメージ push も担います。",
+    examTip:
+      "「CI/CD のビルドフェーズをサーバーレスで実行したい」という要件で選びます。Jenkins をマネージドに置き換える選択肢として出てきます。",
+    related: ["CodePipeline", "CodeDeploy", "ECR", "S3"],
+  },
+  {
+    id: "codedeploy",
+    name: "AWS CodeDeploy",
+    category: "開発者ツール",
+    shortDefinition: "EC2・Lambda・ECS へのデプロイを自動化・安全にロールアウトするサービスです。",
+    description:
+      "Blue/Green デプロイ・カナリアデプロイ・ローリングアップデートをサポートし、デプロイ失敗時の自動ロールバックも行います。EC2・オンプレミス・Lambda・ECS に対応しています。",
+    examTip:
+      "「Blue/Green デプロイを自動化したい」「デプロイ失敗時に自動ロールバックしたい」という要件で選びます。ECS のデプロイ戦略（Blue/Green・ローリング）はどちらも CodeDeploy で管理できます。",
+    related: ["CodePipeline", "CodeBuild", "ECS", "Lambda", "EC2"],
+  },
+  {
+    id: "xray",
+    name: "AWS X-Ray",
+    category: "開発者ツール",
+    shortDefinition: "マイクロサービスのリクエストを追跡・可視化する分散トレーシングサービスです。",
+    description:
+      "Lambda・EC2・ECS・API Gateway などを通過するリクエストの経路・レイテンシー・エラーをサービスマップとして可視化します。ボトルネックや障害箇所を特定するのに使います。",
+    examTip:
+      "「マイクロサービスのレイテンシーを分析したい」「どのサービスでエラーが発生しているか特定したい」という要件で選びます。CloudWatch はメトリクス監視、X-Ray はリクエストのエンドツーエンド追跡です。",
+    related: ["CloudWatch", "App Mesh", "Lambda", "API Gateway", "ECS"],
+  },
+
+  // ── ガバナンス・運用（追加）──────────────────────────────────────────
+  {
+    id: "organizations",
+    name: "AWS Organizations",
+    category: "ガバナンス",
+    shortDefinition: "複数の AWS アカウントを階層的に管理し、ポリシーを一元適用するサービスです。",
+    description:
+      "組織単位（OU）にアカウントをグループ化し、SCP（Service Control Policy）でアカウントの最大権限を制限できます。一括請求（Consolidated Billing）でボリュームディスカウントを受けながら、アカウント単位のコスト管理もできます。",
+    examTip:
+      "「複数アカウントに特定の操作を禁止したい」「全アカウントの請求を一本化したい」という要件で選びます。SCP は IAM を上書きして最大権限を制限する点を覚えましょう。",
+    related: ["Control Tower", "IAM Identity Center", "Security Hub", "Firewall Manager"],
+  },
+  {
+    id: "service-catalog",
+    name: "AWS Service Catalog",
+    category: "ガバナンス",
+    shortDefinition: "承認済みの AWS リソース構成（製品）をセルフサービスでプロビジョニングできる仕組みです。",
+    description:
+      "管理者が CloudFormation テンプレートを「製品」として登録し、承認されたリソースのみをユーザーがデプロイできるようにします。標準化・コンプライアンス遵守・セルフサービスの両立を実現します。",
+    examTip:
+      "「開発者が承認済みの構成のみをデプロイできるようにしたい」「セルフサービスでリソース作成を制御したい」という要件で選びます。CloudFormation がインフラ定義、Service Catalog がその配布・制御の仕組みです。",
+    related: ["CloudFormation", "Organizations", "Control Tower", "IAM"],
+  },
+  {
+    id: "opsworks",
+    name: "AWS OpsWorks",
+    category: "ガバナンス",
+    shortDefinition: "Chef・Puppet を使ったインフラ構成管理をマネージドで提供するサービスです。",
+    description:
+      "OpsWorks for Chef Automate・OpsWorks for Puppet Enterprise の 2 種類があり、既存の Chef/Puppet レシピをそのまま AWS で使えます。EC2・オンプレミスのサーバー構成を一元管理します。",
+    examTip:
+      "「既存の Chef/Puppet スクリプトをそのまま AWS で使いたい」という要件で選びます。新規構築なら Systems Manager・CloudFormation・AWS CDK が推奨されることが多く、Chef/Puppet 移行シナリオで出ます。",
+    related: ["Systems Manager", "CloudFormation", "EC2", "Elastic Beanstalk"],
+  },
+  {
+    id: "patch-manager",
+    name: "AWS Systems Manager Patch Manager",
+    category: "ガバナンス",
+    shortDefinition: "EC2 やオンプレサーバーへの OS パッチ適用を自動化する Systems Manager の機能です。",
+    description:
+      "パッチベースライン（適用するパッチの基準）とメンテナンスウィンドウ（実行スケジュール）を設定して、SSH 不要でパッチを自動適用できます。パッチコンプライアンスレポートで各インスタンスの状態を一元確認できます。",
+    examTip:
+      "「大量 EC2 のパッチ適用を自動化・一元管理したい」という要件で選びます。Patch Manager は Systems Manager の一機能であり、SSM Agent がインストールされたインスタンスに適用できます。",
+    related: ["Systems Manager", "EC2", "Organizations", "CloudWatch"],
+  },
+
+  // ── 追加：機械学習・AI ──────────────────────────────────────────────
+  {
+    id: "sagemaker",
+    name: "Amazon SageMaker",
+    category: "機械学習",
+    shortDefinition: "機械学習モデルの構築・学習・デプロイをフルマネージドで提供するサービスです。",
+    description:
+      "データ前処理・モデル学習・ハイパーパラメータ調整・デプロイ・モニタリングまでの ML ライフサイクル全体を統合環境で管理できます。SageMaker Studio・Autopilot・Pipelines などの機能群があります。",
+    examTip:
+      "「カスタム ML モデルを構築・学習・デプロイしたい」という要件で選びます。Rekognition（画像認識 API）や Comprehend（テキスト分析 API）は事前学習済みモデルの利用で、カスタムモデルが必要なら SageMaker です。",
+    related: ["S3", "ECR", "Lambda", "Rekognition", "Comprehend"],
+  },
+  {
+    id: "rekognition",
+    name: "Amazon Rekognition",
+    category: "機械学習",
+    shortDefinition: "画像・動画の物体検出・顔認識・テキスト抽出を API で提供するサービスです。",
+    description:
+      "事前学習済みモデルを API として提供しており、画像内の物体・顔・テキスト・不適切コンテンツを検出できます。顔比較・有名人認識・PPE（防護具）検出などにも対応します。",
+    examTip:
+      "「画像・動画から顔・物体を検出したい」という要件で選びます。カスタムモデルが不要な画像認識は Rekognition、独自データで学習したモデルが必要なら SageMaker です。",
+    related: ["SageMaker", "Lambda", "S3", "Kinesis Data Streams"],
+  },
+  {
+    id: "comprehend",
+    name: "Amazon Comprehend",
+    category: "機械学習",
+    shortDefinition: "テキストから感情・エンティティ・言語・キーフレーズを抽出する NLP サービスです。",
+    description:
+      "事前学習済みの NLP モデルで、テキストのセンチメント分析・固有表現抽出（人名・地名・組織名）・言語検出・キーフレーズ抽出を API で提供します。Comprehend Medical は医療テキスト専用です。",
+    examTip:
+      "「レビューのネガポジ分析をしたい」「テキストから固有表現を抽出したい」という要件で選びます。テキスト分析 = Comprehend、画像分析 = Rekognition、音声文字起こし = Transcribe と整理しましょう。",
+    related: ["SageMaker", "Lambda", "S3", "Translate"],
+  },
+  {
+    id: "translate",
+    name: "Amazon Translate",
+    category: "機械学習",
+    shortDefinition: "テキストを 75 以上の言語間でリアルタイム翻訳する NMT ベースのサービスです。",
+    description:
+      "ニューラル機械翻訳（NMT）でテキスト・HTML・XML の翻訳を API で提供します。カスタム用語集（専門用語を特定の訳語に固定）や Active Custom Translation（独自コーパスで翻訳精度向上）もサポートします。",
+    examTip:
+      "「多言語対応のアプリを構築したい」「テキストを自動翻訳したい」という要件で選びます。Translate は翻訳、Comprehend は感情・言語検出と役割が異なります。",
+    related: ["Comprehend", "Polly", "Transcribe", "Lambda"],
+  },
+  {
+    id: "textract",
+    name: "Amazon Textract",
+    category: "機械学習",
+    shortDefinition: "スキャン画像や PDF からテキスト・フォーム・テーブルを自動抽出するサービスです。",
+    description:
+      "OCR を超えて、フォームのキー・バリューペアやテーブルの構造を理解して抽出します。健康保険証・契約書・請求書などのドキュメント処理の自動化に使います。",
+    examTip:
+      "「PDF や画像からフォームのデータを自動抽出したい」「スキャンした文書をデジタル化したい」という要件で選びます。Rekognition が画像の視覚的検出、Textract がドキュメントのテキスト構造抽出です。",
+    related: ["Rekognition", "Comprehend", "S3", "Lambda"],
+  },
+
+  // ── 追加：IoT・エッジ ──────────────────────────────────────────────
+  {
+    id: "iot-core",
+    name: "AWS IoT Core",
+    category: "IoT",
+    shortDefinition: "IoT デバイスと AWS クラウドを安全に接続・管理するマネージドサービスです。",
+    description:
+      "MQTT・HTTP・WebSocket でデバイスからデータを受信し、ルールエンジンで S3・DynamoDB・Lambda・Kinesis などに転送できます。数十億台のデバイス接続に対応するスケーラブルな設計です。",
+    examTip:
+      "「IoT デバイスからのデータを AWS に取り込みたい」という要件で選びます。デバイス側の処理は IoT Greengrass、クラウド側の接続・ルーティングは IoT Core と使い分けましょう。",
+    related: ["Kinesis Data Streams", "Lambda", "DynamoDB", "IoT Greengrass"],
+  },
+  {
+    id: "iot-greengrass",
+    name: "AWS IoT Greengrass",
+    category: "IoT",
+    shortDefinition: "エッジデバイス上で Lambda 関数・ML 推論・ローカルデータ処理を実行するランタイムです。",
+    description:
+      "インターネット接続が不安定な環境でもデバイス上でローカル処理を行い、クラウドと同期します。Lambda 関数・Docker コンテナ・SageMaker モデルをエッジで実行でき、クラウドへのデータ転送量を削減できます。",
+    examTip:
+      "「ネットワーク接続が不安定な環境でもデバイス上で処理を実行したい」「エッジで ML 推論をしたい」という要件で選びます。IoT Core がクラウド接続、Greengrass がエッジ処理です。",
+    related: ["IoT Core", "Lambda", "SageMaker", "Kinesis Data Streams"],
+  },
+  {
+    id: "amazon-mq",
+    name: "Amazon MQ",
+    category: "アプリケーション統合",
+    shortDefinition: "Apache ActiveMQ・RabbitMQ をマネージドで提供するメッセージブローカーサービスです。",
+    description:
+      "既存の AMQP・MQTT・STOMP・OpenWire などのプロトコルを使うアプリケーションを変更なしに AWS に移行できます。SQS と異なりブローカーサーバーが存在するためマルチプロトコルに対応しています。",
+    examTip:
+      "「既存の ActiveMQ/RabbitMQ システムをそのまま AWS に移行したい」という要件で選びます。新規開発なら SQS・SNS が推奨で、Amazon MQ は既存メッセージングシステムの移行シナリオで出ます。",
+    related: ["SQS", "SNS", "EventBridge", "Step Functions"],
+  },
+  {
+    id: "lightsail",
+    name: "Amazon Lightsail",
+    category: "コンピューティング",
+    shortDefinition: "仮想サーバー・ストレージ・データベースをシンプルな固定料金で使えるサービスです。",
+    description:
+      "EC2 の複雑さを抽象化し、WordPress・Node.js・LAMP スタックなどの定番構成をワンクリックでセットアップできます。固定の月額料金で VPS・ストレージ・データ転送が含まれます。",
+    examTip:
+      "「シンプルな VPS を低コストで使いたい」「小規模 Web サイトを素早く立ち上げたい」という要件で選びます。EC2 より設定の自由度は低いが、シンプル・低コストを優先する場合に選びます。",
+    related: ["EC2", "Elastic Beanstalk", "RDS"],
+  },
+  {
+    id: "outposts",
+    name: "AWS Outposts",
+    category: "ハイブリッド",
+    shortDefinition: "AWS のインフラをオンプレミスのデータセンターに設置して使えるハイブリッドサービスです。",
+    description:
+      "EC2・EBS・RDS・ECS・EKS などの AWS サービスをオンプレミス環境で実行できます。超低レイテンシーが必要なワークロードや、データを国外に出せない規制要件に対応します。",
+    examTip:
+      "「AWS サービスをオンプレミスのラック内で実行したい」「超低レイテンシーまたはデータ主権の要件でクラウド移行できない」という要件で選びます。",
+    related: ["Direct Connect", "Storage Gateway", "ECS", "RDS"],
+  },
+  {
+    id: "global-accelerator-adv",
+    name: "AWS Global Accelerator（詳細）",
+    category: "ネットワーク",
+    shortDefinition: "静的エニーキャスト IP でユーザーを最適な AWS エンドポイントに誘導するサービスです。",
+    description:
+      "2 つの静的エニーキャスト IP アドレスを提供し、AWS のグローバルネットワーク経由でユーザーを最も近いエッジロケーションに誘導します。フェイルオーバーは秒単位で、DNS キャッシュの影響を受けません。",
+    examTip:
+      "CloudFront との違いを問われます。Global Accelerator は TCP/UDP（非 HTTP にも対応）で固定 IP、CloudFront は HTTP/HTTPS でコンテンツキャッシュが主目的です。",
+    related: ["CloudFront", "Route 53", "ALB", "NLB"],
+  },
+  {
+    id: "transcribe",
+    name: "Amazon Transcribe",
+    category: "機械学習",
+    shortDefinition: "音声ファイルをテキストに自動変換する音声認識サービスです。",
+    description:
+      "S3 の音声ファイル（MP3・WAV・FLAC など）や リアルタイムの音声ストリームをテキストに変換します。話者識別・カスタム語彙（専門用語の認識精度向上）・有害コンテンツフィルタリングにも対応します。",
+    examTip:
+      "「コールセンターの音声をテキスト化したい」「会議録を自動生成したい」という要件で選びます。Transcribe = 音声→テキスト、Polly = テキスト→音声と対になって覚えましょう。",
+    related: ["Polly", "Comprehend", "S3", "Lambda"],
+  },
+  {
+    id: "polly",
+    name: "Amazon Polly",
+    category: "機械学習",
+    shortDefinition: "テキストを自然な音声に変換する TTS（テキスト読み上げ）サービスです。",
+    description:
+      "60 以上の言語・100 以上の音声スタイルでテキストを MP3・OGG などの音声ファイルに変換します。SSML タグで話し方・速度・感情を細かく制御できます。リアルタイム変換にも対応します。",
+    examTip:
+      "「アプリに音声読み上げ機能を追加したい」「多言語の音声ナビを実装したい」という要件で選びます。Transcribe（音声→テキスト）と Polly（テキスト→音声）はセットで覚えましょう。",
+    related: ["Transcribe", "Comprehend", "Lambda", "S3"],
+  },
+  {
+    id: "kinesis-data-analytics",
+    name: "Amazon Kinesis Data Analytics",
+    category: "分析",
+    shortDefinition: "Kinesis ストリームのデータを Apache Flink で リアルタイム処理するサービスです。",
+    description:
+      "Kinesis Data Streams・Kinesis Data Firehose のストリームを Apache Flink アプリケーションでリアルタイム集計・異常検知・ウィンドウ処理できます。SQL ベースの処理（旧 KDA for SQL）は非推奨となり Flink が推奨です。",
+    examTip:
+      "「Kinesis のリアルタイムストリームをミリ秒単位で集計・分析したい」という要件で選びます。Firehose（60 秒以上のバッファで S3 配信）との違いは、KDA はリアルタイム変換・集計ができる点です。",
+    related: ["Kinesis Data Streams", "Kinesis Firehose", "EMR", "Lambda"],
+  },
 ];
 
 export const studyTermCategories = Array.from(

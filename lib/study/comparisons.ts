@@ -736,4 +736,390 @@ export const comparisonItems: ComparisonItem[] = [
     conclusion:
       "管理コスト最小でイベント処理は Lambda、コンテナをサーバーレスで動かすなら Fargate、最大の制御が必要なら EC2 です。",
   },
+
+  // ── 追加比較（21〜30件目） ─────────────────────────────────────────────────
+  {
+    id: "sqs-vs-kinesis-streams",
+    title: "SQS vs Kinesis Data Streams",
+    category: "メッセージング",
+    summary:
+      "メッセージキューとリアルタイムストリーミングの違いを理解して使い分けます。",
+    services: [
+      {
+        name: "SQS",
+        summary: "アプリ間の非同期メッセージ受け渡しに最適なキューサービスです。",
+        points: [
+          { label: "モデル", value: "メッセージキュー（1 メッセージを 1 コンシューマーが受け取る）" },
+          { label: "データ保持", value: "最大 14 日間・受信後は削除される" },
+          { label: "スループット", value: "スタンダードは無制限、FIFO は 3,000 件/秒（バッチ）" },
+          { label: "コンシューマー", value: "1 つのメッセージは原則 1 コンシューマーが処理" },
+          { label: "向いている用途", value: "タスクキュー、非同期ジョブ、バッファリング" },
+        ],
+      },
+      {
+        name: "Kinesis Data Streams",
+        summary: "大量のリアルタイムストリームデータを複数の消費者で並列処理します。",
+        points: [
+          { label: "モデル", value: "ストリーム（同じデータを複数コンシューマーが独立して読める）" },
+          { label: "データ保持", value: "デフォルト 24 時間、最大 7 日間（拡張保持）" },
+          { label: "スループット", value: "シャード単位（1 シャード = 1 MB/秒書き込み）" },
+          { label: "コンシューマー", value: "複数コンシューマーが同じストリームを独立して読める" },
+          { label: "向いている用途", value: "ログ収集、IoT データ、リアルタイム分析、複数処理系" },
+        ],
+      },
+    ],
+    examTip:
+      "「1 メッセージを 1 サービスが処理」→ SQS、「同じデータを複数サービスが並列処理」または「リアルタイム分析」→ Kinesis Data Streams と使い分けます。",
+    conclusion:
+      "タスクキューや非同期処理なら SQS、大量ストリームの複数コンシューマー処理やリアルタイム分析なら Kinesis Data Streams です。",
+  },
+  {
+    id: "cloudwatch-vs-cloudtrail-vs-config",
+    title: "CloudWatch vs CloudTrail vs AWS Config",
+    category: "モニタリング",
+    summary:
+      "「何が起きているか（パフォーマンス）」「誰が操作したか（監査）」「設定は正しいか（コンプライアンス）」の 3 つを使い分けます。",
+    services: [
+      {
+        name: "CloudWatch",
+        summary: "リソースのメトリクスとログをリアルタイムで監視します。",
+        points: [
+          { label: "目的", value: "パフォーマンス監視・アラート・ダッシュボード" },
+          { label: "収集対象", value: "CPU・メモリ・リクエスト数などのメトリクス、アプリログ" },
+          { label: "アクション", value: "アラームで SNS 通知・Auto Scaling トリガー" },
+          { label: "キーワード", value: "「CPU が 80% を超えたら通知」「ログの異常検知」" },
+        ],
+      },
+      {
+        name: "CloudTrail",
+        summary: "AWS API 操作の全履歴を記録して監査します。",
+        points: [
+          { label: "目的", value: "API 操作の監査ログ・セキュリティ調査" },
+          { label: "収集対象", value: "誰が・いつ・何の API を呼び出したかの証跡" },
+          { label: "アクション", value: "S3 に証跡保存・CloudWatch Logs に転送" },
+          { label: "キーワード", value: "「誰が S3 バケットを削除したか」「不正な API 呼び出しの調査」" },
+        ],
+      },
+      {
+        name: "AWS Config",
+        summary: "リソースの設定変更履歴を記録しコンプライアンスを継続評価します。",
+        points: [
+          { label: "目的", value: "設定変更の追跡・コンプライアンスルールの継続評価" },
+          { label: "収集対象", value: "リソースの設定スナップショットと変更履歴" },
+          { label: "アクション", value: "非準拠リソースを検出・自動修復も可能" },
+          { label: "キーワード", value: "「S3 バケットが暗号化されているか継続確認したい」「設定変更の監査」" },
+        ],
+      },
+    ],
+    examTip:
+      "「パフォーマンス・メトリクス」→ CloudWatch、「API 操作の監査」→ CloudTrail、「設定の準拠確認・変更履歴」→ AWS Config と覚えます。3 つは補完関係にあり組み合わせて使います。",
+    conclusion:
+      "リソースの動作を監視するなら CloudWatch、誰が何をしたか追跡するなら CloudTrail、設定が正しいか継続チェックするなら AWS Config です。",
+  },
+  {
+    id: "nat-gateway-vs-nat-instance",
+    title: "NAT Gateway vs NAT Instance",
+    category: "ネットワーク",
+    summary:
+      "プライベートサブネットからのインターネット接続を提供する 2 つの方法を比較します。",
+    services: [
+      {
+        name: "NAT Gateway",
+        summary: "マネージドな NAT サービスで可用性・スループットが高いです。",
+        points: [
+          { label: "管理", value: "AWS フルマネージド（パッチ・スケールは自動）" },
+          { label: "可用性", value: "AZ 内で自動冗長化。複数 AZ 対応には各 AZ に 1 つ配置" },
+          { label: "スループット", value: "最大 100 Gbps まで自動スケール" },
+          { label: "コスト", value: "時間料金 + データ転送量（EC2 より高め）" },
+          { label: "セキュリティグループ", value: "設定不可（自動で適切な設定が適用される）" },
+        ],
+      },
+      {
+        name: "NAT Instance",
+        summary: "EC2 インスタンスを NAT として使う方法でコストを抑えられます。",
+        points: [
+          { label: "管理", value: "自己管理（パッチ・スケール・冗長化は自分で設計）" },
+          { label: "可用性", value: "単一インスタンスはデフォルトで単一障害点になる" },
+          { label: "スループット", value: "インスタンスサイズに依存・手動でスケールが必要" },
+          { label: "コスト", value: "スポットインスタンス利用で安くできる場合もある" },
+          { label: "セキュリティグループ", value: "設定可能・ポートフォワードなど細かい制御ができる" },
+        ],
+      },
+    ],
+    examTip:
+      "試験では NAT Gateway が推奨解答になることがほとんどです。「コスト削減でスポットを使いたい」「ポートフォワードが必要」などの特殊要件が明示されたときだけ NAT Instance を選びます。",
+    conclusion:
+      "運用の手間をかけたくないなら NAT Gateway、細かい制御やコスト最優先ならNAT Instance です。現代の試験では NAT Gateway が基本解答です。",
+  },
+  {
+    id: "shield-vs-waf-vs-firewall-manager",
+    title: "Shield vs WAF vs Firewall Manager",
+    category: "セキュリティ",
+    summary:
+      "DDoS 防御・アプリ層攻撃フィルタリング・ポリシー一元管理という異なる役割を持つ 3 つのセキュリティサービスを使い分けます。",
+    services: [
+      {
+        name: "AWS Shield",
+        summary: "DDoS 攻撃からインフラを保護するサービスです。",
+        points: [
+          { label: "保護対象", value: "L3/L4 の DDoS 攻撃（大量パケット・SYN フラッド など）" },
+          { label: "プラン", value: "Standard（無料・自動適用）/ Advanced（有料・高度な保護・DRT サポート）" },
+          { label: "適用範囲", value: "CloudFront・Route 53・ELB・EC2（Global Accelerator 経由）" },
+          { label: "キーワード", value: "「DDoS 攻撃から守りたい」「大量トラフィックによるサービス停止を防ぎたい」" },
+        ],
+      },
+      {
+        name: "AWS WAF",
+        summary: "HTTP/HTTPS レイヤーの悪意あるリクエストをフィルタリングします。",
+        points: [
+          { label: "保護対象", value: "L7 攻撃（SQL インジェクション・XSS・不正ボット など）" },
+          { label: "ルール", value: "IP・地理・ヘッダー・本文の条件でカスタムルールを定義" },
+          { label: "適用先", value: "CloudFront・ALB・API Gateway・AppSync" },
+          { label: "キーワード", value: "「SQL インジェクションを防ぎたい」「特定 IP をブロックしたい」" },
+        ],
+      },
+      {
+        name: "AWS Firewall Manager",
+        summary: "複数アカウントに WAF・Shield・Network Firewall ポリシーを一元適用します。",
+        points: [
+          { label: "保護対象", value: "WAF・Shield Advanced・Network Firewall のポリシー管理" },
+          { label: "スコープ", value: "AWS Organizations 全アカウントに一括適用" },
+          { label: "前提条件", value: "AWS Organizations と Config が有効であること" },
+          { label: "キーワード", value: "「複数アカウントに WAF ルールを統一したい」「セキュリティポリシーの一元管理」" },
+        ],
+      },
+    ],
+    examTip:
+      "「DDoS」→ Shield、「HTTP 攻撃・SQL インジェクション・XSS」→ WAF、「複数アカウントへのポリシー統一」→ Firewall Manager と問題文のキーワードで素早く判断します。",
+    conclusion:
+      "大量パケット攻撃は Shield、アプリ層の悪意あるリクエストは WAF、それらのポリシーを組織全体に適用するなら Firewall Manager です。",
+  },
+  {
+    id: "cognito-user-pool-vs-identity-pool",
+    title: "Cognito User Pool vs Identity Pool",
+    category: "セキュリティ",
+    summary:
+      "Cognito の 2 つの機能、ユーザー認証管理と AWS リソースへのアクセス付与を使い分けます。",
+    services: [
+      {
+        name: "Cognito User Pool",
+        summary: "アプリのユーザー認証・管理を担います。",
+        points: [
+          { label: "役割", value: "ユーザーのサインアップ・サインイン・パスワード管理" },
+          { label: "出力", value: "認証成功後に JWT トークン（ID/Access/Refresh Token）を発行" },
+          { label: "連携", value: "Google・Facebook・Apple などのソーシャル IdP と Federation できる" },
+          { label: "キーワード", value: "「アプリのユーザー認証基盤を作りたい」「MFA・パスワードポリシーを管理したい」" },
+        ],
+      },
+      {
+        name: "Cognito Identity Pool",
+        summary: "認証済みユーザーに AWS リソースへのアクセス権限を付与します。",
+        points: [
+          { label: "役割", value: "認証済みユーザーに一時的な AWS 認証情報（IAM ロール）を付与" },
+          { label: "出力", value: "STS から一時的な AWS アクセスキー・シークレット・セッショントークンを発行" },
+          { label: "連携", value: "User Pool・Google・Facebook・SAML など様々な IdP と連携可能" },
+          { label: "キーワード", value: "「モバイルアプリから S3 に直接アップロードしたい」「認証ユーザーに DynamoDB アクセスを許可したい」" },
+        ],
+      },
+    ],
+    examTip:
+      "「ユーザーのサインイン・パスワード管理」→ User Pool、「AWS リソース（S3・DynamoDB など）への一時的なアクセス権」→ Identity Pool と判断します。多くの場合、両方を組み合わせて使います。",
+    conclusion:
+      "ユーザー認証基盤を作るなら User Pool、認証後に AWS サービスへのアクセス権を与えるなら Identity Pool です。",
+  },
+  {
+    id: "systems-manager-vs-opsworks",
+    title: "Systems Manager vs OpsWorks",
+    category: "運用管理",
+    summary:
+      "EC2・オンプレミスサーバーの構成管理・自動化を担う 2 つのアプローチを比較します。",
+    services: [
+      {
+        name: "AWS Systems Manager",
+        summary: "AWS ネイティブのサーバー管理・自動化プラットフォームです。",
+        points: [
+          { label: "アプローチ", value: "SSM Agent を介した AWS ネイティブの管理（Chef/Puppet 不要）" },
+          { label: "主な機能", value: "Run Command・Patch Manager・Session Manager・Parameter Store など" },
+          { label: "対応環境", value: "EC2・オンプレミス・その他クラウドの混在環境" },
+          { label: "キーワード", value: "「SSH なしでコマンド実行」「OS パッチ自動適用」「設定値の一元管理」" },
+        ],
+      },
+      {
+        name: "AWS OpsWorks",
+        summary: "既存の Chef・Puppet ワークフローを AWS でそのまま使えるマネージドサービスです。",
+        points: [
+          { label: "アプローチ", value: "Chef Automate / Puppet Enterprise をマネージドで提供" },
+          { label: "主な機能", value: "Chef レシピ・Puppet マニフェストによるサーバー構成管理" },
+          { label: "対応環境", value: "EC2・オンプレミス" },
+          { label: "キーワード", value: "「既存の Chef/Puppet スクリプトをそのまま AWS で使いたい」" },
+        ],
+      },
+    ],
+    examTip:
+      "「Chef/Puppet を既に使っている」→ OpsWorks、それ以外の新規構築や AWS ネイティブの管理自動化 → Systems Manager が推奨です。試験では既存 Chef/Puppet 移行シナリオで OpsWorks が出ます。",
+    conclusion:
+      "新規で AWS のサーバー管理を自動化するなら Systems Manager、既存の Chef/Puppet 資産を活かすなら OpsWorks です。",
+  },
+  {
+    id: "glue-vs-data-pipeline-vs-emr",
+    title: "Glue vs Data Pipeline vs EMR",
+    category: "分析",
+    summary:
+      "ETL・データ移動・大規模バッチ処理という異なるユースケースで使い分けます。",
+    services: [
+      {
+        name: "AWS Glue",
+        summary: "サーバーレス ETL とデータカタログを提供するマネージドサービスです。",
+        points: [
+          { label: "実行モデル", value: "サーバーレス（インフラ管理不要）" },
+          { label: "得意なこと", value: "S3・RDS・DynamoDB 間の ETL、スキーマ自動検出、Data Catalog" },
+          { label: "コード", value: "Python / Scala（Spark ベース）または Visual ETL（ノーコード）" },
+          { label: "キーワード", value: "「サーバーレス ETL」「データカタログで Athena と連携」" },
+        ],
+      },
+      {
+        name: "AWS Data Pipeline",
+        summary: "AWS サービス間のデータ移動・変換をスケジュール実行する旧世代サービスです。",
+        points: [
+          { label: "実行モデル", value: "EC2 や EMR クラスターを起動して実行（サーバーレスではない）" },
+          { label: "得意なこと", value: "定期的なデータ移動・変換のワークフロー定義" },
+          { label: "現状", value: "新規開発には Glue・Step Functions が推奨される旧世代サービス" },
+          { label: "キーワード", value: "「既存の Data Pipeline を移行したい」シナリオで出題される" },
+        ],
+      },
+      {
+        name: "Amazon EMR",
+        summary: "Hadoop・Spark などのビッグデータフレームワークを動かすマネージドクラスターです。",
+        points: [
+          { label: "実行モデル", value: "EC2 クラスター（または EMR Serverless）で Spark/Hadoop を実行" },
+          { label: "得意なこと", value: "大規模バッチ処理・機械学習・インタラクティブ分析" },
+          { label: "コスト最適化", value: "スポットインスタンスでクラスターコストを大幅削減可能" },
+          { label: "キーワード", value: "「大規模 Spark ジョブ」「Hadoop エコシステム」「ペタバイト規模の処理」" },
+        ],
+      },
+    ],
+    examTip:
+      "「サーバーレス ETL・データカタログ」→ Glue、「既存 Data Pipeline の置き換え」→ Glue + Step Functions、「大規模 Spark/Hadoop」→ EMR と使い分けます。",
+    conclusion:
+      "シンプルなサーバーレス ETL なら Glue、大規模な分散処理フレームワークが必要なら EMR、Data Pipeline は新規では使わずに Glue へ移行します。",
+  },
+  {
+    id: "ecs-ec2-vs-fargate-vs-eks",
+    title: "ECS on EC2 vs ECS on Fargate vs EKS",
+    category: "コンテナ",
+    summary:
+      "コンテナワークロードの管理方法とオーケストレーターの選択を比較します。",
+    services: [
+      {
+        name: "ECS on EC2",
+        summary: "ECS が EC2 インスタンス上でコンテナを管理します。",
+        points: [
+          { label: "インフラ管理", value: "EC2 インスタンス（クラスター）を自分で管理する" },
+          { label: "コスト", value: "EC2 の料金（スポットインスタンスで安くできる）" },
+          { label: "向いている用途", value: "コスト最適化・特殊なインスタンスタイプ（GPU など）が必要" },
+          { label: "オーケストレーター", value: "AWS 独自（ECS）" },
+        ],
+      },
+      {
+        name: "ECS on Fargate",
+        summary: "サーバーレスでコンテナを実行します。インフラ管理不要です。",
+        points: [
+          { label: "インフラ管理", value: "不要（AWS がインフラを管理）" },
+          { label: "コスト", value: "タスクの vCPU・メモリ使用量に応じた課金（Fargate Spot で削減可）" },
+          { label: "向いている用途", value: "運用負荷を最小化・EC2 管理なしでコンテナを動かしたい" },
+          { label: "オーケストレーター", value: "AWS 独自（ECS）" },
+        ],
+      },
+      {
+        name: "Amazon EKS",
+        summary: "Kubernetes をマネージドで提供します。",
+        points: [
+          { label: "インフラ管理", value: "EC2 ノードまたは Fargate（マネージドノードグループも可）" },
+          { label: "コスト", value: "EKS クラスター料金 + EC2/Fargate 料金" },
+          { label: "向いている用途", value: "Kubernetes の知識・既存 K8s ワークロード・マルチクラウド対応" },
+          { label: "オーケストレーター", value: "Kubernetes（業界標準）" },
+        ],
+      },
+    ],
+    examTip:
+      "「サーバー管理なし・コンテナを AWS で手軽に動かす」→ ECS on Fargate、「既存の Kubernetes ワークロード・K8s 標準が必要」→ EKS、「EC2 コスト最適化・特殊ハードウェア」→ ECS on EC2 と判断します。",
+    conclusion:
+      "運用負荷を最小化するなら Fargate、K8s 標準が必要なら EKS、コスト最適化・EC2 制御が必要なら ECS on EC2 です。",
+  },
+  {
+    id: "s3-transfer-acceleration-vs-cloudfront-vs-global-accelerator",
+    title: "S3 Transfer Acceleration vs CloudFront vs Global Accelerator",
+    category: "ネットワーク",
+    summary:
+      "グローバルユーザーへの高速配信・転送を目的とする 3 つのサービスを比較します。",
+    services: [
+      {
+        name: "S3 Transfer Acceleration",
+        summary: "S3 へのアップロードを CloudFront エッジ経由で高速化します。",
+        points: [
+          { label: "用途", value: "S3 へのファイルアップロードの高速化" },
+          { label: "仕組み", value: "最寄りの CloudFront エッジロケーションを経由して AWS バックボーンを使う" },
+          { label: "向き", value: "クライアント → S3（アップロード方向）" },
+          { label: "キーワード", value: "「世界中のユーザーが S3 に大きなファイルをアップロードするのを高速化したい」" },
+        ],
+      },
+      {
+        name: "Amazon CloudFront",
+        summary: "静的・動的コンテンツをエッジでキャッシュして配信します。",
+        points: [
+          { label: "用途", value: "静的コンテンツキャッシュ・動的コンテンツ高速配信・DDoS 軽減" },
+          { label: "仕組み", value: "エッジロケーションでキャッシュし、オリジンへのリクエストを削減" },
+          { label: "向き", value: "S3・ALB・EC2 → クライアント（ダウンロード方向）" },
+          { label: "キーワード", value: "「静的ファイルのグローバル配信」「API レスポンスのキャッシュ」" },
+        ],
+      },
+      {
+        name: "AWS Global Accelerator",
+        summary: "静的エニーキャスト IP で最適な AWS エンドポイントにルーティングします。",
+        points: [
+          { label: "用途", value: "TCP/UDP トラフィックの低レイテンシールーティング・フェイルオーバー" },
+          { label: "仕組み", value: "AWS グローバルネットワーク経由でエンドポイント（ALB・EC2・EIP）に転送" },
+          { label: "向き", value: "双方向（HTTP 以外の TCP/UDP にも対応）" },
+          { label: "キーワード", value: "「固定 IP が必要」「ゲーム・VoIP など非 HTTP の低レイテンシー通信」「フェイルオーバーを秒単位で」" },
+        ],
+      },
+    ],
+    examTip:
+      "「S3 アップロード高速化」→ Transfer Acceleration、「コンテンツキャッシュ・HTTP 配信」→ CloudFront、「固定 IP・非 HTTP・秒単位フェイルオーバー」→ Global Accelerator と使い分けます。",
+    conclusion:
+      "S3 へのアップロードを速くするなら Transfer Acceleration、コンテンツをキャッシュ配信するなら CloudFront、固定 IP や非 HTTP の低レイテンシー通信なら Global Accelerator です。",
+  },
+  {
+    id: "rds-proxy-vs-elasticache",
+    title: "RDS Proxy vs ElastiCache",
+    category: "データベース",
+    summary:
+      "データベース性能を改善する 2 つのアプローチ、コネクション管理とキャッシュを比較します。",
+    services: [
+      {
+        name: "RDS Proxy",
+        summary: "DB コネクションを効率的にプールして DB への接続数を削減します。",
+        points: [
+          { label: "役割", value: "コネクションプールにより DB の同時接続数を削減" },
+          { label: "仕組み", value: "アプリ → RDS Proxy（コネクション再利用）→ RDS/Aurora" },
+          { label: "効果", value: "DB への接続数削減・フェイルオーバー時の自動再接続" },
+          { label: "キーワード", value: "「Lambda から RDS に大量接続してエラーになる」「コネクション数上限超え」" },
+        ],
+      },
+      {
+        name: "ElastiCache",
+        summary: "頻繁にアクセスするデータをインメモリにキャッシュして DB クエリを削減します。",
+        points: [
+          { label: "役割", value: "インメモリキャッシュで DB クエリ数と読み取り負荷を削減" },
+          { label: "仕組み", value: "アプリ → ElastiCache でキャッシュヒット → DB クエリをスキップ" },
+          { label: "効果", value: "マイクロ秒レベルのレスポンス・DB 読み取り負荷大幅削減" },
+          { label: "キーワード", value: "「DB の読み取り負荷が高い」「同じクエリが繰り返し実行される」「セッション管理」" },
+        ],
+      },
+    ],
+    examTip:
+      "「DB への接続数が多すぎる・Lambda からの同時接続」→ RDS Proxy、「DB のクエリが遅い・繰り返し同じデータを読む」→ ElastiCache と問題文の症状で判断します。",
+    conclusion:
+      "Lambda などの大量接続でコネクションエラーが出るなら RDS Proxy、同じデータへの繰り返しクエリで DB 負荷が高いなら ElastiCache です。",
+  },
 ];
