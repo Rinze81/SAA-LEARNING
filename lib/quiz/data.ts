@@ -2825,4 +2825,569 @@ export const quizQuestions: QuizQuestion[] = [
     rememberAxis:
       "既存 NFS/SMB を維持しながら S3 にデータ保存 → Storage Gateway ファイルゲートウェイ。オンプレ↔S3 の差分同期 → DataSync。VPC 内の共有ファイルシステム → EFS。",
   },
+
+  // ── シナリオ: Well-Architected Framework ─────────────────────────────────
+
+  {
+    id: "well-arch-1",
+    category: "Well-Architected",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がシステム運用の自動化を推進したい。現在は本番環境への変更を手動で実施しており、ヒューマンエラーによる障害が頻発している。AWS Well-Architected Framework の「運用上の優秀性」の原則に基づく最も適切な改善方針はどれか。",
+    context:
+      "現在の運用チームはサーバーへの手動 SSH 接続・手動デプロイが常態化しています。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "ベテランオペレーターの手順書を詳細化し、手動作業の品質を高める", hint: "手順書の改善は有効だが、手動作業を排除しない限りヒューマンエラーは根本解決しない" },
+      { id: "b", label: "B", text: "変更時は必ずメンテナンスウィンドウを設けて計画的に実施する", hint: "計画的な変更は重要だが、自動化なしでは依然としてヒューマンエラーリスクが残る" },
+      { id: "c", label: "C", text: "IaC（CloudFormation/CDK）で環境を定義し、CI/CD パイプラインで変更を自動デプロイする", hint: "運用上の優秀性の核心は「運用をコードとして扱う」こと。IaC と CI/CD で変更の一貫性・反復可能性を確保する" },
+      { id: "d", label: "D", text: "本番環境を読み取り専用にして変更できないようにする", hint: "変更を禁止してもシステムは進化できない。変更プロセスの自動化・安全化が目的" },
+    ],
+    explanation:
+      "AWS Well-Architected Framework の「運用上の優秀性（Operational Excellence）」の柱では、「運用をコードとして実行する」ことが重要な設計原則です。インフラを CloudFormation や CDK で IaC（Infrastructure as Code）として定義し、アプリケーションの変更は CodePipeline・CodeBuild・CodeDeploy などの CI/CD パイプラインで自動デプロイします。手動作業を排除することでヒューマンエラーを防ぎ、変更の一貫性・トレーサビリティ・ロールバック能力を確保できます。",
+    comparePoint:
+      "運用上の優秀性の原則：運用をコードとして扱う・変更の自動化・失敗から学ぶ・頻繁な小さな変更。IaC（CloudFormation/CDK）：インフラ定義のコード化。CI/CD：変更の自動テスト・デプロイ。",
+    rememberAxis:
+      "ヒューマンエラー削減・運用自動化 → IaC + CI/CD。インフラのバージョン管理 → CloudFormation/CDK。アプリのブルーグリーンデプロイ → CodeDeploy。",
+  },
+  {
+    id: "well-arch-2",
+    category: "Well-Architected",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある金融系企業が AWS でシステムを設計する際、セキュリティを多層防御（Defense in Depth）で実装したい。AWS Well-Architected Framework の「セキュリティ」の柱に基づいて、最も適切な多層防御の構成はどれか。",
+    context:
+      "インターネットに公開された Web アプリで、EC2 上で動作しています。データベースは RDS を使用。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "インターネットゲートウェイにセキュリティグループを設定する", hint: "インターネットゲートウェイ自体にセキュリティグループは設定できない" },
+      { id: "b", label: "B", text: "WAF + Shield で DDoS/L7 攻撃を防ぎ、NACL と SG で通信を制限し、KMS でデータを暗号化する", hint: "WAF・Shield・NACL・SG・KMS を組み合わせた多層防御。各レイヤーで異なる攻撃を防ぐ" },
+      { id: "c", label: "C", text: "EC2 に強力なパスワードポリシーを設定するだけで十分", hint: "パスワードポリシーは認証の一要素に過ぎない。ネットワーク・データ・アプリ各層の防御が必要" },
+      { id: "d", label: "D", text: "すべてのトラフィックを VPN 経由にする", hint: "VPN は重要な手段だが、アプリ層・データ層・ネットワーク層の多層防御には不十分" },
+    ],
+    explanation:
+      "Well-Architected の「セキュリティ」の柱では、多層防御（Defense in Depth）が重要な設計原則です。①エッジ層：CloudFront + WAF（L7 攻撃防御）+ Shield（DDoS 防御）、②ネットワーク層：VPC・パブリック/プライベートサブネット分離・NACL（ステートレス）・セキュリティグループ（ステートフル）、③アプリ層：最小権限の IAM ロール・EC2 は SSH を無効化（Systems Manager Session Manager を使用）、④データ層：KMS による保存時暗号化・TLS による転送時暗号化。各層が独立して機能するため、1 つの層が突破されても次の層で防御できます。",
+    comparePoint:
+      "多層防御のレイヤー：エッジ（WAF・Shield）→ ネットワーク（NACL・SG）→ アプリ（IAM・STS）→ データ（KMS・TLS）。単一の防御策への依存を避けることが重要。",
+    rememberAxis:
+      "L7 攻撃（SQL インジェクション・XSS） → WAF。DDoS 対策 → Shield Standard（無料）/ Advanced（有料）。通信制御 → SG（ステートフル）・NACL（ステートレス）。保存時暗号化 → KMS。",
+  },
+  {
+    id: "well-arch-3",
+    category: "Well-Architected",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が EC2 で動作するシステムを「信頼性」の観点で改善したい。現在は単一 EC2 が障害を起こすとサービス全体が停止する。AWS Well-Architected Framework の「信頼性」の柱に基づく、自動復旧を実現する最も適切な構成はどれか。",
+    context:
+      "EC2 の障害検知から復旧までを人手を介さず自動化したい。データは RDS に保存されています。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Auto Scaling グループ（最小 2）と ALB を組み合わせ、ヘルスチェック失敗時にインスタンスを自動置換する", hint: "ASG + ALB の組み合わせは EC2 障害の自動検知・除外・置換を実現する信頼性の標準パターン" },
+      { id: "b", label: "B", text: "CloudWatch アラームで EC2 の CPU を監視し、アラーム発生時に SNS でオペレーターに通知する", hint: "通知は重要だが人手による対応が必要で、自動復旧にはならない" },
+      { id: "c", label: "C", text: "EC2 を予約インスタンスにして障害リスクを減らす", hint: "予約インスタンスはコスト削減の仕組みで、障害耐性とは無関係" },
+      { id: "d", label: "D", text: "EC2 の EBS スナップショットを毎日取得して障害時に復旧する", hint: "スナップショットからの復旧には時間がかかり自動復旧ではない。RTO が長くなる" },
+    ],
+    explanation:
+      "Well-Architected の「信頼性（Reliability）」の柱では、「障害から自動的に復旧する」ことが核心原則です。ALB は EC2 インスタンスのヘルスチェックを定期的に実施し、失敗したインスタンスをルーティング対象から除外します。Auto Scaling グループはその除外されたインスタンスを終了し、新しいインスタンスを自動起動・ALB に登録します。最小 2 台構成にすることで、1 台が障害中も残り 1 台がリクエストを処理できます（AZ 分散も重要）。この一連の処理は完全に自動化され、人手の介入なしに数分で復旧します。",
+    comparePoint:
+      "信頼性の原則：自動復旧・水平スケール・キャパシティを自動管理・変更の影響を限定。ASG + ALB：EC2 の自動置換・高可用性。RDS Multi-AZ：DB の自動フェイルオーバー。",
+    rememberAxis:
+      "EC2 の自動障害復旧 → ASG + ALB（ヘルスチェック + 自動置換）。DB の自動フェイルオーバー → RDS Multi-AZ。アプリ全体の自動復旧 → ASG + ALB + RDS Multi-AZ の組み合わせ。",
+  },
+  {
+    id: "well-arch-4",
+    category: "Well-Architected",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の EC2 ベースの API サーバーがレイテンシの問題を抱えている。データベースへのクエリが遅く、同じデータを繰り返し取得している。AWS Well-Architected Framework の「パフォーマンス効率」の柱に基づく最も適切な改善策はどれか。",
+    context:
+      "API の 80% は同じマスターデータ（商品カタログ等）を返す読み取りリクエストです。データの更新頻度は 1 日 1 回程度。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "EC2 インスタンスのサイズをアップグレードして処理能力を高める", hint: "スケールアップは即効性があるが根本解決ではない。同じクエリを繰り返す非効率は解消されない" },
+      { id: "b", label: "B", text: "RDS のリードレプリカを増やして読み取りを分散する", hint: "リードレプリカは有効だが、頻繁に同じデータを DB から取得し続ける非効率は残る" },
+      { id: "c", label: "C", text: "API のコードを最適化してクエリ回数を減らす", hint: "コード最適化は重要だが、キャッシュ導入と組み合わせる方が大幅な改善を得られる" },
+      { id: "d", label: "D", text: "ElastiCache（Redis）をキャッシュ層として追加し、頻繁に読まれるデータをメモリに保持する", hint: "ElastiCache はサブミリ秒のキャッシュ取得を提供し、DB へのクエリを 80% 以上削減できる" },
+    ],
+    explanation:
+      "Well-Architected の「パフォーマンス効率（Performance Efficiency）」の柱では、「キャッシュを活用してリクエストを効率化する」ことが重要です。Amazon ElastiCache（Redis または Memcached）をアプリケーションとデータベースの間に配置すると、同じデータへのリクエストはメモリから数マイクロ秒で返せます。商品カタログのような 1 日 1 回更新のデータは TTL を適切に設定することでキャッシュヒット率を最大化できます。DB への読み取り負荷が 80% 削減されることでレイテンシが大幅に改善し、RDS のコストも下がります。",
+    comparePoint:
+      "ElastiCache（Redis）：サブミリ秒キャッシュ・セッション管理・Pub/Sub。RDS リードレプリカ：読み取りスケール・非同期レプリケーション・SQL クエリが必要。CloudFront：HTTP コンテンツのエッジキャッシュ。",
+    rememberAxis:
+      "DB の読み取り負荷軽減・高速キャッシュ → ElastiCache（Redis/Memcached）。読み取り DB のスケール → RDS リードレプリカ。API レスポンスの HTTP キャッシュ → CloudFront。",
+  },
+  {
+    id: "well-arch-5",
+    category: "Well-Architected",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が AWS のコストを削減したい。現在は本番・開発・テスト環境のすべてで On-Demand インスタンスを常時起動している。AWS Well-Architected Framework の「コスト最適化」の柱に基づく最も効果的な改善策はどれか。",
+    context:
+      "開発・テスト環境は平日 9〜18 時のみ使用。本番はベースラインが安定していてスパイクは少ない。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "すべての環境を最も安いインスタンスタイプに変更する", hint: "過小なインスタンスはパフォーマンス問題を引き起こす可能性があり、コスト最適化の手段としては不適切" },
+      { id: "b", label: "B", text: "本番は Reserved Instance で割引を受け、開発・テストは夜間・週末に自動停止する", hint: "本番の安定ワークロードに RI（最大 72% 割引）、開発環境の停止で非稼働時間のコストをゼロにできる" },
+      { id: "c", label: "C", text: "すべての EC2 を Spot インスタンスに変更する", hint: "Spot は中断リスクがある。本番サービスへの無条件適用は可用性を損なう" },
+      { id: "d", label: "D", text: "AWS コスト削減のためにオンプレミスに戻す", hint: "オンプレへの回帰は運用コスト・CAPEX が発生し、AWS の柔軟性も失う" },
+    ],
+    explanation:
+      "Well-Architected の「コスト最適化（Cost Optimization）」の柱では「需要と供給を一致させる」「消費モデルを採用する」が重要な原則です。安定した本番ベースラインには Reserved Instance（1 年 or 3 年）を購入すると最大 72% 割引を受けられます。Savings Plans（Compute/EC2）も同様の割引を提供します。開発・テスト環境は EC2 Instance Scheduler などで平日 9〜18 時以外に自動停止することで、非稼働時間（約 73%）のコストをゼロにできます。スパイク分は On-Demand で対応し、中断耐性のあるバッチは Spot を活用するという組み合わせが最適です。",
+    comparePoint:
+      "Reserved Instance：安定ベースライン・最大 72% 割引・1〜3 年コミット。Savings Plans：柔軟性が高い割引プラン・インスタンスタイプ変更可能。Spot：中断あり・最大 90% 割引・バッチ/ML 向け。",
+    rememberAxis:
+      "安定した常時稼働ワークロード → Reserved Instance または Savings Plans。開発・テスト環境 → スケジュール停止。中断耐性のあるバッチ → Spot インスタンス。",
+  },
+
+  // ── シナリオ: メッセージング・統合 ───────────────────────────────────────
+
+  {
+    id: "messaging-1",
+    category: "Messaging & Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が SQS キューで注文処理を行っている。処理に失敗したメッセージが何度もリトライされ、常に失敗するメッセージがキューを詰まらせている。失敗メッセージを分離して調査・再処理できるようにしたい。最適な構成はどれか。",
+    context:
+      "メッセージの処理失敗はアプリのバグや外部 API の障害が原因。失敗したメッセージを安全に保管して後から分析したい。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "SQS のデッドレターキュー（DLQ）を設定し、最大受信数を超えたメッセージを自動的に DLQ へ移動させる", hint: "DLQ は一定回数失敗したメッセージを隔離し、メインキューへの影響を防ぎながら失敗原因を調査できる" },
+      { id: "b", label: "B", text: "失敗したメッセージを Lambda が検出して S3 に保存するカスタムロジックを実装する", hint: "可能だが複雑な実装が必要。DLQ はこの用途のためにネイティブにサポートされている機能" },
+      { id: "c", label: "C", text: "メッセージの可視性タイムアウトを無限大に設定する", hint: "可視性タイムアウトを無限大にすると、メッセージが永遠に処理中とみなされキューが詰まる" },
+      { id: "d", label: "D", text: "失敗したメッセージを手動で削除して再送する", hint: "手動対応はスケールしない。DLQ で自動隔離・一括再処理が可能" },
+    ],
+    explanation:
+      "SQS のデッドレターキュー（DLQ）はメインキューと別に作成する SQS キューで、メッセージが最大受信数（maxReceiveCount）を超えて処理失敗した場合に自動的に移動します。DLQ にあるメッセージは通常のキューには戻らないため、メインキューのブロッキングを防ぎます。DLQ 内のメッセージは CloudWatch アラームで監視し、原因調査後に SQS コンソールまたは API で「DLQ からの再処理」機能を使ってメインキューに一括戻すことができます（SQS DLQ Redrive）。",
+    comparePoint:
+      "SQS DLQ：失敗メッセージの自動隔離・調査・一括再処理。可視性タイムアウト：処理中のメッセージを他のコンシューマーから隠す時間。最大受信数（maxReceiveCount）：DLQ 移動のトリガーとなる失敗回数。",
+    rememberAxis:
+      "処理失敗メッセージの隔離・調査 → SQS デッドレターキュー（DLQ）。メッセージの重複処理防止 → SQS FIFO キュー（Exactly-Once）。メッセージの順序保証 → SQS FIFO キュー。",
+  },
+  {
+    id: "messaging-2",
+    category: "Messaging & Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある EC サイトで新規注文が発生したとき、在庫管理システム・配送システム・メール通知システムの 3 つへ同時にイベントを通知したい。将来的に分析システムも追加する予定がある。最も拡張性の高い疎結合アーキテクチャはどれか。",
+    context:
+      "現在は注文サービスが各システムに直接 API 呼び出しをしているが、システムが増えるたびに改修が必要になっている。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "注文サービスが 3 つの SQS キューに順番にメッセージを送る", hint: "注文サービスが送信先を知っている密結合。新システム追加のたびに注文サービスを改修する必要がある" },
+      { id: "b", label: "B", text: "共有の SQS キューを 1 つ作り、全システムが同じキューをポーリングする", hint: "SQS の 1 メッセージは 1 コンシューマーにのみ届くため、全システムへのファンアウトには使えない" },
+      { id: "c", label: "C", text: "SNS トピックに注文イベントをパブリッシュし、各システムの SQS キューをサブスクライブさせる", hint: "SNS ファンアウトパターン。1 パブリッシュで全サブスクライバーに届き、新システム追加はサブスクリプション追加のみ" },
+      { id: "d", label: "D", text: "注文サービスがすべての処理を同期的に順番に実行する", hint: "同期処理では 1 つのシステムが遅い場合に全体が遅延し、障害の波及リスクもある" },
+    ],
+    explanation:
+      "SNS（Simple Notification Service）のファンアウトパターンが拡張性の高い疎結合アーキテクチャの標準解です。注文サービスは SNS トピックにのみイベントをパブリッシュし、送信先を意識する必要がありません。各システムは独自の SQS キューを SNS トピックにサブスクライブし、自分のペースで処理します。分析システムを追加する場合は SNS に SQS サブスクリプションを追加するだけで、注文サービスの改修は不要です。各 SQS キューは DLQ と組み合わせて障害耐性も確保できます。",
+    comparePoint:
+      "SNS ファンアウト：1 対多・パブリッシャーは送信先を意識しない・拡張が容易。SQS のみ：1 対 1・ファンアウト不可。直接 API 呼び出し：密結合・拡張のたびに改修が必要。",
+    rememberAxis:
+      "1 イベントを複数サブスクライバーへ配信 → SNS ファンアウト + SQS。メッセージの非同期キューイング → SQS。リアルタイムのストリーム処理 → Kinesis。",
+  },
+  {
+    id: "messaging-3",
+    category: "Messaging & Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が SaaS アプリ（Salesforce・GitHub・Stripe）からのイベントと AWS サービスのイベント（EC2 起動・S3 オブジェクト作成）を統合し、イベントの内容に応じて異なる Lambda 関数を呼び出したい。低コードでイベントルーティングを設定したい。最適なサービスはどれか。",
+    context:
+      "イベントの種類は今後も増える予定。ルーティングロジックを宣言的に管理したい。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "すべてのイベントを SQS に入れて Lambda でフィルタリングする", hint: "Lambda でのフィルタリングはコードの管理が必要でルーティングロジックが散在する" },
+      { id: "b", label: "B", text: "SNS トピックを複数作成しイベント種別ごとに管理する", hint: "SNS は有効だが、SaaS イベントのネイティブ統合やJSON パターンマッチングは EventBridge の方が優れている" },
+      { id: "c", label: "C", text: "API Gateway に全イベントを受け付け Lambda でルーティングを実装する", hint: "独自ルーティングロジックの実装・管理コストが高い。EventBridge の方が宣言的でシンプル" },
+      { id: "d", label: "D", text: "Amazon EventBridge のイベントバスとルールで JSON パターンマッチングによりルーティングする", hint: "EventBridge は SaaS パートナー統合・AWS サービスのイベント・カスタムイベントを統合し、JSON ルールで宣言的にルーティングできる" },
+    ],
+    explanation:
+      "Amazon EventBridge はイベント駆動アーキテクチャの中心となるサービスです。デフォルトのイベントバス（AWS サービスのイベント）に加え、カスタムイベントバス（独自アプリ）とパートナーイベントバス（Salesforce・GitHub・Stripe 等 200 以上の SaaS パートナーから直接受信）をサポートします。ルールは JSON パターンマッチングで定義し（コードなし）、マッチしたイベントを Lambda・SQS・SNS・Step Functions など多数のターゲットへルーティングします。スキーマレジストリでイベント構造を管理でき、IDE での自動補完も可能です。",
+    comparePoint:
+      "EventBridge：SaaS 統合・JSON パターンマッチング・多数のターゲット・スキーマレジストリ・コードなしルーティング。SNS：シンプルなファンアウト・フィルターポリシー（EventBridge より機能限定）。SQS：非同期キュー・ファンアウト不可。",
+    rememberAxis:
+      "SaaS イベント + AWS イベントの統合ルーティング → EventBridge。シンプルなファンアウト → SNS。非同期キューイング → SQS。複雑なビジネスフローの状態管理 → Step Functions。",
+  },
+  {
+    id: "messaging-4",
+    category: "Messaging & Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が EC サイトの注文処理ワークフロー（在庫確認 → 決済 → 配送登録 → メール送信）を実装したい。各ステップは Lambda 関数で実装済みで、決済失敗時は在庫を元に戻す補償トランザクションが必要。また、配送 API が一時的に失敗した場合は 3 回まで自動リトライしたい。最適なサービスはどれか。",
+    context:
+      "現在は Lambda が次の Lambda を直接呼び出す実装で、エラーハンドリングが複雑化しています。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "SQS キューで Lambda を連鎖させ、DLQ でエラーを処理する", hint: "SQS 連鎖は疎結合だが、ステップ間の状態管理・補償トランザクション・順序制御は自前実装が必要" },
+      { id: "b", label: "B", text: "AWS Step Functions でステートマシンを定義し、エラーキャッチ・リトライ・補償トランザクションを宣言的に設定する", hint: "Step Functions は各ステップの状態・リトライ・エラーハンドリング・補償フローを JSON/YAML で宣言的に定義できる" },
+      { id: "c", label: "C", text: "単一の Lambda 関数に全ステップを組み込み、try-catch でエラーを処理する", hint: "モノリシックな Lambda では各ステップの独立した管理・リトライ・タイムアウト設定が困難" },
+      { id: "d", label: "D", text: "EventBridge Scheduler でステップを時間差で順番に実行する", hint: "Scheduler は定期実行向けで、前ステップの結果を受けた条件分岐・エラーハンドリングには不向き" },
+    ],
+    explanation:
+      "AWS Step Functions は Lambda 関数などをステートマシン（状態機械）として定義し、ワークフローの実行・状態管理・エラーハンドリングを自動化するサービスです。Amazon States Language（JSON ベース）で各ステップのリトライ回数・待機時間・エラーキャッチを宣言的に設定でき、コードの複雑さを排除できます。Saga パターン（補償トランザクション）も実装でき、決済失敗時に在庫戻しステップを呼び出すフローを定義できます。実行履歴は Step Functions コンソールでビジュアル確認でき、デバッグが容易です。",
+    comparePoint:
+      "Step Functions：ワークフロー状態管理・リトライ・補償トランザクション・ビジュアル確認。SQS：非同期キュー・状態管理なし。EventBridge：イベントルーティング・定期実行。Lambda 連鎖：密結合・エラーハンドリングが複雑。",
+    rememberAxis:
+      "複数ステップのワークフロー・状態管理・補償トランザクション → Step Functions。疎結合なイベント配信 → SNS/SQS/EventBridge。定期バッチ実行 → EventBridge Scheduler。",
+  },
+  {
+    id: "messaging-5",
+    category: "Messaging & Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がモバイルアプリのバックエンドとして GraphQL API を構築したい。リアルタイムのデータ更新（チャット・通知）が必要で、クライアントからのサブスクリプション機能（WebSocket）も実装したい。サーバーの管理を最小化したい。最適なサービスはどれか。",
+    context:
+      "モバイルアプリは iOS と Android で、データソースは DynamoDB と Lambda を組み合わせる予定。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "AWS AppSync を使い GraphQL API とリアルタイムサブスクリプションを実装する", hint: "AppSync はフルマネージドの GraphQL サービスで WebSocket によるリアルタイムサブスクリプションをネイティブサポートする" },
+      { id: "b", label: "B", text: "API Gateway + Lambda で REST API を構築し、WebSocket API で通知を実装する", hint: "可能だが REST + WebSocket の 2 系統管理が必要。AppSync の方が GraphQL + サブスクリプションを一元管理できる" },
+      { id: "c", label: "C", text: "EC2 に Node.js の Apollo Server をインストールして GraphQL サーバーを構築する", hint: "サーバーの管理・スケーリング・HA 設定が必要でサーバーレス要件に反する" },
+      { id: "d", label: "D", text: "Amazon Cognito のみでリアルタイム通知を実装する", hint: "Cognito はユーザー認証サービスで GraphQL API やリアルタイム通知の機能はない" },
+    ],
+    explanation:
+      "AWS AppSync はフルマネージドの GraphQL サービスで、スキーマを定義するだけで DynamoDB・Lambda・RDS・HTTP エンドポイントなど複数のデータソースをリゾルバーとして接続できます。クライアントの GraphQL サブスクリプション（Subscription）は WebSocket で自動的にリアルタイムに通知されます（Mutation の結果を購読中クライアントにプッシュ）。Cognito と統合することで認証済みユーザーのみがデータにアクセスできる fine-grained アクセス制御も実装できます。サーバーの管理は不要です。",
+    comparePoint:
+      "AppSync：GraphQL・リアルタイムサブスクリプション・複数データソース・Cognito 統合・サーバーレス。API Gateway REST：REST/HTTP API・WebSocket 別管理。API Gateway WebSocket：独自のリアルタイム通信・GraphQL ではない。",
+    rememberAxis:
+      "GraphQL API + リアルタイムサブスクリプション → AWS AppSync。REST API のサーバーレス構築 → API Gateway + Lambda。WebSocket のみ（非 GraphQL） → API Gateway WebSocket API。",
+  },
+
+  // ── シナリオ: 機械学習 ───────────────────────────────────────────────────
+
+  {
+    id: "ml-1",
+    category: "Machine Learning",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がカスタムの機械学習モデルを開発・学習・デプロイしたい。データサイエンティストが Jupyter Notebook で実験し、本番モデルを REST API エンドポイントとして公開する必要がある。サーバーの管理を最小化したい。最適なサービスはどれか。",
+    context:
+      "モデルは scikit-learn と TensorFlow で実装予定。学習データは S3 に保存されている。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "EC2 の GPU インスタンスで学習し、Flask API サーバーをデプロイする", hint: "EC2 の管理・スケーリング・監視を自前で実装する必要がある" },
+      { id: "b", label: "B", text: "Amazon SageMaker でノートブック・学習・モデルデプロイを一元管理する", hint: "SageMaker は ML ライフサイクル全体（実験・学習・デプロイ・監視）をマネージドに提供する" },
+      { id: "c", label: "C", text: "AWS Lambda でモデル推論を実装する", hint: "Lambda はモデルファイルが大きい場合や長時間推論には制限（10 GB・15 分）がある" },
+      { id: "d", label: "D", text: "Amazon EMR で Spark ML を使って学習する", hint: "EMR は大規模分散処理向け。scikit-learn/TensorFlow の学習には SageMaker の方が適切" },
+    ],
+    explanation:
+      "Amazon SageMaker は機械学習のライフサイクル全体をカバーするフルマネージドサービスです。①SageMaker Studio（Jupyter ベースの IDE）で実験・コード開発、②SageMaker Training Job で EC2/GPU インスタンスを自動プロビジョニングして学習（完了後に自動終了）、③SageMaker Endpoints でモデルを REST API としてデプロイ（Auto Scaling 対応）、④SageMaker Model Monitor でデータドリフトを監視。サーバーの管理は SageMaker が担当し、データサイエンティストは ML に集中できます。",
+    comparePoint:
+      "SageMaker：ML ライフサイクル全体・マネージド・Studio/Training/Endpoints/Pipelines。EC2 + Flask：完全な制御・サーバー管理が必要。Lambda：軽量推論・制限あり。Bedrock：生成 AI 基盤モデルの API 利用（カスタム学習なし）。",
+    rememberAxis:
+      "カスタム ML モデルの開発〜デプロイ → SageMaker。生成 AI 基盤モデルの API 利用 → Amazon Bedrock。大規模分散 ML（Spark ML） → EMR。",
+  },
+  {
+    id: "ml-2",
+    category: "Machine Learning",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある小売企業が店舗の監視カメラ映像から万引き疑い行動（棚から商品を隠すなど）をリアルタイムで検知したい。自社で ML モデルを構築するリソースはない。最も迅速に実現できるソリューションはどれか。",
+    context:
+      "監視カメラ映像は S3 にリアルタイムで保存されています。AIの知識は限られており、事前学習済みモデルを活用したい。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Amazon Rekognition Video を使って動画内の人物行動・物体を分析する", hint: "Rekognition Video は事前学習済みモデルで人物検出・ラベル検出・カスタムラベルをコードなしで利用できる" },
+      { id: "b", label: "B", text: "SageMaker でカスタムの物体検出モデルを学習して展開する", hint: "可能だが学習データ収集・モデル開発に時間がかかる。事前学習済みモデルがない場合は必要" },
+      { id: "c", label: "C", text: "Lambda で映像を 1 フレームずつ処理して OpenCV で分析する", hint: "OpenCV での実装は専門知識が必要。Rekognition はより高度な分析をマネージドに提供する" },
+      { id: "d", label: "D", text: "Amazon Comprehend で映像のテキストを分析する", hint: "Comprehend はテキスト分析サービスで映像・画像の分析はできない" },
+    ],
+    explanation:
+      "Amazon Rekognition は画像・動画分析の事前学習済みモデルを API として提供するサービスです。Rekognition Video では動画内の人物検出・顔認識・行動ラベル検出（人物が荷物を持つ・置くなどの行動）をリアルタイムまたはバッチで分析できます。カスタムラベル（Custom Labels）機能を使うと、少量の学習画像（数十〜数百枚）で特定の物体・シーンを検出するカスタムモデルを作成できます。ML の専門知識なしに Amazon Kinesis Video Streams と連携してリアルタイム分析パイプラインを構築できます。",
+    comparePoint:
+      "Rekognition：画像/動画の事前学習済みモデル・顔認識・物体検出・コンテンツモデレーション。SageMaker：カスタムモデル開発・学習・デプロイ。Comprehend：テキスト分析・感情分析・エンティティ抽出。",
+    rememberAxis:
+      "画像/動画の顔認識・物体検出 → Amazon Rekognition。テキストの感情分析・エンティティ抽出 → Amazon Comprehend。カスタム ML モデルの開発 → Amazon SageMaker。",
+  },
+  {
+    id: "ml-3",
+    category: "Machine Learning",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がカスタマーサポートの問い合わせメール（日英混合・1 日 10,000 件）を自動分析したい。メールの感情（ポジティブ・ネガティブ・中立）を判定し、ネガティブなメールを優先的に担当者へ割り振りたい。最も迅速に実現できる構成はどれか。",
+    context:
+      "ML モデルを自社開発するリソースはない。API 呼び出しで感情分析できることが条件。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "SageMaker でカスタムの感情分析モデルを学習・デプロイする", hint: "カスタムモデルは精度を上げられるが、開発・学習コストが高い。事前学習済みモデルが要件を満たせるなら不要" },
+      { id: "b", label: "B", text: "Amazon Rekognition で感情分析する", hint: "Rekognition は画像/動画の分析サービスでテキストの感情分析はできない" },
+      { id: "c", label: "C", text: "Amazon Comprehend の感情分析 API でメールのポジネガを判定する", hint: "Comprehend は事前学習済みのテキスト分析サービスで、API 1 回の呼び出しで感情・エンティティ・キーフレーズを返す" },
+      { id: "d", label: "D", text: "Amazon Translate でメールを翻訳してから人手で判定する", hint: "Translate は言語変換サービスで感情分析機能はない。人手での判定は 1 日 1 万件をスケールできない" },
+    ],
+    explanation:
+      "Amazon Comprehend はテキスト分析の事前学習済みモデルを API として提供するサービスです。感情分析（DetectSentiment API）はテキストを送信するだけで POSITIVE・NEGATIVE・NEUTRAL・MIXED の感情スコアを返します。日本語を含む多言語に対応しており、日英混合のメールでも言語自動検出（DetectDominantLanguage）と組み合わせて処理できます。SQS + Lambda + Comprehend のパイプラインで 1 日 1 万件のメールを非同期処理し、ネガティブスコアの高いメールを優先キューへ転送する構成が実現できます。",
+    comparePoint:
+      "Comprehend：テキスト分析・感情分析・エンティティ・キーフレーズ・言語検出・多言語対応。Rekognition：画像/動画分析。Translate：言語翻訳。Transcribe：音声→テキスト変換。",
+    rememberAxis:
+      "テキストの感情分析・エンティティ抽出 → Amazon Comprehend。音声の文字起こし → Amazon Transcribe。テキストの翻訳 → Amazon Translate。画像/動画の分析 → Amazon Rekognition。",
+  },
+  {
+    id: "ml-4",
+    category: "Machine Learning",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がコールセンターの通話録音（日本語）を自動でテキスト化し、多言語（英語・中国語）に翻訳してグローバルチームで共有したい。さらにテキストを音声（TTS）に変換して海外スタッフがヒアリングできるようにしたい。最適な AWS サービスの組み合わせはどれか。",
+    context:
+      "通話録音は S3 に保存されています。自動化されたバッチ処理が必要。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "SageMaker + カスタム音声認識モデルで対応する", hint: "カスタムモデルの開発コストが高い。AWS のマネージドサービスで要件を満たせる" },
+      { id: "b", label: "B", text: "Amazon Comprehend で音声ファイルを直接テキスト化する", hint: "Comprehend はテキスト分析サービスで音声ファイルの変換（ASR）はできない" },
+      { id: "c", label: "C", text: "Amazon Rekognition で通話内容を分析する", hint: "Rekognition は画像/動画分析サービスで音声テキスト変換はできない" },
+      { id: "d", label: "D", text: "Transcribe で音声をテキスト化 → Translate で翻訳 → Polly で音声合成する", hint: "Transcribe（ASR）→ Translate（翻訳）→ Polly（TTS）は音声関連処理の定番パイプライン" },
+    ],
+    explanation:
+      "音声処理の三段階パイプラインが最適です。①Amazon Transcribe（ASR：自動音声認識）：日本語の通話音声を高精度にテキスト化します。カスタム語彙（専門用語・固有名詞）の登録も可能です。②Amazon Translate：テキストを英語・中国語など 75 以上の言語に高品質に翻訳します。③Amazon Polly（TTS：テキスト音声合成）：翻訳されたテキストを自然な音声（複数の声色・言語・感情表現）に変換して MP3 で出力します。この全パイプラインを Lambda と S3 で自動化できます。",
+    comparePoint:
+      "Transcribe：音声→テキスト（ASR）・話者分離・カスタム語彙。Translate：テキスト翻訳・75 以上の言語。Polly：テキスト→音声（TTS）・自然な音声・SSML 対応。Comprehend：テキスト分析（感情・エンティティ）。",
+    rememberAxis:
+      "音声→テキスト → Transcribe。テキスト翻訳 → Translate。テキスト→音声 → Polly。音声処理フル自動化 → Transcribe → Translate → Polly のパイプライン。",
+  },
+  {
+    id: "ml-5",
+    category: "Machine Learning",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある動画ストリーミング企業がユーザーの視聴履歴・クリック・評価データをもとに、各ユーザーへの動画レコメンドを自動化したい。ML の専門知識は少なく、大量の学習データを用意せずに迅速に展開したい。最適なサービスはどれか。",
+    context:
+      "ユーザー数は 100 万人、動画コンテンツは 10 万本。リアルタイムのパーソナライズが必要。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Amazon Personalize を使い、インタラクションデータをアップロードしてレコメンドモデルを学習・デプロイする", hint: "Personalize は Amazon.com のレコメンドエンジン技術を API として提供し、ML 専門知識なしにパーソナライズを実現できる" },
+      { id: "b", label: "B", text: "SageMaker で協調フィルタリングモデルを自作して学習・デプロイする", hint: "カスタムモデルは柔軟だが ML の専門知識と大量の開発工数が必要" },
+      { id: "c", label: "C", text: "DynamoDB に閲覧履歴を保存して人気ランキングを表示する", hint: "全員に同じランキングを表示するのはパーソナライズではない" },
+      { id: "d", label: "D", text: "Amazon Comprehend でコンテンツのジャンルを分類してルールベースでレコメンドする", hint: "ルールベースはパターンが固定化され、個々のユーザー行動を学習できない" },
+    ],
+    explanation:
+      "Amazon Personalize は Amazon.com が内部で使用しているレコメンドエンジン技術を API として提供するサービスです。ユーザーのインタラクションデータ（視聴・クリック・購入履歴）・ユーザー属性・アイテム属性を S3 にアップロードし、Personalize がデータに最適なアルゴリズム（協調フィルタリング・コンテンツベース等）を自動選択して学習します。学習完了後は Campaign エンドポイントに API でリクエストを送ると、リアルタイムで各ユーザーへのパーソナライズされたレコメンドを返します。ML の専門知識なしに数時間で展開できます。",
+    comparePoint:
+      "Amazon Personalize：レコメンドエンジン・ユーザー行動学習・ML 専門知識不要・リアルタイム API。SageMaker：カスタムモデル・高い柔軟性・ML 専門知識必要。ルールベース：固定パターン・パーソナライズ不可。",
+    rememberAxis:
+      "パーソナライズされたレコメンド → Amazon Personalize。カスタム ML モデルの開発 → SageMaker。画像/動画分析 → Rekognition。テキスト分析 → Comprehend。",
+  },
+
+  // ── シナリオ: ガバナンス・コンプライアンス ──────────────────────────────
+
+  {
+    id: "governance-1",
+    category: "Governance & Compliance",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある大企業が 50 個の AWS アカウントを管理しており、全アカウントに統一のセキュリティポリシー（特定リージョンのみ使用可・特定サービスの禁止）を適用したい。また、財務部門が全アカウントの請求を一括管理したい。最適な構成はどれか。",
+    context:
+      "各アカウントは異なるチームが管理しています。ポリシー違反のリソース作成をシステムレベルで阻止したい。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "各アカウントに同じ IAM ポリシーを手動で設定する", hint: "50 アカウントの手動管理は漏れが発生しやすく、スケールしない" },
+      { id: "b", label: "C", text: "AWS Config ルールを全アカウントに展開して違反を検知する", hint: "Config は違反を検知できるが阻止はできない。阻止には SCP が必要" },
+      { id: "c", label: "C", text: "AWS Organizations で SCP（サービスコントロールポリシー）を適用し、統合請求も有効化する", hint: "SCP は Organizations 配下の全アカウントでリソース作成を事前に阻止できる。統合請求も Organizations の機能" },
+      { id: "d", label: "D", text: "各アカウントに CloudTrail を設定して不正操作を監査する", hint: "CloudTrail は監査ログの記録で、リソース作成の事前阻止はできない" },
+    ],
+    explanation:
+      "AWS Organizations は複数の AWS アカウントをグループ（OU: Organizational Unit）に整理し、一元管理するサービスです。SCP（サービスコントロールポリシー）を OU またはアカウントに適用すると、その配下のアカウントで実行可能な API 操作を制限できます（IAM のアクセス許可の上限を設定）。たとえば「us-east-1 以外でのリソース作成を拒否」「EC2 Spot インスタンスの起動を禁止」などを宣言的に定義できます。統合請求（Consolidated Billing）により全アカウントの請求を一括管理でき、使用量の合算により AWS の Volume Discount も受けられます。",
+    comparePoint:
+      "SCP：アカウントレベルでの API 操作制限（事前阻止）・Organizations 必須。IAM ポリシー：アイデンティティ/リソースレベルの制御。AWS Config：設定変更の検知・コンプライアンス評価（事後検知）。",
+    rememberAxis:
+      "全アカウントへのポリシー強制・事前阻止 → Organizations + SCP。不正操作の事後検知 → CloudTrail + Config。全アカウントの請求一括管理 → Organizations 統合請求。",
+  },
+  {
+    id: "governance-2",
+    category: "Governance & Compliance",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が PCI DSS 準拠のため、AWS 環境内のすべての EC2 インスタンスが「パブリック IP なし」「特定のセキュリティグループを使用」などの設定要件を継続的に満たしているか監視したい。要件違反のリソースが検出されたら自動修復もしたい。最適なサービスはどれか。",
+    context:
+      "手動での設定確認は週 1 回実施しているが、その間に設定変更が起きても気づけない。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "CloudTrail ですべての API 操作を記録して手動で確認する", hint: "CloudTrail は操作の記録であり、継続的な設定評価や自動修復はできない" },
+      { id: "b", label: "B", text: "AWS Config のマネージドルールで設定を継続評価し、自動修復アクションを設定する", hint: "Config はリソース設定を継続的に評価し、非準拠時に Systems Manager Automation で自動修復できる" },
+      { id: "c", label: "C", text: "Lambda を定期実行して EC2 の設定を確認するスクリプトを書く", hint: "可能だが Lambda の維持・管理が必要。Config のマネージドルールの方がシンプルで確実" },
+      { id: "d", label: "D", text: "GuardDuty で EC2 の設定違反を検知する", hint: "GuardDuty は脅威検出（不審なアクセス・マルウェア等）サービスで設定コンプライアンスの評価はしない" },
+    ],
+    explanation:
+      "AWS Config はリソースの設定変更を継続的に記録・評価するサービスです。マネージドルール（例：ec2-instance-no-public-ip・restricted-ssh）を有効化すると、設定変更があるたびに自動的に評価し、非準拠リソースをコンソールに表示します。Systems Manager Automation ドキュメントと連携した「修復アクション」を設定すると、非準拠を検出した際に自動でセキュリティグループを変更・パブリック IP を無効化するなどの修復が実行されます。Config Aggregator を使うと複数アカウント・リージョンの結果を一元管理できます。",
+    comparePoint:
+      "AWS Config：設定の継続評価・コンプライアンス・自動修復。CloudTrail：API 操作の記録・監査証跡。GuardDuty：脅威検出・不審な動作。Security Hub：複数サービスの検出結果の統合。",
+    rememberAxis:
+      "設定の継続監視・コンプライアンス評価 → AWS Config。API 操作の監査ログ → CloudTrail。脅威・攻撃の検出 → GuardDuty。設定違反の自動修復 → Config + Systems Manager Automation。",
+  },
+  {
+    id: "governance-3",
+    category: "Governance & Compliance",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある金融企業が規制要件として「AWS 上のすべての API 操作を 7 年間保存し、改ざんを防止する必要がある」と定められている。また、特定の IAM ユーザーが本番環境のリソースを削除した場合は 10 分以内にセキュリティチームへ通知したい。最適な構成はどれか。",
+    context:
+      "現在 CloudTrail は有効だが、ログの保存場所・保存期間・改ざん防止・アラートが設定されていない。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "CloudTrail のログを S3 に送りログファイル整合性検証を有効化し、EventBridge で削除 API イベントを検知して SNS 通知する", hint: "CloudTrail のログファイル整合性検証で改ざんを検知でき、S3 のライフサイクルで 7 年保存、EventBridge で削除 API をリアルタイム検知できる" },
+      { id: "b", label: "B", text: "CloudWatch Logs に CloudTrail ログを送り、ログを 7 年間保持する", hint: "CloudWatch Logs は高価なため 7 年保存はコストが高い。S3 の方が低コスト。また改ざん防止の仕組みもない" },
+      { id: "c", label: "C", text: "AWS Config でリソースの設定変更を記録する", hint: "Config は設定変更の記録・評価が目的で、API 操作の完全な監査ログは CloudTrail が担う" },
+      { id: "d", label: "D", text: "VPC フローログを 7 年間保存して API 操作を記録する", hint: "VPC フローログはネットワーク通信の記録で API 操作の詳細（誰が何をしたか）は含まない" },
+    ],
+    explanation:
+      "AWS CloudTrail はすべての AWS API 操作を記録するサービスです。証跡（Trail）を作成して S3 バケットへのログ配信を設定し、S3 ライフサイクルポリシーで 7 年後に Glacier Deep Archive へ移行（低コストで長期保存）します。ログファイル整合性検証（Log File Validation）を有効化すると SHA-256 ダイジェストが生成され、ログの改ざん有無を検証できます。EventBridge の CloudTrail イベントルールを使い、特定 IAM ユーザーの DeleteBucket・TerminateInstances などのイベントをフィルタリングして SNS → メール通知を実現できます。",
+    comparePoint:
+      "CloudTrail：API 操作の監査ログ・誰が何をしたか・改ざん防止（ログ整合性検証）。Config：リソース設定の変更記録・コンプライアンス評価。VPC フローログ：ネットワーク通信の記録。",
+    rememberAxis:
+      "AWS API 操作の監査ログ・改ざん防止 → CloudTrail + S3（ログファイル整合性検証）。リアルタイム API イベント通知 → CloudTrail + EventBridge + SNS。設定変更のコンプライアンス → AWS Config。",
+  },
+  {
+    id: "governance-4",
+    category: "Governance & Compliance",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が複数の AWS アカウント（20 個）のセキュリティ状態を一元管理したい。GuardDuty・Inspector・Macie・Config のアラートを 1 つの画面で確認し、ISO 27001・PCI DSS への準拠状況もスコア化して把握したい。最適なサービスはどれか。",
+    context:
+      "各サービスのコンソールを個別に確認するのが煩雑で、全体の優先度がわかりにくい。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "Amazon GuardDuty の Organizations 統合で全アカウントを管理する", hint: "GuardDuty の統合は可能だが、他のセキュリティサービスの検出結果の統合や準拠スコアの計算はできない" },
+      { id: "b", label: "B", text: "AWS Config Aggregator で全アカウントの設定を集約する", hint: "Config Aggregator は設定コンプライアンスの集約に有効だが、GuardDuty・Inspector などのアラート統合はない" },
+      { id: "c", label: "C", text: "CloudWatch Dashboard に各サービスのメトリクスを集約して表示する", hint: "CloudWatch は監視・アラーム向けで、セキュリティ検出結果の統合・準拠スコア計算はできない" },
+      { id: "d", label: "D", text: "AWS Security Hub で全アカウントのセキュリティ検出結果を集約し、コンプライアンス標準を評価する", hint: "Security Hub は GuardDuty・Inspector・Macie・Config の検出結果を統合し、CIS・PCI DSS・ISO 準拠スコアを計算する" },
+    ],
+    explanation:
+      "AWS Security Hub は複数の AWS セキュリティサービス（GuardDuty・Amazon Inspector・Amazon Macie・AWS Config・AWS Firewall Manager 等）の検出結果を一元集約するサービスです。AWS Organizations と統合することで 20 アカウントの検出結果を管理アカウントのダッシュボードに集約できます。CIS AWS Foundations Benchmark・PCI DSS・AWS 基礎セキュリティベストプラクティス・ISO 27001 など複数のコンプライアンス標準に基づいて自動的にスコア計算し、改善が必要な箇所を優先度付きで表示します。",
+    comparePoint:
+      "Security Hub：複数サービスの検出結果統合・コンプライアンス標準評価・Organizations 対応。GuardDuty：脅威検出専門（Security Hub に検出結果を送信）。Config：設定コンプライアンス（Security Hub に結果を送信）。",
+    rememberAxis:
+      "複数セキュリティサービスの統合・準拠スコア → Security Hub。脅威検出 → GuardDuty（→ Security Hub へ連携）。設定コンプライアンス → Config（→ Security Hub へ連携）。機密データ検出 → Macie（→ Security Hub へ連携）。",
+  },
+  {
+    id: "governance-5",
+    category: "Governance & Compliance",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある大企業が新しい AWS 環境を複数のビジネスユニット向けに素早くセットアップしたい。各アカウントに対して、セキュリティの基準（CloudTrail 有効化・Config 有効化・ガードレール）を自動的に適用し、アカウント作成から運用までを標準化したい。最適なサービスはどれか。",
+    context:
+      "現在は各チームが個別に AWS アカウントを設定しており、設定のばらつきが発生している。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "AWS Organizations の SCP だけで全設定を強制する", hint: "SCP は API 操作の制限が可能だが、CloudTrail 有効化などの設定の自動適用はできない" },
+      { id: "b", label: "B", text: "AWS Control Tower を使って Landing Zone を構築し、ガードレールで標準設定を自動適用する", hint: "Control Tower は Organizations・SSO・Config・CloudTrail などを統合したアカウント管理の自動化サービス" },
+      { id: "c", label: "C", text: "CloudFormation StackSets で各アカウントに設定を展開する", hint: "StackSets は有効な手段だが、Control Tower はより包括的なランディングゾーン管理を提供する" },
+      { id: "d", label: "D", text: "AWS Service Catalog で承認済みリソースのカタログを作成する", hint: "Service Catalog は承認済みのリソース（EC2・DB 等）をセルフサービスで展開する仕組みで、アカウント管理の標準化には Control Tower が適切" },
+    ],
+    explanation:
+      "AWS Control Tower はマルチアカウント環境のセットアップと統制を自動化するサービスです。「Landing Zone」と呼ばれるベストプラクティスに基づいたマルチアカウント環境を数時間でセットアップし、AWS Organizations・IAM Identity Center（SSO）・AWS Config・CloudTrail・VPC などを自動設定します。「ガードレール（Guardrail）」は SCP や Config ルールとして実装された事前定義のポリシーで、「必須ガードレール」（有効化が強制）と「選択的ガードレール」（任意で有効化）があります。Account Factory でテンプレートに基づいた新しい AWS アカウントを自動作成・設定できます。",
+    comparePoint:
+      "Control Tower：Landing Zone・ガードレール・Account Factory・包括的なアカウント管理。Organizations + SCP：API 制限のみ・設定の自動適用なし。CloudFormation StackSets：テンプレートの一括展開・アカウント管理機能なし。",
+    rememberAxis:
+      "マルチアカウントの標準化・ガードレール → Control Tower。API 操作の制限 → Organizations SCP。設定の一括展開 → CloudFormation StackSets。",
+  },
+
+  // ── シナリオ: 災害復旧 ───────────────────────────────────────────────────
+
+  {
+    id: "dr-1",
+    category: "Disaster Recovery",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある中小企業が AWS で Web アプリを運用している。RTO（目標復旧時間）は 24 時間以内、RPO（目標復旧時点）は 24 時間以内で構わない。DR コストを最小限に抑えたい。最も適切な DR 戦略はどれか。",
+    context:
+      "本番は EC2 + RDS 構成。DR リージョンは不要で、同一リージョン内での復旧を想定。コストが最重要。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "EC2 の AMI と RDS スナップショットを毎日取得し、障害時にリストアする", hint: "バックアップ&リストアは最もコストが低い DR 戦略。RTO 24 時間・RPO 24 時間であれば十分対応できる" },
+      { id: "b", label: "B", text: "別 AZ にパイロットライト構成（DB レプリカのみ）を常時起動する", hint: "パイロットライトはコストが低いが、同一リージョン内の DR としてはバックアップ&リストアより高コスト" },
+      { id: "c", label: "C", text: "別リージョンにウォームスタンバイを構築する", hint: "ウォームスタンバイは RTO 数分だが、コストが高く RTO 24 時間の要件には過剰" },
+      { id: "d", label: "D", text: "マルチサイトアクティブ/アクティブ構成を組む", hint: "最も高コストな DR 戦略で、RTO 24 時間の要件に対して大幅に過剰" },
+    ],
+    explanation:
+      "バックアップ&リストア戦略は、EC2 の AMI スナップショット・RDS の自動バックアップ（またはスナップショット）を定期取得し、障害時にそこからリストアする最も低コストな DR 戦略です。RTO は数時間〜24 時間程度（インスタンス起動・データのリストア時間）で、RPO はバックアップ頻度（毎日なら最大 24 時間）に依存します。AWS Backup サービスを使うと複数リソースのバックアップ計画を一元管理でき、バックアップの自動化・クロスリージョンコピー・保持期間管理が容易になります。",
+    comparePoint:
+      "バックアップ&リストア：最低コスト・RTO 時間単位・RPO バックアップ頻度依存。パイロットライト：低コスト・RTO 数十分。ウォームスタンバイ：中コスト・RTO 数分。マルチサイト：最高コスト・RTO ほぼゼロ。",
+    rememberAxis:
+      "コスト最小・RTO/RPO 時間単位 → バックアップ&リストア（AMI + RDS スナップショット）。低コストで RTO 数十分 → パイロットライト。RTO 数分・中コスト → ウォームスタンバイ。RTO ほぼゼロ → マルチサイト Active-Active。",
+  },
+  {
+    id: "dr-2",
+    category: "Disaster Recovery",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が us-east-1 をプライマリとして運用しており、DR リージョン（ap-northeast-1）を用意したい。コストを抑えつつ RTO 30 分・RPO 1 時間を実現したい。DR リージョンでは最小限のリソースだけを常時稼働させる。この要件に最も適切な DR 戦略はどれか。",
+    context:
+      "DB は RDS MySQL。アプリは EC2 + ALB で動作。DR リージョンではトラフィックを受けない（平時）。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "バックアップ&リストア：DR リージョンへスナップショットをコピーし、障害時にフルでリストアする", hint: "スナップショットからのフルリストアは RTO 30 分を満たせない可能性が高い" },
+      { id: "b", label: "B", text: "ウォームスタンバイ：DR リージョンで縮小版のシステムを常時稼働させる", hint: "ウォームスタンバイは RTO 数分で達成できるが、常時稼働のコストがかかりコスト最適化の要件に対して過剰" },
+      { id: "c", label: "C", text: "パイロットライト：DR リージョンで RDS リードレプリカのみ起動し、障害時に EC2 を素早く起動する", hint: "DB レプリカのみ稼働させ、障害時に EC2 を AMI から起動することで RTO 30 分・RPO 1 時間を低コストで達成できる" },
+      { id: "d", label: "D", text: "マルチサイト Active-Active：両リージョンで常時トラフィックを受ける", hint: "Active-Active は RTO ほぼゼロだが、コストが 2 倍になり要件の「コストを抑える」に反する" },
+    ],
+    explanation:
+      "パイロットライト（Pilot Light）戦略はデータベースのレプリカなどコア（核心）コンポーネントのみを DR リージョンで稼働させ、障害時にアプリケーション層（EC2 等）を素早く起動する戦略です。RDS クロスリージョンリードレプリカを作成すると、プライマリの変更がリアルタイムに同期されます（RPO 数分〜1 時間）。障害時はリードレプリカをライトに昇格し、EC2 を事前に用意した AMI から Auto Scaling で起動し、ALB のターゲットに登録します。EC2 を常時起動しないため、ウォームスタンバイより大幅に低コストで RTO 30 分を達成できます。",
+    comparePoint:
+      "パイロットライト：DB レプリカのみ常時稼働・障害時に EC2 起動・RTO 数十分・低コスト。ウォームスタンバイ：縮小版フルスタック常時稼働・RTO 数分・中コスト。バックアップ&リストア：スナップショットのみ・RTO 時間単位・最低コスト。",
+    rememberAxis:
+      "DR コスト最小で RTO 数時間 → バックアップ&リストア。低コストで RTO 30 分〜1 時間 → パイロットライト。中コストで RTO 数分 → ウォームスタンバイ。コスト不問で RTO 最小 → Active-Active。",
+  },
+  {
+    id: "dr-3",
+    category: "Disaster Recovery",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が us-east-1 をプライマリとして EC2 + RDS 環境を運用している。DR 要件は RTO 10 分以内・RPO 15 分以内。DR リージョンでは縮小版のシステムを常時稼働させておく予定。リージョン障害時にすぐにトラフィックを切り替えられる構成はどれか。",
+    context:
+      "DR リージョン（us-west-2）でも ALB・EC2（最小台数）・RDS を常時稼働させて準備する。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "パイロットライト：DB レプリカのみ稼働させ、障害時に EC2 を起動する", hint: "EC2 の起動には 5〜10 分かかり、RTO 10 分の達成が難しい場合がある" },
+      { id: "b", label: "B", text: "ウォームスタンバイ：縮小版フルスタックを常時稼働させ、Route 53 フェイルオーバーで切り替える", hint: "縮小版スタックが稼働済みのため、Route 53 の DNS 切替だけで RTO 10 分以内に対応できる" },
+      { id: "c", label: "C", text: "バックアップ&リストア：スナップショットから DR リージョンでリストアする", hint: "フルリストアは RTO 数時間かかり 10 分以内を達成できない" },
+      { id: "d", label: "D", text: "DR リージョンに同規模のフルスタックを常時稼働させる（Active-Active）", hint: "Active-Active は RTO ほぼゼロだが、コストが 2 倍になる" },
+    ],
+    explanation:
+      "ウォームスタンバイ（Warm Standby）戦略は DR リージョンで縮小版（最小スペック・最小台数）のフルスタックシステムを常時稼働させておく戦略です。プライマリが障害になったとき、Route 53 のフェイルオーバールーティングで DNS を DR リージョンの ALB に切り替えれば、EC2 の起動待ちなしにトラフィックを受けられます。その後、Auto Scaling でインスタンスを本番規模にスケールアップします。RDS はクロスリージョンリードレプリカをライターに昇格させます。RTO 10 分・RPO 15 分の要件をパイロットライトより確実に達成できます。",
+    comparePoint:
+      "ウォームスタンバイ：縮小版常時稼働・スケールアップで本番対応・RTO 数分・中コスト。パイロットライト：DB のみ常時稼働・EC2 起動が必要・RTO 数十分・低コスト。Active-Active：フルスタック常時稼働・RTO ほぼゼロ・最高コスト。",
+    rememberAxis:
+      "RTO 数分・縮小版常時稼働 → ウォームスタンバイ。RTO 数十分・DB のみ常時稼働 → パイロットライト。RTO ほぼゼロ・コスト不問 → Active-Active。",
+  },
+  {
+    id: "dr-4",
+    category: "Disaster Recovery",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある金融機関が RPO ほぼゼロ・RTO 数分以内の DR を要求されている。システムは常に最高のパフォーマンスを維持し、リージョン障害時もユーザーへの影響をほぼゼロにしたい。コストは二次的な考慮事項。最適な DR 戦略はどれか。",
+    context:
+      "us-east-1 と eu-west-1 の 2 リージョンで稼働させる予定。データは常に両リージョンに存在する必要がある。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "ウォームスタンバイ + RDS クロスリージョンレプリカ", hint: "縮小版スタックの稼働・スケールアップが必要で RTO 数分以内の保証が難しい場合がある" },
+      { id: "b", label: "B", text: "パイロットライト + Aurora Global Database", hint: "EC2 の起動が必要で RTO 数分の保証が難しい。また RPO ほぼゼロにするにはデータ同期が必要" },
+      { id: "c", label: "C", text: "バックアップ&リストア + S3 クロスリージョンレプリケーション", hint: "RPO ほぼゼロ・RTO 数分を達成できない最低コスト戦略" },
+      { id: "d", label: "D", text: "マルチサイト Active-Active：両リージョンで常時フルトラフィックを受け、DynamoDB Global Tables でデータを同期する", hint: "両リージョンが常時稼働しているため RTO ほぼゼロ・RPO ほぼゼロを実現できる" },
+    ],
+    explanation:
+      "マルチサイト Active-Active 戦略は両リージョン（またはマルチリージョン）で完全なフルスタックを常時稼働させ、実際のトラフィックを両方で処理する戦略です。Route 53 のレイテンシーベースルーティングで両リージョンに均等または最適な比率でトラフィックを振り分けます。DynamoDB Global Tables はマルチリージョンのマルチマスター書き込みをサポートし、どちらのリージョンで書き込んでも 1 秒以内に他のリージョンへ反映されます（RPO 約 1 秒）。リージョン障害時は Route 53 のヘルスチェックで自動的に正常なリージョンへ 100% のトラフィックを振り向けます（RTO 数秒〜数分）。",
+    comparePoint:
+      "Active-Active：両リージョン常時稼働・RTO 数秒・RPO ほぼゼロ・最高コスト・最高可用性。ウォームスタンバイ：片方が縮小版・RTO 数分・中コスト。パイロットライト：片方が DB のみ・RTO 数十分・低コスト。",
+    rememberAxis:
+      "RTO ほぼゼロ・RPO ほぼゼロ・コスト不問 → マルチサイト Active-Active。DynamoDB のマルチリージョン同期 → DynamoDB Global Tables。クロスリージョン Aurora → Aurora Global Database。",
+  },
+  {
+    id: "dr-5",
+    category: "Disaster Recovery",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が以下の要件で DR 戦略を選択している。「医療記録システムで、患者データは最大 1 時間分の損失まで許容できる（RPO 1 時間）。障害から 4 時間以内にシステムを復旧させる必要がある（RTO 4 時間）。追加のインフラコストは月 $500 以内に抑えたい」。この要件を満たす最適な DR 戦略はどれか。",
+    context:
+      "本番はシングルリージョンで EC2 + RDS MySQL 構成。現在 DR はない。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "1 時間ごとの RDS 自動バックアップと EC2 AMI を取得し、障害時に別 AZ または DR リージョンへリストアする", hint: "RPO 1 時間（毎時バックアップ）・RTO 4 時間（リストア時間）をほぼ$0 の追加コストで達成できる" },
+      { id: "b", label: "B", text: "パイロットライト構成で DR リージョンに RDS リードレプリカを常時起動する", hint: "RDS リードレプリカの費用（DB インスタンス料金）は月 $100〜300 程度かかるが、コスト内に収まる可能性がある" },
+      { id: "c", label: "C", text: "ウォームスタンバイ構成で DR リージョンに縮小版スタックを常時稼働させる", hint: "EC2 + RDS の常時稼働は月 $500 を超える可能性が高く、コスト要件に反する場合がある" },
+      { id: "d", label: "D", text: "マルチサイト Active-Active 構成を構築する", hint: "最高コスト戦略で月 $500 の制約を大幅に超える" },
+    ],
+    explanation:
+      "RPO・RTO の要件とコスト制約からバックアップ&リストアが最適です。RPO 1 時間は RDS の自動バックアップ（15 分間隔）またはトランザクションログで達成でき、EC2 の AMI を定期取得することでアプリサーバーも復旧できます。RTO 4 時間は RDS のリストア（〜30 分）と EC2 AMI からの起動（〜10 分）で十分達成可能です。コストは S3 へのスナップショット保存費用（数十 GB = 数ドル/月）のみで、$500 以内に大きく収まります。AWS Backup で自動化・一元管理すれば運用コストも最小化できます。",
+    comparePoint:
+      "要件マッピング：RPO・RTO が長い＆コスト重視 → バックアップ&リストア。RPO 1 時間・RTO 30 分・低コスト → パイロットライト。RPO 数分・RTO 数分・中コスト → ウォームスタンバイ。RPO ほぼゼロ・RTO ほぼゼロ → Active-Active。",
+    rememberAxis:
+      "RPO・RTO の要件からコスト最小の DR 戦略を選ぶ：バックアップ&リストア < パイロットライト < ウォームスタンバイ < Active-Active（コスト順）。逆に RTO が短くなるほど常時稼働コストが増加する。",
+  },
 ];
