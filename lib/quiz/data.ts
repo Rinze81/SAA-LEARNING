@@ -3390,4 +3390,1083 @@ export const quizQuestions: QuizQuestion[] = [
     rememberAxis:
       "RPO・RTO の要件からコスト最小の DR 戦略を選ぶ：バックアップ&リストア < パイロットライト < ウォームスタンバイ < Active-Active（コスト順）。逆に RTO が短くなるほど常時稼働コストが増加する。",
   },
+
+  // ── シナリオ: IAM・アクセス管理（追加） ──────────────────────────────────
+
+  {
+    id: "iam-1",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の開発者が EC2 インスタンスから S3 バケットにアクセスするアプリケーションを開発している。現在はアクセスキー（Access Key ID / Secret Access Key）をコードにハードコードしている。セキュリティリスクを排除する最善の方法はどれか。",
+    context:
+      "アクセスキーが Git リポジトリに誤ってコミットされる事故が過去に発生しました。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "アクセスキーを環境変数に移してハードコードを避ける", hint: "環境変数は改善だが、キーの漏洩・ローテーションの手間は残る" },
+      { id: "b", label: "B", text: "EC2 インスタンスに IAM ロールをアタッチし、アクセスキーを一切使用しない", hint: "IAM ロールは EC2 に一時的な認証情報を自動付与し、キーの管理・漏洩リスクをゼロにする" },
+      { id: "c", label: "C", text: "アクセスキーを AWS Secrets Manager に保存して取得する", hint: "Secrets Manager は有効だが、EC2 から AWS API を呼ぶだけなら IAM ロールの方がシンプル" },
+      { id: "d", label: "D", text: "IAM ユーザーのパスワードポリシーを強化する", hint: "パスワードポリシーはコンソールログインに関するもので、アクセスキーのリスクとは無関係" },
+    ],
+    explanation:
+      "EC2 インスタンスに IAM ロールをアタッチすると、AWS SDK は自動的にインスタンスメタデータサービス（IMDS）から一時的な認証情報（STS トークン）を取得します。アクセスキーをコードや設定ファイルに記述する必要が一切なく、認証情報は自動ローテーションされます。これが EC2 から AWS サービスにアクセスする際の AWS 推奨ベストプラクティスです。Lambda・ECS タスク・EKS Pod でも同様にサービスロールを使います。",
+    comparePoint:
+      "IAM ロール（EC2）：アクセスキー不要・自動ローテーション・最小権限原則。アクセスキー：長期認証情報・漏洩リスク・ローテーション管理が必要。Secrets Manager：シークレット（DB パスワード・API キー等）の安全な保存・取得向け。",
+    rememberAxis:
+      "EC2/Lambda/ECS から AWS サービスへのアクセス → IAM ロール（アクセスキー不要）。外部システムへの認証情報管理 → Secrets Manager。クロスアカウントのアクセス → IAM ロール + AssumeRole。",
+  },
+  {
+    id: "iam-2",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が本番環境へのアクセスを厳格に管理したい。本番 AWS アカウントでは、特定の時間帯（平日 9〜18 時）かつ社内 IP からの操作のみを許可し、それ以外は拒否したい。最も適切な実装方法はどれか。",
+    context:
+      "IAM ユーザーは全社員に払い出されています。社内 IP アドレスは固定（203.0.113.0/24）。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "IAM ポリシーの Condition 要素で aws:SourceIp と aws:CurrentTime を組み合わせて制限する", hint: "Condition キーで送信元 IP と時刻を指定し、範囲外の操作を Deny できる" },
+      { id: "b", label: "B", text: "セキュリティグループで特定 IP からのアクセスを制限する", hint: "セキュリティグループはネットワーク通信の制御であり、AWS Management Console の IAM 操作は制限できない" },
+      { id: "c", label: "C", text: "AWS WAF でコンソールへのアクセスを IP 制限する", hint: "WAF は CloudFront・ALB などの前段に配置するもので、IAM API 操作を IP 制限する手段ではない" },
+      { id: "d", label: "D", text: "VPN 接続を必須にして、VPN 経由のみコンソールアクセスを許可する", hint: "VPN は有効な手段だが、IAM ポリシーの Condition による制御と比べて設定が複雑で IAM レベルの制御ではない" },
+    ],
+    explanation:
+      "IAM ポリシーの Condition 要素では、リクエストのコンテキスト情報を条件として指定できます。aws:SourceIp でリクエスト元の IP アドレスを制限し、aws:CurrentTime（または aws:RequestedRegion 等）で時刻を制限できます。Deny ポリシーに Condition を組み合わせることで「社内 IP 以外からの操作を拒否」「平日 9〜18 時以外の操作を拒否」を実現できます。Organizations の SCP にも同様の Condition を適用することで、複数アカウントに一括展開できます。",
+    comparePoint:
+      "IAM Condition（aws:SourceIp）：IP アドレスによる API 操作制限。IAM Condition（aws:CurrentTime）：時刻による制限。SG：EC2 等へのネットワーク通信制限（IAM API 制限ではない）。",
+    rememberAxis:
+      "特定 IP からの AWS API 操作のみ許可 → IAM Condition（aws:SourceIp）。特定時間帯のみ操作許可 → IAM Condition（aws:CurrentTime）。全アカウントへの一括適用 → Organizations SCP + Condition。",
+  },
+  {
+    id: "iam-3",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の A アカウントのアプリが B アカウントの S3 バケットにアクセスする必要がある。クロスアカウントアクセスを安全に実現する最適な方法はどれか。",
+    context:
+      "A アカウント（アプリ）と B アカウント（データ）は同じ企業の別部門が管理しています。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "B アカウントの IAM ユーザーのアクセスキーを A アカウントのアプリに渡す", hint: "アクセスキーの共有は漏洩リスクが高く、最小権限の原則にも反する" },
+      { id: "b", label: "B", text: "S3 バケットをパブリックアクセス可能にする", hint: "パブリック公開は誰でもアクセスできるため絶対に避けるべき" },
+      { id: "c", label: "C", text: "B アカウントに IAM ロールを作成し、A アカウントから AssumeRole してアクセスする", hint: "クロスアカウントロールはアクセスキー不要で一時的認証情報を使う AWS 推奨のクロスアカウントアクセス方法" },
+      { id: "d", label: "D", text: "VPC ピアリングで A と B の VPC を接続する", hint: "VPC ピアリングはネットワーク接続であり、S3 のアクセス権限の制御には使えない" },
+    ],
+    explanation:
+      "クロスアカウントアクセスには IAM ロールの AssumeRole を使います。①B アカウントに IAM ロールを作成し、信頼ポリシーで A アカウントからの AssumeRole を許可する、②A アカウントのアプリが STS AssumeRole API で一時的な認証情報を取得する、③取得した一時認証情報で B アカウントの S3 にアクセスする。この方法はアクセスキーの共有が不要で、最小権限の IAM ポリシーをロールに付与でき、CloudTrail で誰がいつアクセスしたかを追跡できます。",
+    comparePoint:
+      "クロスアカウントロール + AssumeRole：推奨・一時的認証情報・監査可能。アクセスキー共有：非推奨・漏洩リスク・ローテーション困難。S3 バケットポリシー：特定アカウントへの直接許可も可能（ロールと併用推奨）。",
+    rememberAxis:
+      "クロスアカウントのサービスアクセス → IAM ロール + AssumeRole。EC2/Lambda から AWS サービスへ → IAM ロール（アタッチ）。API キー不要の外部アクセス → STS Federation。",
+  },
+  {
+    id: "iam-4",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が AWS アカウントへの不正ログインを防ぐため、MFA（多要素認証）を全 IAM ユーザーに強制したい。MFA 未設定のユーザーが AWS サービスにアクセスできないようにしたい。最適な実装方法はどれか。",
+    context:
+      "現在 MFA は任意設定で、未設定のユーザーも本番リソースにフルアクセスできる状態。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "新しい IAM ユーザーを作成するたびに手動で MFA を設定する", hint: "手動設定は漏れが発生しやすく、既存ユーザーの管理もできない" },
+      { id: "b", label: "B", text: "GuardDuty で MFA 未設定のユーザーの操作を監視する", hint: "GuardDuty は脅威検出であり、MFA 未設定ユーザーのアクセスを事前に阻止はできない" },
+      { id: "c", label: "C", text: "AWS Config ルールで MFA 未設定のユーザーを検知する", hint: "Config は検知できるが自動的なアクセス拒否はできない" },
+      { id: "d", label: "D", text: "「MFA 未認証時は全 API を Deny する」 IAM ポリシーを全ユーザーに適用する", hint: "Condition の aws:MultiFactorAuthPresent を false で Deny するポリシーを適用し、MFA なしのアクセスを拒否できる" },
+    ],
+    explanation:
+      "IAM ポリシーの Condition キー aws:MultiFactorAuthPresent を使うと、MFA 認証済みかどうかを条件にできます。全ユーザーに「aws:MultiFactorAuthPresent が false の場合に全 API を Deny」するポリシー（DenyWithoutMFA）を適用することで、MFA 未設定または MFA 未認証のセッションからは AWS サービスにアクセスできなくなります。このポリシーには MFA の設定操作（iam:CreateVirtualMFADevice・iam:EnableMFADevice 等）だけを許可するため、未設定ユーザーも自分で MFA を設定できます。IAM Identity Center（SSO）を使うと組織全体の MFA 強制をより簡単に管理できます。",
+    comparePoint:
+      "aws:MultiFactorAuthPresent：MFA 認証済みセッションかどうかの Condition キー。DenyWithoutMFA ポリシー：MFA 未認証アクセスを強制的に拒否。IAM Identity Center：組織全体の MFA ポリシーを一元管理。",
+    rememberAxis:
+      "MFA 未認証アクセスの拒否 → IAM Condition（aws:MultiFactorAuthPresent: false を Deny）。全組織への MFA 強制 → IAM Identity Center の MFA 設定。不正ログインの検知 → GuardDuty（IAM 異常検知）。",
+  },
+  {
+    id: "iam-5",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が本番環境の RDS データベースのパスワードを安全に管理したい。アプリケーションコードにパスワードをハードコードせず、パスワードを定期的に自動ローテーションし、アクセスログも取りたい。最適なサービスはどれか。",
+    context:
+      "現在はパスワードを環境変数に設定しているが、ローテーションが手動で年 1 回程度しか行われていない。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "AWS Secrets Manager にパスワードを保存し、自動ローテーションを有効にする", hint: "Secrets Manager は RDS の自動ローテーションをネイティブサポートし、アクセスログも CloudTrail で取得できる" },
+      { id: "b", label: "B", text: "AWS Systems Manager Parameter Store（SecureString）にパスワードを保存する", hint: "Parameter Store は安全な保存はできるが、自動ローテーション機能がない（Lambda で自前実装が必要）" },
+      { id: "c", label: "C", text: "S3 バケットに暗号化してパスワードを保存する", hint: "S3 での保存は可能だが、ローテーション・アクセス制御・監査が煩雑" },
+      { id: "d", label: "D", text: "EC2 の IAM ロールでデータベースに直接アクセスする", hint: "IAM ロールは AWS サービス間の認証に使うもので、RDS MySQL/PostgreSQL のデータベース認証には IAM DB 認証が必要（設定が別途必要）" },
+    ],
+    explanation:
+      "AWS Secrets Manager はパスワード・API キー・データベース認証情報などのシークレットを安全に保存・取得・ローテーションするサービスです。RDS・Redshift・DocumentDB とのネイティブ統合により、指定した期間（例：30 日）ごとにパスワードを自動ローテーションし、RDS の実際のパスワードも同時に更新します。アプリケーションは Secrets Manager API でシークレットを取得するだけでよく、コードにパスワードを記述する必要がありません。アクセス履歴は CloudTrail に記録されます。",
+    comparePoint:
+      "Secrets Manager：自動ローテーション・RDS 統合・CloudTrail 監査・有料（$0.40/シークレット/月）。SSM Parameter Store（SecureString）：KMS 暗号化・自動ローテーションなし・低コスト（標準は無料）。KMS：暗号化キー管理（Secrets Manager が内部で使用）。",
+    rememberAxis:
+      "DB パスワードの自動ローテーション → Secrets Manager。シークレットの安全な保存（ローテーション不要） → SSM Parameter Store SecureString。暗号化キーの管理 → KMS（CMK）。",
+  },
+
+  // ── シナリオ: VPC 設計（追加） ────────────────────────────────────────────
+
+  {
+    id: "vpc-1",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が VPC を設計している。Web 層・AP 層・DB 層の 3 層アーキテクチャで、DB 層はインターネットから完全に隔離したい。高可用性のため 2 AZ 構成とする。最もセキュアな VPC サブネット設計はどれか。",
+    context:
+      "インターネットから Web 層への HTTPS（443）のみ許可。AP 層はロードバランサー経由のみ。DB 層は AP 層からのみ接続可能。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "すべての層を同じパブリックサブネットに配置し、セキュリティグループで制御する", hint: "DB がパブリックサブネットに存在するとインターネットからアクセス可能な状態になりセキュリティリスクがある" },
+      { id: "b", label: "B", text: "Web 層をパブリックサブネット、AP/DB 層をプライベートサブネットに分離し、各層のセキュリティグループで通信を制限する", hint: "DB がプライベートサブネットにありインターネットに露出しない。SG で層間通信を最小限に制御できる" },
+      { id: "c", label: "C", text: "すべての層をプライベートサブネットに配置する", hint: "Web 層もプライベートにするとインターネットからユーザーがアクセスできなくなる" },
+      { id: "d", label: "D", text: "Web 層・AP 層をパブリック、DB 層のみプライベートにし、NAT Gateway は使用しない", hint: "AP 層がパブリックサブネットにあると外部から直接 AP サーバーへのアクセスが可能になる" },
+    ],
+    explanation:
+      "3 層アーキテクチャの標準 VPC 設計は、Web 層（ALB）をパブリックサブネットに配置してインターネットからのアクセスを受け付け、AP 層（EC2）と DB 層（RDS）はプライベートサブネットに配置してインターネットから隔離します。セキュリティグループで「Web ALB SG → AP EC2 SG（ポート 8080）→ DB RDS SG（ポート 3306）」という最小権限のチェーンを構成します。AP 層が外部へのアクセスが必要な場合は NAT Gateway を経由させます。2 AZ それぞれにパブリック・プライベートサブネットを作成して高可用性を確保します。",
+    comparePoint:
+      "パブリックサブネット：インターネットゲートウェイへのルートあり・EIP で直接公開可能。プライベートサブネット：インターネットゲートウェイへのルートなし・NAT Gateway 経由でアウトバウンドのみ可能。",
+    rememberAxis:
+      "外部公開リソース（ALB・Bastion） → パブリックサブネット。内部リソース（EC2 AP・RDS・Lambda） → プライベートサブネット。プライベートから外部へのアウトバウンド → NAT Gateway（パブリックサブネットに配置）。",
+  },
+  {
+    id: "vpc-2",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の開発者が踏み台サーバー（Bastion Host）を経由して EC2 にアクセスしているが、Bastion の管理・パッチ適用・SSH キーの管理が煩雑になっている。踏み台サーバーなしでプライベートサブネットの EC2 に安全にアクセスする方法はどれか。",
+    context:
+      "EC2 はプライベートサブネットにありインターネットから直接アクセスできない。EC2 には 22 番ポートを開けたくない。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "EC2 に EIP を付与してインターネット経由で SSH する", hint: "EIP を付与するとインターネットに露出しセキュリティリスクが高まる" },
+      { id: "b", label: "B", text: "VPN を使って社内ネットワーク経由で EC2 に SSH する", hint: "VPN は有効だがセキュリティグループで 22 番を開ける必要があり、Bastion 同様の管理コストがある" },
+      { id: "c", label: "C", text: "AWS Systems Manager Session Manager を使い、ポート開放・SSH キーなしでブラウザまたは CLI からアクセスする", hint: "Session Manager は SSM エージェント経由でトンネルを張り、22 番ポート不要・SSH キー不要・IAM で制御・操作ログが自動記録される" },
+      { id: "d", label: "D", text: "RDP over HTTPS で Windows EC2 にアクセスする", hint: "RDP は Windows 向けで Linux EC2 には使えない。また Session Manager の方が安全" },
+    ],
+    explanation:
+      "AWS Systems Manager Session Manager は、EC2 インスタンスに SSM エージェントをインストールし、HTTPS のトンネル経由でインタラクティブなシェルセッションを確立するサービスです。SSH ポート（22番）の開放が不要で、SSH キーの管理も不要です。IAM ポリシーで誰がどのインスタンスにアクセスできるかを制御でき、セッションの操作ログは S3 または CloudWatch Logs に自動記録されます。Bastion Host のプロビジョニング・パッチ・キー管理コストがすべて不要になります。",
+    comparePoint:
+      "Session Manager：ポート不要・SSH キー不要・IAM 制御・操作ログ自動記録・Bastion 不要。Bastion Host：SSH 22 番が必要・キー管理・EC2 管理コストあり。EC2 Instance Connect：SSH ベース・一時キーを AWS が生成（Session Manager より制限あり）。",
+    rememberAxis:
+      "Bastion 不要のプライベート EC2 アクセス → Systems Manager Session Manager。SSH ポート不要・IAM 制御・ログ記録 → Session Manager。緊急時のポート開放なしアクセス → Session Manager（SSM エージェント必須）。",
+  },
+  {
+    id: "vpc-3",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が VPC 内のトラフィックを監視したい。特定の IP アドレスからの不審な通信、大量のデータ転送、許可されていないポートへの接続を検知したい。VPC フローログを S3 に保存し、後から分析する構成を検討している。最もコスト効率よく分析できる構成はどれか。",
+    context:
+      "フローログは毎日数 GB 生成されます。リアルタイム検知は不要で、日次でバッチ分析したい。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "VPC フローログを S3 に送り、Amazon Athena でクエリ分析する", hint: "S3 は低コスト保存、Athena はクエリした分だけ課金のサーバーレス分析。日次バッチ分析に最適" },
+      { id: "b", label: "B", text: "VPC フローログを CloudWatch Logs に送り、Insights でクエリする", hint: "CloudWatch Logs は高コスト。数 GB/日のフローログを長期保存するとコストが高い" },
+      { id: "c", label: "C", text: "VPC フローログを Kinesis Data Streams に送りリアルタイム処理する", hint: "リアルタイム処理は要件外で過剰。Kinesis のコストも発生する" },
+      { id: "d", label: "D", text: "EC2 に Wireshark をインストールしてパケットキャプチャする", hint: "Wireshark は特定インスタンスのキャプチャで VPC 全体のフローログの代替にならない" },
+    ],
+    explanation:
+      "VPC フローログは VPC・サブネット・ENI レベルで IP トラフィック情報（送信元・宛先 IP・ポート・プロトコル・転送量・ACCEPT/REJECT）を記録します。S3 に送ることで低コストな長期保存が可能です。Athena の CREATE TABLE で VPC フローログの列定義を作成すると、SQL で「特定 IP からのトラフィック」「拒否された通信の一覧」「特定ポートへの接続」をクエリできます。日次分析なら Athena のスキャン課金（$5/TB）のみで済みコスト効率が高いです。リアルタイム検知が必要なら Kinesis + Lambda + GuardDuty の組み合わせが有効です。",
+    comparePoint:
+      "VPC フローログ + S3 + Athena：低コスト・日次バッチ分析向け。VPC フローログ + CloudWatch Logs Insights：リアルタイム近傍・高コスト。GuardDuty：VPC フローログを自動分析した脅威検出（マネージド）。",
+    rememberAxis:
+      "VPC ネットワークトラフィックの記録 → VPC フローログ。フローログの低コスト分析 → S3 + Athena。リアルタイムの脅威検出（フローログを自動分析）→ GuardDuty。",
+  },
+  {
+    id: "vpc-4",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が SaaS サービスを AWS 上で提供している。顧客（他社の AWS アカウント）が自社 VPC から SaaS のサービスエンドポイントにプライベートに接続したい。インターネットを経由せず、顧客の VPC と SaaS 提供者の VPC を直接接続するベストプラクティスはどれか。",
+    context:
+      "顧客は多数おり、それぞれ異なる VPC を持っています。VPC ピアリングでは管理が複雑になりすぎる。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "VPC ピアリングですべての顧客 VPC と接続する", hint: "顧客数が増えると接続数が爆発的に増え管理が困難。CIDR の重複問題も発生する" },
+      { id: "b", label: "C", text: "Transit Gateway に全顧客 VPC を接続する", hint: "Transit Gateway は自社管理の VPC 間接続向け。外部顧客の VPC を Transit Gateway に接続するのはセキュリティ上問題がある" },
+      { id: "c", label: "C", text: "顧客に Direct Connect を引いてもらいオンプレ経由で接続する", hint: "Direct Connect は物理回線で導入コストが高く、AWS 間のサービス利用には過剰" },
+      { id: "d", label: "D", text: "AWS PrivateLink を使い、サービスを VPC エンドポイントとして顧客 VPC に公開する", hint: "PrivateLink は SaaS 提供者が Network Load Balancer の前にエンドポイントサービスを作成し、顧客が VPC エンドポイントとして接続できる仕組み" },
+    ],
+    explanation:
+      "AWS PrivateLink を使うと、SaaS 提供者はサービスを「エンドポイントサービス」として公開でき、顧客は自分の VPC に「インターフェース型 VPC エンドポイント（ENI）」を作成することでプライベートに接続できます。インターネットを一切経由せず、顧客の VPC 内の ENI に割り当てられたプライベート IP でサービスにアクセスできます。CIDR アドレス重複の問題がなく、顧客ごとに VPC ピアリングを管理する必要もありません。AWS Marketplace のサービスの多くもこの仕組みで提供されています。",
+    comparePoint:
+      "PrivateLink：SaaS のプライベート公開・インターネット不要・CIDR 重複不問・顧客ごとのピアリング不要。VPC ピアリング：双方向の VPC 間通信・CIDR 重複不可・推移的ルーティング不可。Transit Gateway：多数の VPC の集約・自社管理向け。",
+    rememberAxis:
+      "SaaS サービスを顧客 VPC にプライベート公開 → AWS PrivateLink（エンドポイントサービス）。多数の自社 VPC の相互接続 → Transit Gateway。少数の VPC の接続 → VPC ピアリング。",
+  },
+  {
+    id: "vpc-5",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が ALB に WAF を適用してウェブアプリを保護している。特定の国（中国・ロシア）からのリクエストをすべてブロックし、SQL インジェクション・XSS 攻撃のパターンも自動検出・ブロックしたい。最適な WAF の設定はどれか。",
+    context:
+      "ALB の前段に AWS WAF v2 を設定済み。マネージドルールを活用してメンテナンスコストを下げたい。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "カスタムルールで各国の IP レンジを手動でブロックリストに追加する", hint: "IP レンジは膨大で頻繁に変わるため手動管理は現実的でない" },
+      { id: "b", label: "B", text: "WAF の地理的一致条件ルールで国をブロックし、AWS マネージドルール（Core Rule Set・SQL Database）を追加する", hint: "地理的一致は国コードでブロック可能。マネージドルールは AWS が継続的に更新するため手動メンテナンス不要" },
+      { id: "c", label: "C", text: "セキュリティグループで国別 IP をブロックする", hint: "セキュリティグループは IP・ポート・プロトコルで制御できるが、国レベルの自動ブロック機能はない" },
+      { id: "d", label: "D", text: "Lambda@Edge でリクエストの送信元国をチェックしてブロックする", hint: "技術的には可能だが WAF の地理的一致機能で同じことが設定のみで実現できる" },
+    ],
+    explanation:
+      "AWS WAF v2 の地理的一致条件（Geo Match）は Country Code（CN・RU 等）を指定するだけで該当国からのリクエストをブロックできます。AWS IP レンジの更新は自動のため手動メンテナンスは不要です。AWS マネージドルールグループの「Core Rule Set（CRS）」はOWASP Top 10 の一般的な攻撃パターン（XSS・コードインジェクション等）を、「SQL Database」は SQL インジェクション攻撃パターンをブロックします。マネージドルールは AWS の脅威インテリジェンスチームが継続的に更新するため、ルール定義の維持コストが不要です。",
+    comparePoint:
+      "WAF 地理的一致：国単位のブロック・IP 自動管理。WAF マネージドルール：OWASP Top 10・SQLi・XSS を AWS が維持・更新。Shield Advanced：大規模 DDoS への拡張保護（WAF と組み合わせ）。",
+    rememberAxis:
+      "国単位のアクセスブロック → WAF 地理的一致条件。OWASP Top 10 攻撃パターン → WAF Core Rule Set（マネージドルール）。SQL インジェクション専用 → WAF SQL Database ルールグループ。大規模 DDoS → Shield Advanced。",
+  },
+
+  // ── シナリオ: S3 詳細（追加） ────────────────────────────────────────────
+
+  {
+    id: "s3-adv-1",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が S3 に保存されている顧客の個人情報（PII）が含まれるオブジェクトを自動的に検出し、アクセスログも監視したい。コンプライアンス要件として PII データの所在と不正アクセスを把握する必要がある。最適なサービスはどれか。",
+    context:
+      "S3 バケットは 10 個あり、合計数百万オブジェクトを管理しています。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "S3 バケットポリシーで全オブジェクトをスキャンするスクリプトを定期実行する", hint: "自前のスキャンロジック実装・PII 検出の精度・管理コストが高い" },
+      { id: "b", label: "B", text: "AWS Config で S3 オブジェクトの内容を監視する", hint: "Config は S3 の設定（バケットポリシー・暗号化設定等）を監視するが、オブジェクトの内容（PII）の検出はできない" },
+      { id: "c", label: "C", text: "Amazon Macie を有効化して PII の自動検出とアクセスパターンの分析を行う", hint: "Macie は ML を使って S3 の PII（氏名・クレカ番号・SSN 等）を自動検出し、異常なアクセスパターンも検知する" },
+      { id: "d", label: "D", text: "Rekognition で S3 オブジェクトの内容を分析する", hint: "Rekognition は画像/動画分析サービスでテキストの PII 検出はできない" },
+    ],
+    explanation:
+      "Amazon Macie は機械学習を使って S3 バケット内の機密データ（PII：個人識別情報・クレジットカード番号・AWS アクセスキー等）を自動的に検出するセキュリティサービスです。バケット単位での PII 含有状況をダッシュボードで確認でき、データの分類結果は検出結果（Findings）として出力されます。また S3 のアクセスパターンを分析し、大量ダウンロード・異常な IP からのアクセスなどの不審なアクティビティを検知します。Organizations 統合で複数アカウントの S3 を一元監視できます。",
+    comparePoint:
+      "Macie：S3 の PII 自動検出・アクセス異常検知・ML ベース・コンプライアンス向け。GuardDuty：AWS 全体の脅威検出（不審な API・マルウェア等）。Config：S3 設定のコンプライアンス評価（内容は見ない）。Inspector：EC2・Lambda・ECR の脆弱性スキャン。",
+    rememberAxis:
+      "S3 の PII 検出・機密データ分類 → Amazon Macie。S3 の設定コンプライアンス（暗号化・パブリックアクセス設定）→ AWS Config。S3 への不審アクセス・脅威検出 → GuardDuty（S3 Protection）。",
+  },
+  {
+    id: "s3-adv-2",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が S3 に重要なビジネスデータを保存している。誤操作やランサムウェアによるオブジェクトの上書き・削除からデータを保護したい。削除されても 30 日以内なら復元できるようにしたい。最適な S3 の設定はどれか。",
+    context:
+      "開発者が本番バケットに直接アクセスできる環境で、誤削除のリスクがある。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "S3 バージョニングを有効化し、MFA Delete を設定する", hint: "バージョニングで削除操作が削除マーカーに変わり旧バージョンを保持。MFA Delete で削除操作に MFA を要求できる" },
+      { id: "b", label: "B", text: "S3 のクロスリージョンレプリケーション（CRR）を設定する", hint: "CRR はデータの地理的冗長化が目的。誤削除は複製先にも反映されるため削除保護にはならない" },
+      { id: "c", label: "C", text: "バケットポリシーで DELETE 操作を全ユーザーに禁止する", hint: "DELETE 禁止では正当な削除もできなくなる。また管理者は回避できる" },
+      { id: "d", label: "D", text: "S3 Transfer Acceleration を有効化する", hint: "Transfer Acceleration はアップロード速度の改善機能で、データ保護とは無関係" },
+    ],
+    explanation:
+      "S3 バージョニングを有効化すると、オブジェクトを削除しても実際には「削除マーカー」が追加されるだけで旧バージョンが保持されます。削除マーカーを削除することで元のオブジェクトを復元できます。上書きの場合も旧バージョンが残るため、任意の時点のデータに戻せます。MFA Delete を有効化すると、バージョンの完全削除やバージョニングの無効化に MFA 認証が必要になり、ランサムウェアや誤操作からの保護が強化されます。ライフサイクルポリシーで 30 日後に旧バージョンを削除することでコストも管理できます。",
+    comparePoint:
+      "S3 バージョニング：オブジェクトの全バージョンを保持・削除マーカーで復元可能。MFA Delete：バージョン削除に MFA 要求・追加保護。S3 Object Lock：WORM（Write Once Read Many）・削除・上書き不可の法的保持向け。",
+    rememberAxis:
+      "誤削除からの復元 → S3 バージョニング。削除操作の追加認証 → MFA Delete。法規制の WORM 要件 → S3 Object Lock（Compliance モード）。地理的冗長化 → クロスリージョンレプリケーション。",
+  },
+  {
+    id: "s3-adv-3",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が S3 に保存された静的ウェブサイトのアセット（HTML・CSS・JS）を世界中のユーザーに配信している。S3 バケットをパブリックにしたくないが、CloudFront 経由のアクセスのみを許可したい。最適な設定はどれか。",
+    context:
+      "現在は S3 バケットをパブリックにして CloudFront 経由で配信しているが、S3 の URL に直接アクセスされることを防ぎたい。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "S3 バケットポリシーで CloudFront の IP レンジからのアクセスのみ許可する", hint: "CloudFront の IP レンジは頻繁に変更されるため手動管理は困難で非現実的" },
+      { id: "b", label: "B", text: "S3 バケットに署名付き URL を設定してアクセスを制限する", hint: "署名付き URL はユーザーへのアクセス制限に使うもので、CloudFront ← S3 間の制限には使わない" },
+      { id: "c", label: "C", text: "S3 のブロックパブリックアクセスを有効化するだけで CloudFront 経由のアクセスは維持できる", hint: "ブロックパブリックアクセスだけでは CloudFront からのアクセスも拒否される" },
+      { id: "d", label: "D", text: "CloudFront に OAC（Origin Access Control）を設定し、S3 バケットポリシーで CloudFront サービスプリンシパルのみ許可する", hint: "OAC を使うと CloudFront の署名付きリクエストでのみ S3 にアクセスでき、S3 のパブリック公開は不要になる" },
+    ],
+    explanation:
+      "OAC（Origin Access Control）は CloudFront が S3 オリジンにアクセスする際に使う最新の認証メカニズム（旧 OAI の後継）です。CloudFront ディストリビューションに OAC を設定すると、CloudFront は AWS Signature Version 4 で署名したリクエストを S3 に送信します。S3 バケットポリシーで「cloudfront.amazonaws.com サービスプリンシパル かつ 特定の CloudFront ディストリビューション ID」からのアクセスのみを許可することで、S3 をパブリックにせず CloudFront 経由のアクセスのみを許可できます。",
+    comparePoint:
+      "OAC（Origin Access Control）：CloudFront の S3 認証・最新推奨・SSE-KMS 対応。OAI（Origin Access Identity）：旧方式・現在は OAC への移行を推奨。署名付き URL：エンドユーザーへの期限付きアクセス付与向け。",
+    rememberAxis:
+      "S3 非公開 + CloudFront 経由のみ許可 → CloudFront OAC + S3 バケットポリシー。CloudFront でのコンテンツアクセス制御（有料会員のみ） → 署名付き URL/Cookie。S3 への直接アクセス防止 → ブロックパブリックアクセス + OAC。",
+  },
+  {
+    id: "s3-adv-4",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が S3 に 1 億個のオブジェクト（合計 500 TB）を保存している。オブジェクトを別の S3 バケット（別リージョン）にレプリケーションしたいが、既存の 1 億オブジェクトもコピーする必要がある。また今後追加されるオブジェクトも自動的にレプリケーションしたい。最適な構成はどれか。",
+    context:
+      "既存オブジェクトは S3 レプリケーション設定だけでは自動コピーされない。既存と新規の両方を対象にする。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "S3 クロスリージョンレプリケーション（CRR）を設定するだけで既存オブジェクトも自動コピーされる", hint: "CRR の設定後は新規オブジェクトのみレプリケーションされ、既存オブジェクトは対象外" },
+      { id: "b", label: "B", text: "CRR を設定して新規オブジェクトを自動レプリケーションし、S3 Batch Operations で既存オブジェクトを一括コピーする", hint: "CRR で今後の新規オブジェクトを自動化し、Batch Operations で既存 1 億オブジェクトを非同期一括処理できる" },
+      { id: "c", label: "C", text: "Lambda で全オブジェクトを S3 CopyObject API で順番にコピーする", hint: "1 億オブジェクトを Lambda で順番にコピーするのは時間がかかりすぎる。タイムアウトや管理も困難" },
+      { id: "d", label: "D", text: "Snowball Edge で既存オブジェクトをエクスポートして別リージョンにインポートする", hint: "Snowball はネットワーク転送が困難な場合向け。500 TB は CRR + Batch Operations の方が効率的" },
+    ],
+    explanation:
+      "S3 クロスリージョンレプリケーション（CRR）は設定後に作成・更新されるオブジェクトのみを対象とし、既存オブジェクトは自動でレプリケーションされません。既存オブジェクトの一括コピーには S3 Batch Operations を使います。S3 Batch Operations は S3 インベントリリストを入力として、指定した操作（S3 ReplicateObject・CopyObject・RestoreObject など）を何億ものオブジェクトに対して並列で非同期実行できます。ジョブの進捗はコンソールまたは CloudWatch で確認できます。",
+    comparePoint:
+      "S3 CRR：新規オブジェクトの自動レプリケーション・既存オブジェクトは対象外。S3 Batch Operations：大量の既存オブジェクトへの一括操作（コピー・タグ付け・ACL 変更等）。DataSync：継続的な差分同期・オンプレ↔S3 向け。",
+    rememberAxis:
+      "新規オブジェクトの自動レプリケーション → S3 CRR/SRR。既存の大量オブジェクトへの一括操作 → S3 Batch Operations。オンプレ↔S3 の継続同期 → DataSync。",
+  },
+  {
+    id: "s3-adv-5",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある金融機関が S3 に保存する財務データを暗号化したい。暗号化キーは自社のセキュリティポリシーで「AWS に預けてはいけない」という要件がある。つまりキーは常にオンプレミスで管理したい。最適な暗号化方式はどれか。",
+    context:
+      "規制要件でキーの管理権限を完全に自社で保持する必要があります。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "S3 のデフォルト暗号化（SSE-S3）を使用する", hint: "SSE-S3 は AWS が管理するキーで暗号化するため「AWS にキーを預ける」ことになる" },
+      { id: "b", label: "B", text: "AWS KMS のカスタマー管理キー（CMK）で SSE-KMS を使用する", hint: "CMK はキーの管理権限を自社が持てるが、キー自体は AWS KMS 上（HSM）に保存されるため要件を完全には満たさない" },
+      { id: "c", label: "C", text: "SSE-C（Customer-Provided Keys）を使い、暗号化キーをリクエスト時に提供する", hint: "SSE-C はオブジェクトの暗号化に使うキーをリクエストのたびにクライアントが提供し、AWS はキーを保存しない" },
+      { id: "d", label: "D", text: "クライアントサイド暗号化（CSE）でデータを暗号化してから S3 にアップロードする", hint: "CSE はアップロード前にクライアントで暗号化し AWS はキーも平文も知らない。SSE-C よりさらに完全なキー管理が可能" },
+    ],
+    explanation:
+      "「AWS にキーを一切預けない」要件の実現方法は 2 つあります。①SSE-C（サーバーサイド暗号化・顧客提供キー）：オブジェクトの PUT/GET のたびにクライアントがキーを HTTPS ヘッダーで提供し、AWS は暗号化処理後にキーを廃棄します。②クライアントサイド暗号化（CSE）：AWS SDK の暗号化クライアント等でデータをクライアントで暗号化してから S3 にアップロードします。AWS は暗号化済みのデータのみを保存し、キーも平文も認識しません。CSE の方がより厳密なキー管理が可能です。",
+    comparePoint:
+      "SSE-S3：AWS 管理キー（自社キー管理なし）。SSE-KMS：CMK で管理権限あり・キーは KMS（AWS 上）に保存。SSE-C：クライアントがキー提供・AWS はキーを保存しない。CSE：クライアントで暗号化・AWS はキーも平文も知らない。",
+    rememberAxis:
+      "AWS にキーを預けない → SSE-C（リクエスト毎にキー提供）または CSE（クライアントで暗号化）。キーの管理権限を自社に → SSE-KMS（CMK）。最も簡単な暗号化 → SSE-S3（デフォルト）。",
+  },
+
+  // ── シナリオ: コスト最適化（追加） ──────────────────────────────────────
+
+  {
+    id: "cost-adv-1",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業のクラウドコスト担当者が AWS の請求書を確認したところ、NAT Gateway のデータ処理料金が月 $5,000 を超えていることがわかった。調査すると、VPC 内の EC2 インスタンスが同一リージョンの S3 と DynamoDB に大量のトラフィックを NAT Gateway 経由で送っていた。コストを最小化する方法はどれか。",
+    context:
+      "EC2 はプライベートサブネット。S3 と DynamoDB へのアクセスは NAT Gateway 経由で行われている。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "NAT Gateway のインスタンスサイズをダウングレードする", hint: "NAT Gateway はマネージドサービスでサイズ変更の概念がない。コスト削減にならない" },
+      { id: "b", label: "B", text: "S3 と DynamoDB の VPC ゲートウェイエンドポイントを作成し、NAT Gateway を経由しないようにする", hint: "VPC ゲートウェイエンドポイントは無料で S3/DynamoDB へのプライベートアクセスを可能にし、NAT Gateway 通信を排除できる" },
+      { id: "c", label: "C", text: "EC2 を Spot インスタンスに変更してコストを削減する", hint: "Spot は EC2 コスト削減には有効だが、NAT Gateway のデータ処理料金の問題は解決しない" },
+      { id: "d", label: "D", text: "S3 バケットと DynamoDB テーブルを EC2 と同じ VPC 内に移動する", hint: "S3 と DynamoDB は VPC 外のリージョナルサービスで「VPC 内に移動」はできない" },
+    ],
+    explanation:
+      "VPC ゲートウェイエンドポイントは S3 と DynamoDB に対して無料で使えるエンドポイントで、プライベートサブネットの EC2 から S3/DynamoDB へのトラフィックを AWS のプライベートネットワーク（バックボーン）経由にルーティングします。NAT Gateway を経由しなくなるため、NAT Gateway のデータ処理料金（$0.045/GB）が発生しなくなります。VPC のルートテーブルにエンドポイントのルートを追加するだけで設定でき、追加コストはかかりません。月 $5,000 のコストをほぼゼロにできる大幅な改善です。",
+    comparePoint:
+      "VPC ゲートウェイエンドポイント：無料・S3/DynamoDB 専用・NAT Gateway 不要。VPC インターフェースエンドポイント（PrivateLink）：有料・多数の AWS サービス対応・ENI 経由。NAT Gateway：プライベートサブネットから汎用的なインターネットアクセス・有料（データ処理課金）。",
+    rememberAxis:
+      "S3/DynamoDB への NAT Gateway コスト削減 → VPC ゲートウェイエンドポイント（無料）。他の AWS サービスへのプライベートアクセス → インターフェースエンドポイント（有料）。インターネットアウトバウンド → NAT Gateway（引き続き必要）。",
+  },
+  {
+    id: "cost-adv-2",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が RDS for MySQL（db.r5.2xlarge）を本番で常時稼働させている。週末と夜間（月〜金 20:00〜9:00）はほぼ使われていない。RDS のコストを削減する最も効果的な方法はどれか。",
+    context:
+      "RDS は本番データベースで、停止中のデータは保持する必要がある。週末の夜間は完全に使われない。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "RDS のスケジュールされた停止・起動を設定し、使用しない時間帯は自動停止する", hint: "RDS は停止中もストレージ料金は発生するがインスタンス料金は発生しない。平日夜間・週末停止で大幅削減可能" },
+      { id: "b", label: "B", text: "RDS を削除してスナップショットから毎回復元する", hint: "スナップショットからの復元には時間がかかり、本番環境での運用には非現実的" },
+      { id: "c", label: "C", text: "RDS を Spot インスタンスに変更する", hint: "RDS には Spot インスタンスの概念がない（EC2 の Spot とは別）" },
+      { id: "d", label: "D", text: "RDS のインスタンスクラスを小さくして常時稼働する", hint: "インスタンス縮小は有効だが、本番の性能要件を満たせない可能性がある。停止の方がコスト削減効果が高い" },
+    ],
+    explanation:
+      "Amazon RDS は停止機能をサポートしており、停止中はデータベースのインスタンス料金が発生しません（ストレージ料金・スナップショット料金は継続発生）。AWS Systems Manager（または EventBridge + Lambda）でスケジュールを設定し、平日 20:00 に停止・9:00 に起動、週末は全日停止を自動化できます。停止できる時間が全体の 50% なら、インスタンス料金を最大 50% 削減できます。なお RDS は連続停止が最大 7 日間（その後自動起動）の制限があるため、週 1 回以上の起動が必要です。",
+    comparePoint:
+      "RDS 停止：インスタンス料金ゼロ・ストレージ料金は継続・最大 7 日連続停止。RDS インスタンス縮小：コスト削減・性能低下リスク。Aurora Serverless v2：使用量に応じて自動スケール・アイドル時コスト低減。",
+    rememberAxis:
+      "使用時間が限られた RDS のコスト削減 → スケジュール停止（インスタンス料金ゼロ）。アクセス頻度が不規則な DB のコスト最適化 → Aurora Serverless v2。常時使用する安定ワークロード → Reserved Instance（最大 72% 割引）。",
+  },
+  {
+    id: "cost-adv-3",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が AWS の月次コストを分析したところ、どのサービスのどの環境（本番・開発・テスト）にコストが発生しているかが不明瞭で、部門別のコスト配賦もできていない。AWS のコスト可視化と配賦を改善するには何を使うべきか。",
+    context:
+      "EC2・RDS・S3 など複数サービスを使用。リソースには現在タグが付いていない。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "AWS Organizations の統合請求のみで部門別コストを確認する", hint: "統合請求はアカウント単位の集計。アカウント内のリソース別・環境別の配賦はできない" },
+      { id: "b", label: "B", text: "AWS Pricing Calculator でコストを事前計算する", hint: "Pricing Calculator は見積もりツールで、実際の使用コストの可視化・配賦はできない" },
+      { id: "c", label: "C", text: "CloudWatch のカスタムメトリクスでコストを監視する", hint: "CloudWatch は性能・運用メトリクスの監視が目的。コスト配賦には Cost Explorer・タグが適切" },
+      { id: "d", label: "D", text: "全リソースにコスト配賦タグを付け、AWS Cost Explorer でタグ別コストを分析する", hint: "タグ（Environment: prod/dev・Team: backend 等）をリソースに付与し Cost Explorer でフィルタリングすると部門別・環境別のコストを把握できる" },
+    ],
+    explanation:
+      "AWS Cost Explorer はコストと使用量を可視化・分析するサービスです。リソースに「Environment: production」「Team: backend」「Project: app-x」などのタグを付与し、「コスト配賦タグ」として有効化すると、Cost Explorer でタグ別にコストをフィルタリング・グループ化できます。部門別・環境別・プロジェクト別のコスト配賦レポートを作成し、チャージバック（実費請求）やショーバック（参照用）に使えます。AWS Budgets でタグ別のコスト予算・アラートを設定することも可能です。",
+    comparePoint:
+      "Cost Explorer：コストの可視化・タグ別分析・トレンド分析・予測。Cost and Usage Report（CUR）：詳細な請求データをS3に出力・Athena/Redshift で分析。AWS Budgets：コスト予算の設定・アラート通知。",
+    rememberAxis:
+      "コストの可視化・タグ別配賦 → コスト配賦タグ + Cost Explorer。詳細な請求データの分析 → Cost and Usage Report（CUR）+ Athena。コスト超過の通知 → AWS Budgets アラート。",
+  },
+  {
+    id: "cost-adv-4",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がデータ分析基盤として Redshift クラスター（ra3.4xlarge × 4 ノード）を常時稼働させている。実際にクエリが実行されるのは平日 9〜18 時のみで、夜間・週末は完全にアイドル状態。コストを最小化したい。最適な構成変更はどれか。",
+    context:
+      "クエリは平日日中のみ。夜間・週末はクラスターが完全にアイドル。データは常に保持する必要がある。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Redshift を Reserved Node（1 年）で購入してコストを削減する", hint: "Reserved Node は割引率が高いが、夜間・週末のアイドル時間のコストは削減できない" },
+      { id: "b", label: "B", text: "クラスターのノード数を 4 から 2 に減らす", hint: "ノード削減はコスト削減になるが、日中のクエリ性能が低下するリスクがある" },
+      { id: "c", label: "C", text: "Redshift Serverless に移行し、クエリ実行時のみ課金される構成にする", hint: "Redshift Serverless はクエリの実行時間に応じた RPU 課金で、アイドル時間のコストがゼロになる" },
+      { id: "d", label: "D", text: "Redshift を削除して分析のたびにスナップショットから復元する", hint: "復元に時間がかかり実用的でない" },
+    ],
+    explanation:
+      "Amazon Redshift Serverless は従来のプロビジョニング型クラスターとは異なり、クエリ実行時のコンピューティングリソース（RPU：Redshift Processing Unit）に対してのみ課金されます。クエリがない時間帯のコストは発生しません。平日 9〜18 時のみの利用であれば、1 日あたり 9 時間・週 5 日 = 週 45 時間しか課金されず、常時稼働の 168 時間と比べて大幅なコスト削減が可能です。データは Redshift Managed Storage（RMS）で保持され、クラスターが停止中も参照できます。",
+    comparePoint:
+      "Redshift Serverless：RPU 課金・アイドルゼロコスト・自動スケール・使用時間が少ない場合に有効。Redshift プロビジョニング：常時稼働・ノード時間課金・Reserved で最大 75% 割引。",
+    rememberAxis:
+      "使用時間が限られた Redshift → Serverless（使用分のみ課金）。常時稼働の安定した分析ワークロード → プロビジョニング型 + Reserved Node。S3 上のデータをアドホックにクエリ → Athena（スキャン課金）。",
+  },
+  {
+    id: "cost-adv-5",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が EC2 インスタンス（m5.2xlarge × 20 台）を本番環境で常時稼働させている。過去 1 年間の使用状況を分析すると、CPU 使用率は常時 20〜30% 程度だった。AWS Compute Optimizer からは「m5.xlarge への変更を推奨」という提案が届いている。コストを最適化するための最善のアプローチはどれか。",
+    context:
+      "インスタンスは 24 時間 365 日稼働のベースロードで、スパイクはほぼない。アプリケーションの改修は避けたい。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Compute Optimizer の推奨に従い m5.xlarge にダウンサイズし、1 年の Savings Plans を購入する", hint: "ダウンサイズで EC2 コストを約 50% 削減し、さらに Savings Plans でオンデマンドより最大 66% 割引できる" },
+      { id: "b", label: "B", text: "インスタンスを Spot に変更してコストを最大削減する", hint: "Spot は最大 90% 割引だが中断リスクがある。24/365 の本番サービスへの無条件適用は可用性を損なう" },
+      { id: "c", label: "C", text: "Compute Optimizer の推奨を無視してインスタンスタイプは変更しない", hint: "常時 20〜30% の CPU 使用率は明らかなオーバープロビジョニングでコストの無駄" },
+      { id: "d", label: "D", text: "インスタンスを全て Lambda に移行してサーバーレスにする", hint: "Lambda への移行はアプリケーションの大幅な改修が必要で「改修を避けたい」要件に反する" },
+    ],
+    explanation:
+      "AWS Compute Optimizer は CloudWatch のメトリクス（CPU・メモリ・ネットワーク）を ML で分析し、最適なインスタンスタイプを推奨するサービスです。CPU 使用率が 20〜30% の場合、現行の半分のサイズ（m5.2xlarge → m5.xlarge）への変更が推奨される典型的なパターンです。ダウンサイズにより EC2 コストを約 50% 削減でき、さらに 1 年 Compute Savings Plans を購入すると On-Demand 比最大 66% の割引になります。変更前にステージング環境でパフォーマンステストを行い、問題ないことを確認してから本番に適用します。",
+    comparePoint:
+      "Compute Optimizer：ML ベースの右サイジング推奨・EC2/Lambda/ECS/EBS 対応。Savings Plans：柔軟な割引プラン・インスタンスファミリー変更可能・最大 66% 割引。Reserved Instance：特定インスタンスタイプ固定・最大 72% 割引。",
+    rememberAxis:
+      "インスタンスの右サイジング推奨 → Compute Optimizer。常時稼働の安定ワークロード割引 → Savings Plans または Reserved Instance。使用率が低い開発環境 → スケジュール停止。",
+  },
+
+  // ── シナリオ: Lambda 詳細（追加） ────────────────────────────────────────
+
+  {
+    id: "lambda-adv-1",
+    category: "Serverless",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の Lambda 関数が外部の商用データベース（VPC 外）と、VPC 内のプライベート RDS の両方に接続する必要がある。また Lambda 関数の同時実行数が急増したとき、RDS の接続数上限（max_connections）を超えて障害が発生している。最適な解決策はどれか。",
+    context:
+      "Lambda のコールドスタート・コネクションプールの管理が問題になっています。RDS は Aurora MySQL。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Lambda の最大同時実行数（Reserved Concurrency）を制限して RDS への接続数を抑える", hint: "接続数は抑えられるが、大量リクエスト時にスロットリングが発生しユーザー体験が悪化する" },
+      { id: "b", label: "B", text: "RDS Proxy を Lambda と RDS の間に配置し、接続プーリングで接続数を管理する", hint: "RDS Proxy は Lambda などの大量の短命な接続を接続プールで集約し、RDS の max_connections 問題を根本解決する" },
+      { id: "c", label: "C", text: "Lambda 関数内でグローバル変数として DB 接続を保持する", hint: "コンテキスト再利用で改善するが、Lambda の同時実行数分の接続が張られる問題は解消されない" },
+      { id: "d", label: "D", text: "RDS を DynamoDB に移行して接続数制限をなくす", hint: "DynamoDB への移行はアプリの大幅な改修が必要で、RDB の必要なユースケースには不向き" },
+    ],
+    explanation:
+      "Amazon RDS Proxy は RDS データベースの前段に配置するフルマネージドなデータベースプロキシです。Lambda 関数が増減しても RDS Proxy が接続を集約・プールするため、RDS に対する実際の接続数を大幅に削減できます。Lambda → RDS Proxy（少数の永続的接続）→ RDS という構成になり、Lambda の同時実行数が数千になっても RDS の max_connections を超えなくなります。VPC 内の RDS に Lambda を接続する際の標準パターンです。また RDS Proxy はフェイルオーバー時間の短縮（Multi-AZ 切替の高速化）にも貢献します。",
+    comparePoint:
+      "RDS Proxy：接続プーリング・Lambda からの大量接続を集約・フェイルオーバー高速化。Lambda Reserved Concurrency：同時実行数の制限・スロットリング発生。DynamoDB：コネクション不要・大規模スケール・RDB の代替にはならない。",
+    rememberAxis:
+      "Lambda の大量同時実行による RDS 接続数超過 → RDS Proxy（接続プーリング）。Lambda の暴走を防ぐ同時実行制限 → Reserved Concurrency。Lambda から RDS への接続（VPC 内）→ Lambda を VPC 配置 + RDS Proxy。",
+  },
+  {
+    id: "lambda-adv-2",
+    category: "Serverless",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が Lambda 関数のコールドスタートによるレイテンシの問題を解決したい。API Gateway から呼ばれる Lambda が、コールドスタート時に約 2〜3 秒の遅延が発生している。ユーザーに常に 200ms 以下のレスポンスを保証したい。最適な解決策はどれか。",
+    context:
+      "Lambda は Node.js で実装。VPC 内に配置されており、コールドスタート時に ENI 作成のオーバーヘッドがある。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "Lambda のタイムアウトを 30 秒に延ばす", hint: "タイムアウト延長はコールドスタートの根本原因を解決しない" },
+      { id: "b", label: "B", text: "Lambda を EC2 に移行してコールドスタートをなくす", hint: "EC2 への移行はサーバーレスの利点を失い、管理コストが増加する" },
+      { id: "c", label: "C", text: "CloudWatch Events で Lambda を定期的に Warm-up 呼び出しする", hint: "Ping で Warm 状態を維持できるが、スケールアウト時の新しいインスタンスにはコールドスタートが発生する。確実な解決ではない" },
+      { id: "d", label: "D", text: "Lambda のプロビジョニングされた同時実行（Provisioned Concurrency）を設定する", hint: "Provisioned Concurrency は指定した数の Lambda 実行環境を事前に初期化状態で維持し、コールドスタートをゼロにする" },
+    ],
+    explanation:
+      "Lambda のプロビジョニングされた同時実行（Provisioned Concurrency）を設定すると、指定した数の実行環境が事前に初期化された状態で待機します。リクエストが来た際に初期化済みの環境がすぐに応答するため、コールドスタートの遅延がゼロになります。VPC 配置の Lambda では ENI の作成もプロビジョニング時に完了しているため、VPC 起因のコールドスタートも解消されます。Application Auto Scaling と組み合わせてトラフィックパターンに応じて Provisioned Concurrency 数を自動調整することもできます。追加コスト（常時プロビジョニングされた環境数 × 時間）が発生します。",
+    comparePoint:
+      "Provisioned Concurrency：コールドスタートゼロ・事前初期化・追加コストあり。Reserved Concurrency：同時実行数の上限設定・コールドスタートは解決しない。Lambda SnapStart（Java）：Java の Init フェーズをスナップショット化してコールドスタート短縮。",
+    rememberAxis:
+      "Lambda のコールドスタートをゼロに → Provisioned Concurrency。Lambda の同時実行数の上限設定 → Reserved Concurrency（スロットリング発生）。Java Lambda のコールドスタート短縮 → Lambda SnapStart。",
+  },
+  {
+    id: "lambda-adv-3",
+    category: "Serverless",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が API Gateway + Lambda のサーバーレス API を運用している。特定のエンドポイントへの大量の不正リクエスト（API 乱用・スクレイピング）が発生しており、Lambda のコストが急増している。IP ベースのレートリミットと API キー認証を実装したい。最適な構成はどれか。",
+    context:
+      "悪意あるクライアントが 1 秒間に数百リクエストを送っています。Lambda の費用が月 $3,000 以上に膨らんでいます。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "API Gateway の使用量プランと API キーを設定し、WAF でレートリミットルールを追加する", hint: "使用量プランで API キー別にレート制限（RPS）とクォータを設定。WAF のレートベースルールで IP 別のレート超過をブロックできる" },
+      { id: "b", label: "B", text: "Lambda 関数内でリクエスト数をカウントしてレートリミットを実装する", hint: "Lambda でのカウントは状態管理が複雑でスケール時に不正確。API Gateway レイヤーで処理する方が効率的" },
+      { id: "c", label: "C", text: "Lambda の Reserved Concurrency を 1 に設定して大量リクエストをスロットリングする", hint: "同時実行 1 では正規ユーザーのリクエストもスロットリングされ、サービス品質が大幅に低下する" },
+      { id: "d", label: "D", text: "CloudFront を API Gateway の前段に配置してキャッシュする", hint: "GET リクエストのキャッシュは有効だが、POST など状態変更リクエストはキャッシュできない。レートリミットも CloudFront だけでは不十分" },
+    ],
+    explanation:
+      "API Gateway の使用量プランは API キーに対してリクエストレート（RPS）・バースト制限・月次クォータを設定できます。クライアントは API キーをヘッダーに付与して送信し、制限を超えたリクエストは 429 Too Many Requests で拒否されます（Lambda が呼ばれないためコストが発生しない）。さらに AWS WAF のレートベースルールを API Gateway に適用すると、同一 IP から一定時間内に閾値を超えるリクエストを自動的にブロックできます。API キーを持たないリクエストや IP ベースの攻撃を 2 層で防御できます。",
+    comparePoint:
+      "API Gateway 使用量プラン：API キー別のレート制限・クォータ管理。WAF レートベースルール：IP 別のレート制限・自動ブロック。Lambda Reserved Concurrency：同時実行上限（正規ユーザーも影響）。",
+    rememberAxis:
+      "API の不正利用・乱用防止 → API Gateway 使用量プラン + WAF レートベースルール。API キー管理・レート制限 → API Gateway 使用量プラン。IP ベースのブロック → WAF（レートベース or IP セット）。",
+  },
+  {
+    id: "lambda-adv-4",
+    category: "Serverless",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が異なる部門の Lambda 関数（200 個以上）が同一アカウントで動作している。新しい Lambda 関数をデプロイしたとき、他の重要な Lambda 関数の同時実行枠を圧迫して性能が低下する問題が発生した。重要な Lambda 関数の性能を保護したい。最適な設定はどれか。",
+    context:
+      "アカウントの Lambda 同時実行数の上限はデフォルト 1,000。重要な決済処理 Lambda が影響を受けている。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Lambda アカウント上限を AWS に申請して増やす", hint: "上限増加は根本解決だが、重要関数の保護には Reserved Concurrency の設定が必要" },
+      { id: "b", label: "B", text: "全ての Lambda 関数を別アカウントに移動する", hint: "アカウント分割は有効だが、200 個以上の移行コストが高い" },
+      { id: "c", label: "C", text: "重要な Lambda 関数に Reserved Concurrency を設定して同時実行枠を確保する", hint: "Reserved Concurrency を設定した関数はその枠が保証され、他の関数に影響されない" },
+      { id: "d", label: "D", text: "重要な Lambda 関数の実行時間を短縮して同時実行数を減らす", hint: "実行時間の短縮は有効な最適化だが、突発的なリクエスト増には対処できない" },
+    ],
+    explanation:
+      "Lambda の Reserved Concurrency（予約済み同時実行）を設定すると、その関数のために指定した同時実行数をアカウントの上限から「予約」します。決済処理 Lambda に Reserved Concurrency 100 を設定すると、アカウント上限 1,000 のうち 100 が決済処理専用として確保され、他の Lambda 関数がいくら同時実行数を使っても決済処理は最低 100 の同時実行が保証されます。また Reserved Concurrency を設定することで、その関数自体の上限も 100 に制限されます（他の関数を保護する効果もある）。",
+    comparePoint:
+      "Reserved Concurrency：特定関数の同時実行数を確保・上限も制限される。Provisioned Concurrency：コールドスタート解消のために実行環境を事前初期化。アカウント上限（バーストリミット）：アカウント全体の同時実行数上限（デフォルト 1,000）。",
+    rememberAxis:
+      "重要な Lambda の同時実行枠を保護 → Reserved Concurrency（枠を確保）。Lambda のコールドスタートをゼロに → Provisioned Concurrency。Lambda の暴走を防ぐ → Reserved Concurrency（上限として機能）。",
+  },
+  {
+    id: "lambda-adv-5",
+    category: "Serverless",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が DynamoDB テーブルへの書き込みをトリガーに Lambda を実行して、リアルタイムで二次データを更新するパイプラインを構築したい。DynamoDB への書き込みが毎秒 10,000 件ある。Lambda の処理が遅れた場合でも全件を確実に処理したい。最適な構成はどれか。",
+    context:
+      "DynamoDB への書き込みと Lambda の処理速度に差がある場合でも、データの取りこぼしは許容できない。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "DynamoDB Streams を有効化し、Lambda のイベントソースマッピングで処理する", hint: "DynamoDB Streams は変更ログを 24 時間保持し、Lambda が遅れても順番に処理できる。シャードで並列化も可能" },
+      { id: "b", label: "B", text: "DynamoDB の書き込み完了後に SNS で Lambda を呼び出す", hint: "SNS は非同期だが DynamoDB の書き込みから SNS への通知ロジックをアプリ側に実装する必要がある" },
+      { id: "c", label: "C", text: "EventBridge で DynamoDB のイベントをキャプチャして Lambda をトリガーする", hint: "EventBridge Pipes で DynamoDB Streams を使う方法はあるが、DynamoDB 直接統合より設定が複雑" },
+      { id: "d", label: "D", text: "Lambda を 1 秒ごとに定期実行して DynamoDB をポーリングする", hint: "ポーリングは非効率で毎秒 1 万件の変更を追いかけるのが困難。Streams の方が確実" },
+    ],
+    explanation:
+      "DynamoDB Streams は DynamoDB テーブルへのすべての書き込み（追加・更新・削除）を変更ログとして最大 24 時間保持するサービスです。Lambda のイベントソースマッピングを設定すると、Lambda が Streams から自動的にバッチでレコードを読み取り処理します。Lambda の処理が遅れても Streams にレコードが残っているため、取りこぼしなく全件を処理できます。シャード数（DynamoDB のパーティション数と同数）に応じて Lambda を並列実行でき、毎秒 1 万件のスループットにもスケールできます。処理失敗時の DLQ（SQS）設定もできます。",
+    comparePoint:
+      "DynamoDB Streams + Lambda：変更ログを順番に処理・24 時間保持・取りこぼしなし。SQS → Lambda：メッセージキュー経由・DLQ でリトライ可能。Kinesis Data Streams + Lambda：大量リアルタイムストリーム・7 日間保持・分析向け。",
+    rememberAxis:
+      "DynamoDB の変更をリアルタイムで Lambda 処理 → DynamoDB Streams + Lambda イベントソースマッピング。S3 へのオブジェクト追加をトリガーに Lambda 実行 → S3 イベント通知。Kinesis の大量ストリームを Lambda で処理 → Kinesis + Lambda イベントソースマッピング。",
+  },
+
+  // ── シナリオ: CloudFormation・IaC（追加） ─────────────────────────────────
+
+  {
+    id: "iac-1",
+    category: "Well-Architected",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が複数のリージョン（us-east-1・eu-west-1・ap-northeast-1）に同一の CloudFormation スタックをデプロイしたい。各リージョンのデプロイを手動で行うのは効率が悪く、設定のばらつきも発生している。最も効率的な方法はどれか。",
+    context:
+      "スタックには VPC・EC2・RDS の構成が含まれています。リージョンごとに CIDR などのパラメータを変える必要がある。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "各リージョンに手動でログインしてスタックを個別にデプロイする", hint: "手動デプロイは設定ミスが発生しやすく、リージョン数が増えると管理が困難" },
+      { id: "b", label: "B", text: "Lambda で CloudFormation API を呼び出して各リージョンにデプロイする", hint: "技術的には可能だが、CloudFormation StackSets の方が管理機能・エラーハンドリングが充実している" },
+      { id: "c", label: "C", text: "CloudFormation StackSets を使い、1 つの操作で複数リージョン・複数アカウントに一括デプロイする", hint: "StackSets は指定したアカウント・リージョンへの一括デプロイ・更新・削除を管理する" },
+      { id: "d", label: "D", text: "Terraform を使ってマルチリージョンデプロイを実装する", hint: "Terraform は有効だが、AWS ネイティブの StackSets の方が Organizations 統合・アクセス管理が容易" },
+    ],
+    explanation:
+      "AWS CloudFormation StackSets は単一の CloudFormation テンプレートを複数のアカウント・複数のリージョンに一括でデプロイ・管理するサービスです。Organizations 統合（SERVICE_MANAGED）を使うと、新しいアカウントが Organizations に追加された際に自動的にスタックをデプロイする自動展開も設定できます。各リージョンのパラメータ（CIDR 等）は「デプロイパラメータのオーバーライド」でリージョンごとに指定できます。デプロイの失敗時には自動ロールバックやエラー検知の仕組みも内蔵されています。",
+    comparePoint:
+      "StackSets：複数アカウント・複数リージョンへの一括展開・Organizations 統合・自動展開。単一スタック：1 アカウント・1 リージョンのみ。Terraform：マルチクラウド・自己管理・Organizations 統合は別途設定。",
+    rememberAxis:
+      "複数リージョン・複数アカウントへの一括 CF デプロイ → StackSets。Organizations 配下への自動デプロイ → StackSets + Organizations 統合（SERVICE_MANAGED）。単一リージョンの変更管理 → CloudFormation スタック + ChangeSets。",
+  },
+  {
+    id: "iac-2",
+    category: "Well-Architected",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の CloudFormation スタックを更新する際、意図せず本番の RDS インスタンスが削除・再作成される更新操作が含まれていた。本番環境でこの操作を防ぎたい。最適な対策はどれか。",
+    context:
+      "CloudFormation の更新で RDS が削除・再作成される変更（Replace が必要な変更）を事前に検知・防止したい。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "CloudFormation の更新前に必ずスナップショットを取得する", hint: "スナップショットはデータ保護に有効だが、誤った更新操作の実行を防ぐことはできない" },
+      { id: "b", label: "B", text: "CloudFormation の変更セット（Change Set）を作成して変更内容を確認し、RDS に DeletionPolicy: Retain を設定する", hint: "Change Set で Replace 操作を事前確認。DeletionPolicy: Retain でスタックからの削除時も RDS を保持できる" },
+      { id: "c", label: "C", text: "CloudFormation スタックにスタックポリシーを設定して RDS リソースの更新を禁止する", hint: "スタックポリシーで特定リソースへの更新操作（Update: Modify/Replace/Delete）を拒否できる" },
+      { id: "d", label: "D", text: "RDS の自動バックアップ保持期間を最大 35 日に設定する", hint: "バックアップ保持は復旧手段だが、誤った更新操作の事前防止には繋がらない" },
+    ],
+    explanation:
+      "2 つの保護策を組み合わせることが最適です。①CloudFormation 変更セット（Change Set）：スタック更新を実行する前に変更内容（追加・変更・削除・置換）をプレビューできます。Replacement: True の操作（リソースの削除・再作成が発生）を事前に確認して承認または却下できます。②DeletionPolicy: Retain：CloudFormation リソースに設定すると、スタックからの削除や置換時に実際のリソースを削除せず残します。RDS に設定しておくことで、誤って削除操作が実行されても実データは保護されます。さらにスタックポリシーで RDS への特定操作を拒否する方法も有効です。",
+    comparePoint:
+      "Change Set：スタック更新前の変更プレビュー・Replace 操作の確認。DeletionPolicy: Retain：削除/置換時にリソースを保持。DeletionPolicy: Snapshot：RDS/ElastiCache 削除前に自動スナップショット。スタックポリシー：特定リソースへの更新操作を拒否。",
+    rememberAxis:
+      "CF 更新前の変更確認 → 変更セット（Change Set）。CF スタック削除/置換時のリソース保護 → DeletionPolicy: Retain。CF の特定リソース更新を禁止 → スタックポリシー。",
+  },
+  {
+    id: "iac-3",
+    category: "Well-Architected",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が AWS CDK（Cloud Development Kit）を使ってインフラをコードで管理したい。開発チームは Python が得意。CDK の最大の利点として正しく説明しているのはどれか。",
+    context:
+      "現在は CloudFormation テンプレート（YAML）を手書きしているが、繰り返しパターンの記述が多く保守が大変。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "CDK は Python などのプログラミング言語でインフラを定義でき、ループ・条件分岐・クラス継承などを活用してコードの再利用性を高められる", hint: "CDK の最大の利点はプログラミング言語の表現力（ループ・関数・クラス）をインフラ定義に使えること" },
+      { id: "b", label: "B", text: "CDK は CloudFormation より高速にリソースをデプロイできる", hint: "CDK は最終的に CloudFormation テンプレートに変換されるため、デプロイ速度は同等" },
+      { id: "c", label: "C", text: "CDK を使うと AWS 以外のクラウド（Azure・GCP）にも同じコードでデプロイできる", hint: "CDK は AWS 専用（AWS CDK）。マルチクラウドには CDKTF（Terraform CDK）を使う" },
+      { id: "d", label: "D", text: "CDK は Terraform より優れているためすべての企業が移行すべきである", hint: "CDK と Terraform はそれぞれ利点があり、ユースケースに応じて選択する" },
+    ],
+    explanation:
+      "AWS CDK（Cloud Development Kit）は Python・TypeScript・Java・Go などのプログラミング言語でクラウドインフラを定義するフレームワークです。最大の利点は、for ループで複数の同一リソースを生成・if 文で環境別の設定を切り替え・クラス継承で共通パターンを再利用・npm/pip でコンポーネントを共有するなど、プログラミング言語の表現力をインフラ定義に活用できることです。CDK コードは cdk synth コマンドで CloudFormation テンプレートに変換され、cdk deploy でデプロイされます。Constructs ライブラリに高レベルな抽象化（L2/L3 Constructs）が含まれ、ベストプラクティスが組み込まれています。",
+    comparePoint:
+      "CDK：プログラミング言語でインフラ定義・再利用性・CloudFormation に変換。CloudFormation：JSON/YAML・宣言的・CDK より低レベル。Terraform：HCL・マルチクラウド・CDK と用途が異なる。",
+    rememberAxis:
+      "プログラミング言語でインフラを定義・再利用性重視 → AWS CDK。JSON/YAML で宣言的にインフラ定義 → CloudFormation。マルチクラウドのインフラ管理 → Terraform（または CDKTF）。",
+  },
+  {
+    id: "iac-4",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が Amazon Inspector を有効化した。Inspector は EC2 インスタンス・Lambda 関数・ECR コンテナイメージの脆弱性を継続的にスキャンする。Inspector で高スコア（Critical）の脆弱性が検出された場合、担当チームに自動で通知したい。最適な通知フローはどれか。",
+    context:
+      "Inspector の検出結果を Slack チャンネルとメールで通知したい。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "Inspector のコンソールを毎日手動でチェックする", hint: "手動チェックは見落としのリスクがあり、Critical の緊急対応には遅すぎる" },
+      { id: "b", label: "B", text: "CloudWatch メトリクスで Inspector のスコアを監視してアラームを設定する", hint: "Inspector の検出結果は CloudWatch Events/EventBridge で取得するのが標準" },
+      { id: "c", label: "C", text: "Inspector の検出結果を S3 に送りバッチで集計する", hint: "バッチ処理では Critical 脆弱性のリアルタイム通知ができない" },
+      { id: "d", label: "D", text: "EventBridge ルールで Inspector の Critical 検出結果をフィルタリングし、SNS 経由で Slack とメールに通知する", hint: "Inspector は EventBridge にイベントを送信する。EventBridge ルールで重要度フィルタリングして SNS・Lambda 経由で多チャンネル通知できる" },
+    ],
+    explanation:
+      "Amazon Inspector は脆弱性検出結果を自動的に Amazon EventBridge に送信します。EventBridge ルールで「Inspector の Finding 重要度が CRITICAL」などの JSON パターンマッチングフィルターを設定することで、Critical のみを抽出してターゲット（SNS トピック）に送信できます。SNS トピックに Email サブスクリプションと Lambda サブスクリプション（Slack Webhook 呼び出し）を設定することで、Slack とメールへの自動通知を実現できます。Inspector の検出結果は Security Hub にも自動的に集約されます。",
+    comparePoint:
+      "Inspector：EC2・Lambda・ECR の脆弱性継続スキャン。EventBridge：Inspector イベントのフィルタリング・ルーティング。SNS：メール・SMS・Lambda（Slack 通知）への配信。Security Hub：Inspector 含む複数サービスの検出結果の統合。",
+    rememberAxis:
+      "EC2/Lambda/ECR の脆弱性継続スキャン → Inspector。Inspector 検出結果のリアルタイム通知 → EventBridge + SNS。全セキュリティ検出結果の統合管理 → Security Hub。",
+  },
+  {
+    id: "iac-5",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が S3 のコスト削減のため、オブジェクトの最終アクセス日時を確認したい。しかし S3 には何千万ものオブジェクトがあり、一つひとつ確認することはできない。オブジェクトの一覧とメタデータ（最終変更日時・ストレージクラス・サイズ）を効率的に取得して分析したい。最適な方法はどれか。",
+    context:
+      "オブジェクト数は 5,000 万個。毎週一覧を更新してコスト分析に使いたい。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "AWS CLI の aws s3 ls コマンドで全オブジェクトをリストアップする", hint: "aws s3 ls は件数が多い場合に時間がかかり、CSV やメタデータの自動集計には不向き" },
+      { id: "b", label: "B", text: "S3 インベントリを設定して週次の CSV/ORC レポートを S3 に自動出力し、Athena で分析する", hint: "S3 インベントリは大量オブジェクトのメタデータを定期レポートとして出力するマネージド機能" },
+      { id: "c", label: "C", text: "Lambda で ListObjectsV2 API を繰り返し呼び出してメタデータを収集する", hint: "5,000 万オブジェクトの ListObjectsV2 呼び出しは API リクエスト料金・時間コストが高い" },
+      { id: "d", label: "D", text: "CloudTrail で S3 のアクセスログを収集してオブジェクト一覧を作成する", hint: "CloudTrail は API 操作の記録で、オブジェクト一覧の定期生成には適していない" },
+    ],
+    explanation:
+      "Amazon S3 インベントリは S3 バケット内のオブジェクトのメタデータ（キー・サイズ・最終変更日時・ストレージクラス・暗号化状態・レプリケーション状態等）を日次または週次で CSV・ORC・Parquet 形式で別の S3 バケットに自動出力するサービスです。5,000 万オブジェクトでも API リクエストを発行せず管理された方法でレポートを生成します。出力された CSV/Parquet ファイルを Athena でクエリすることで、「最終変更から 90 日以上経過した Standard クラスのオブジェクト一覧」などのコスト分析が効率的にできます。",
+    comparePoint:
+      "S3 インベントリ：大量オブジェクトのメタデータ定期レポート・Athena で分析。S3 Storage Lens：ストレージ使用量とアクティビティの集計ダッシュボード。ListObjectsV2 API：小〜中規模のオブジェクト一覧取得・大規模は非効率。",
+    rememberAxis:
+      "大量 S3 オブジェクトのメタデータ定期レポート → S3 インベントリ + Athena。S3 ストレージ使用量の可視化 → S3 Storage Lens。オブジェクトへの最終アクセス日追跡 → S3 サーバーアクセスログ + Athena。",
+  },
+
+  // ── シナリオ: RDS・データベース ─────────────────────────────────────────
+  {
+    id: "rds-1",
+    category: "Database",
+    modeLabel: "シナリオ",
+    prompt:
+      "あるグローバルアプリが RDS MySQL（シングル AZ）を使用している。夜間メンテナンス中に 3〜5 分のダウンタイムが発生しており、サービスレベル要件（RTO < 1 分）を満たせていない。追加コストを最小化しながら RTO を 1 分未満に改善するには何をすべきか。",
+    context: "現在の RDS インスタンスはシングル AZ で稼働中。マルチ AZ への移行を検討している。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "RDS リードレプリカを同一 AZ に作成し、障害時に手動でフェイルオーバーする", hint: "手動フェイルオーバーは RTO を延長する。リードレプリカは読み取りスケールアウト用" },
+      { id: "b", label: "B", text: "RDS をマルチ AZ 配置に変更する", hint: "マルチ AZ ではスタンバイへの自動フェイルオーバーが約 60 秒以内に完了する" },
+      { id: "c", label: "C", text: "RDS を Aurora に移行してグローバルデータベースを構成する", hint: "Aurora Global Database はリージョン間 DR に有効だが、同一リージョン内 RTO 改善としてはオーバースペック" },
+      { id: "d", label: "D", text: "EC2 上に MySQL を自己管理で構築してレプリケーションを設定する", hint: "自己管理は運用負荷が高くマネージドサービスのメリットを失う" },
+    ],
+    explanation:
+      "RDS マルチ AZ 配置では、プライマリインスタンスのデータが別 AZ のスタンバイインスタンスに同期レプリケーションされます。プライマリに障害が発生した場合（AZ 障害・インスタンス障害・OS パッチ適用）、RDS が自動的にスタンバイへフェイルオーバーし、DNS エンドポイントが更新されます。フェイルオーバーは通常 60〜120 秒で完了し、手動操作は不要です。マルチ AZ はスタンバイへの読み取りトラフィックを許可しない点（読み取りスケールアウト不可）に注意。読み取りスケールアウトにはリードレプリカが必要です。",
+    comparePoint:
+      "RDS マルチ AZ：自動フェイルオーバー（RTO ~1 分）・同期レプリケーション・スタンバイは読み取り不可。RDS リードレプリカ：非同期レプリケーション・読み取りスケールアウト・フェイルオーバーは手動。Aurora マルチ AZ：自動フェイルオーバー（RTO ~30 秒）・リードレプリカも同一クラスターで読み取り可能。",
+    rememberAxis:
+      "RDS の自動フェイルオーバー → マルチ AZ（スタンバイは読み取り不可）。読み取りのスケールアウト → リードレプリカ。リージョン間 DR → Aurora Global Database。",
+  },
+  {
+    id: "rds-2",
+    category: "Database",
+    modeLabel: "シナリオ",
+    prompt:
+      "あるアプリが RDS PostgreSQL を使用しており、レポート生成クエリによって本番データベースの CPU が急上昇している。レポートは 30 分遅延を許容できる。本番トラフィックへの影響を最小化するコスト効率の高い解決策はどれか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "RDS リードレプリカを作成し、レポートクエリをリードレプリカにルーティングする", hint: "リードレプリカは読み取り専用で非同期レプリケーション。本番 DB の負荷を分散できる" },
+      { id: "b", label: "B", text: "RDS をマルチ AZ に変更し、スタンバイインスタンスでレポートを実行する", hint: "マルチ AZ のスタンバイは読み取りトラフィックを受け付けない" },
+      { id: "c", label: "C", text: "レポート専用の RDS インスタンスを別途作成しデータを手動で同期する", hint: "手動同期は運用負荷が高く、データの鮮度管理が複雑になる" },
+      { id: "d", label: "D", text: "RDS Performance Insights を有効化してクエリを最適化する", hint: "Performance Insights はクエリの分析ツールであり、負荷を直接分散する仕組みではない" },
+    ],
+    explanation:
+      "RDS リードレプリカは非同期レプリケーションでプライマリのデータをコピーし、読み取り専用のエンドポイントを提供します。レポートや分析クエリをリードレプリカに向けることで、プライマリ DB の CPU 負荷を大幅に削減できます。非同期のため若干の遅延（通常数秒〜数分）がありますが、30 分の遅延を許容できる要件であれば問題ありません。PostgreSQL は最大 5 台のリードレプリカを作成でき、さらにリードレプリカのリードレプリカも作成可能です。",
+    comparePoint:
+      "リードレプリカ：非同期レプリケーション・読み取りスケールアウト・プライマリ負荷分散。マルチ AZ スタンバイ：同期レプリケーション・フェイルオーバー専用・読み取り不可。ElastiCache：インメモリキャッシュ・繰り返し読み取りを高速化・DB クエリ数削減。",
+    rememberAxis:
+      "DB 読み取り負荷の分散 → リードレプリカ。キャッシュで DB クエリを削減 → ElastiCache。DB 障害の自動回復 → マルチ AZ。",
+  },
+  {
+    id: "rds-3",
+    category: "Database",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が Aurora MySQL を使用している。月末の請求処理時に DB 負荷が急増し、通常時の 10 倍のトラフィックが発生する。普段は小さいインスタンスで十分だが、月末だけ大きなインスタンスが必要。コストを最小化しながら自動的にスケールする方法はどれか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Aurora のインスタンスクラスを月末に手動でスケールアップし、処理後にダウングレードする", hint: "手動スケールは運用負荷が高く、インスタンス変更中に数分のダウンタイムが発生する" },
+      { id: "b", label: "B", text: "常に大きなインスタンスクラス（db.r5.4xlarge）を維持する", hint: "月末以外は過剰スペックとなりコストが無駄になる" },
+      { id: "c", label: "C", text: "Aurora Serverless v2 に移行し、ACU（Aurora Capacity Units）の最小・最大値を設定する", hint: "Aurora Serverless v2 は負荷に応じて ACU を自動的にスケールし、アイドル時はコストを削減できる" },
+      { id: "d", label: "D", text: "RDS Proxy を前段に置いてコネクションプールで負荷を吸収する", hint: "RDS Proxy はコネクション管理には有効だが、DB 自体の計算リソースはスケールしない" },
+    ],
+    explanation:
+      "Aurora Serverless v2 は負荷に応じて Aurora Capacity Units（ACU）を細かく自動スケールするサーバーレス構成です。最小 ACU（最低コスト）と最大 ACU（最大スペック）を設定すると、負荷が増えれば自動でスケールアップし、負荷が下がれば自動でスケールダウンします。月末の急増にも自動対応でき、通常時は小さい ACU で稼働するためコストを最小化できます。Aurora Serverless v2 はマルチ AZ やリードレプリカもサポートしており、本番ワークロードにも適しています。",
+    comparePoint:
+      "Aurora Serverless v2：ACU 自動スケール・負荷に応じた課金・本番対応。Aurora Provisioned：固定インスタンスクラス・手動スケール・安定した予測可能ワークロード向け。RDS Proxy：コネクションプーリング・Lambda との統合に有効・コンピューティングスケールは不可。",
+    rememberAxis:
+      "予測不能な負荷スパイク → Aurora Serverless v2（自動スケール）。安定した高スループット → Aurora Provisioned + Reserved Instance。Lambda から DB 接続 → RDS Proxy（コネクション管理）。",
+  },
+
+  // ── シナリオ: ECS・コンテナ（追加） ──────────────────────────────────────
+  {
+    id: "ecs-1",
+    category: "Containers",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が ECS on Fargate でマイクロサービスを運用している。特定のサービスが突発的なトラフィックで CPU 使用率が 80% を超え、レスポンスが遅くなる問題が発生している。最小の運用負荷でタスク数を自動的に増減させる方法はどれか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "ECS サービスに Application Auto Scaling を設定し、CPU 使用率 70% をターゲットに追跡スケーリングポリシーを適用する", hint: "ターゲット追跡スケーリングは指定したメトリクス値を維持するようにタスク数を自動調整する" },
+      { id: "b", label: "B", text: "CloudWatch アラームを作成し、CPU 80% 超過時に Lambda で ECS タスク数を手動更新する", hint: "Lambda で ECS を操作する方法は可能だが、ターゲット追跡スケーリングより複雑で管理が煩雑" },
+      { id: "c", label: "C", text: "ECS タスク定義で CPU を 4 vCPU に増やして常時最大スペックで稼働させる", hint: "固定スペックでは負荷がない時もコストが発生し続ける" },
+      { id: "d", label: "D", text: "ALB のターゲットグループを複数作成し、手動でトラフィックを分散する", hint: "手動分散はリアルタイムの負荷変動に対応できない" },
+    ],
+    explanation:
+      "ECS サービスの Application Auto Scaling（ターゲット追跡スケーリング）は、CPU 使用率や ALB のリクエスト数などのメトリクスを指定したターゲット値に維持するようにタスク数を自動調整します。CPU 70% をターゲットに設定すると、超過時はタスクを追加し、下回れば削減します。Fargate はタスク単位の課金なので、スケールイン時にコストも削減されます。設定は CloudWatch アラームや Lambda 不要で、ECS コンソールから直接設定できます。",
+    comparePoint:
+      "ECS ターゲット追跡スケーリング：メトリクスを自動追跡・シンプルな設定。ECS ステップスケーリング：CloudWatch アラームと連動・段階的にタスクを追加/削除。EC2 Auto Scaling：EC2 インスタンス数をスケール（ECS on EC2 の場合）。",
+    rememberAxis:
+      "ECS タスク数の自動スケール → Application Auto Scaling（ターゲット追跡）。EC2 インスタンス数のスケール → EC2 Auto Scaling + Scaling Policy。Fargate のコスト最適化 → 使用時のみ課金・スケールインでコスト削減。",
+  },
+  {
+    id: "ecs-2",
+    category: "Containers",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が ECS on EC2 を使用しており、EC2 インスタンスのコストを削減したい。ワークロードは中断可能で、処理が途中で止まっても再試行できる。最もコスト効率の高い選択肢はどれか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Reserved Instance を購入して EC2 の割引を受ける", hint: "Reserved Instance はコスト削減に有効だが、スポットインスタンスほどの割引率ではない" },
+      { id: "b", label: "B", text: "ECS Capacity Provider にスポットインスタンスを設定し、タスクをスポットで実行する", hint: "スポットインスタンスはオンデマンドより最大 90% 安い。中断可能なワークロードに最適" },
+      { id: "c", label: "C", text: "Fargate Spot を使用してタスクをスポット価格で実行する", hint: "Fargate Spot はサーバーレスでスポット価格。EC2 管理不要だが選択肢は Fargate への移行が前提" },
+      { id: "d", label: "D", text: "ECS タスクを夜間のみ実行するようにスケジュールする", hint: "スケジューリングは夜間バッチに有効だが、任意のタイミングでの中断可能ワークロードには直接対応しない" },
+    ],
+    explanation:
+      "ECS Capacity Provider を使用すると、ECS クラスターで使用する EC2 インスタンスの調達方法を管理できます。スポットインスタンスを Capacity Provider に設定することで、タスクをスポットインスタンス上で実行し、オンデマンド比最大 90% のコスト削減が可能です。スポットインスタンスは AWS による中断通知（2 分前）を受けてタスクを移行する仕組みも ECS が管理します。中断可能・再試行可能なバッチ処理やワーカーに適しています。",
+    comparePoint:
+      "EC2 スポットインスタンス（ECS Capacity Provider）：オンデマンド比最大 90% 削減・2 分前中断通知・再試行可能なワークロード向け。Fargate Spot：EC2 管理不要・スポット価格・Fargate の柔軟性と低コストを両立。Reserved Instance：1〜3 年コミット・最大 72% 割引・安定した常時稼働に向く。",
+    rememberAxis:
+      "中断可能なコンテナワークロードの低コスト化 → スポットインスタンス or Fargate Spot。常時稼働のコンテナコスト削減 → Savings Plans or Reserved Instance。EC2 インスタンス管理不要のコンテナ → Fargate（オンデマンド or スポット）。",
+  },
+
+  // ── シナリオ: Route 53・DNS ────────────────────────────────────────────
+  {
+    id: "route53-1",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がグローバルにサービスを展開しており、ユーザーを地理的に最も近い AWS リージョンにルーティングしたい。また、特定リージョンが障害を起こした場合は別リージョンに自動的に切り替えたい。Route 53 でどのルーティングポリシーを組み合わせるべきか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "レイテンシーベースルーティング + フェイルオーバールーティングをヘルスチェックと組み合わせる", hint: "レイテンシーで最適リージョンに誘導し、ヘルスチェック失敗時にフェイルオーバーで切り替える" },
+      { id: "b", label: "B", text: "地理的位置ルーティングのみを使用する", hint: "地理的位置ルーティングは物理的な場所でルーティングするが、レイテンシー最適化ではなく障害時の自動フェイルオーバー機能もない" },
+      { id: "c", label: "C", text: "加重ルーティングで両リージョンに 50% ずつトラフィックを振り分ける", hint: "加重ルーティングはトラフィック分散（A/B テストなど）向けで、地理的な最適化や自動フェイルオーバーではない" },
+      { id: "d", label: "D", text: "シンプルルーティングで固定 IP を返す", hint: "シンプルルーティングはヘルスチェックやフェイルオーバー機能を持たない" },
+    ],
+    explanation:
+      "Route 53 のレイテンシーベースルーティングは、各リージョンへのネットワークレイテンシーを測定し、ユーザーから最も低レイテンシーのリージョンにトラフィックをルーティングします。これにヘルスチェックを組み合わせてフェイルオーバールーティングを設定することで、プライマリリージョンが障害になった場合に自動で別リージョンに切り替えることができます。AWS Global Accelerator も同様の要件に対応できますが、Route 53 の組み合わせはより細かなポリシー設定が可能です。",
+    comparePoint:
+      "レイテンシーベースルーティング：ネットワーク遅延が最小のリージョンへ誘導。地理的位置ルーティング：国・大陸単位の物理的な場所でルーティング（コンプライアンス対応向け）。フェイルオーバールーティング：ヘルスチェック失敗時にセカンダリへ切り替え。加重ルーティング：指定した割合でトラフィックを分散（A/B テスト向け）。",
+    rememberAxis:
+      "ユーザーに最速のリージョンへ → レイテンシーベースルーティング。リージョン障害時の自動切り替え → フェイルオーバールーティング + ヘルスチェック。特定国からのトラフィックを制御 → 地理的位置ルーティング。",
+  },
+  {
+    id: "route53-2",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が新バージョンのAPIを段階的にリリースしたい。最初は全トラフィックの 5% を新バージョンに送り、問題がなければ徐々に増やしていく計画だ。Route 53 でこれを実現するにはどのルーティングポリシーを使うべきか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "フェイルオーバールーティング", hint: "フェイルオーバーはプライマリ障害時のセカンダリ切り替え用で、トラフィック分割には使わない" },
+      { id: "b", label: "B", text: "加重ルーティング（Weighted Routing）", hint: "加重ルーティングは各レコードに重みを割り当ててトラフィックを指定割合で分散できる" },
+      { id: "c", label: "C", text: "レイテンシーベースルーティング", hint: "レイテンシーベースはネットワーク遅延で自動ルーティング・手動での割合制御はできない" },
+      { id: "d", label: "D", text: "複数値回答ルーティング", hint: "複数値回答は複数の IP を返してクライアントがランダムに選ぶ仕組みで、割合制御はできない" },
+    ],
+    explanation:
+      "Route 53 の加重ルーティング（Weighted Routing）は、同一の DNS 名に対して複数のレコードを作成し、それぞれに重みを付けることでトラフィックを指定した割合で分散できます。例えば旧バージョンに重み 95、新バージョンに重み 5 を設定すると、約 5% のトラフィックが新バージョンに流れます。段階的リリース（カナリアデプロイ）に最適です。ALB の加重ターゲットグループや AppMesh との組み合わせでも同様のことが可能ですが、Route 53 レベルでの制御はシンプルです。",
+    comparePoint:
+      "加重ルーティング：トラフィックを指定割合で分散・カナリアリリース・A/B テスト向け。レイテンシーベースルーティング：レイテンシー最小リージョンに自動ルーティング・割合制御不可。フェイルオーバールーティング：ヘルスチェック失敗時のセカンダリ切り替え専用。",
+    rememberAxis:
+      "カナリアリリース・A/B テストでのトラフィック分割 → 加重ルーティング。地理的に最速のリージョンへ → レイテンシーベースルーティング。DR のフェイルオーバー → フェイルオーバールーティング + ヘルスチェック。",
+  },
+
+  // ── シナリオ: ElastiCache ────────────────────────────────────────────
+  {
+    id: "elasticache-1",
+    category: "Database",
+    modeLabel: "シナリオ",
+    prompt:
+      "あるeコマースサイトが RDS MySQL を使用しており、商品カタログページへのアクセスが急増すると DB の読み取り負荷が限界に達する。商品カタログのデータは数時間に一度更新される。レスポンスタイムを改善し DB 負荷を削減する最善の方法はどれか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "ElastiCache for Redis を導入し、商品カタログをセッションキャッシュとして保存する", hint: "インメモリキャッシュで DB クエリを削減し、マイクロ秒レベルのレスポンスタイムを実現できる" },
+      { id: "b", label: "B", text: "RDS リードレプリカを追加してすべての読み取りを分散する", hint: "リードレプリカは DB レベルの分散だが、ElastiCache と比較するとレスポンスタイムは DB クエリ速度に依存する" },
+      { id: "c", label: "C", text: "RDS のインスタンスクラスを大きくする（スケールアップ）", hint: "スケールアップは一時的な解決策でコストが増加し、上限がある" },
+      { id: "d", label: "D", text: "CloudFront を CDN として導入してすべての API レスポンスをキャッシュする", hint: "CloudFront は静的コンテンツや API レスポンスのキャッシュに有効だが、動的なユーザー固有データには適さない場合がある" },
+    ],
+    explanation:
+      "ElastiCache for Redis はインメモリデータストアで、DB クエリ結果をキャッシュすることでデータベースへのアクセスを大幅に削減できます。商品カタログのように数時間に一度しか変わらないデータは、TTL（Time to Live）を設定してキャッシュに保存しておくと、大多数のリクエストが DB に届かずにキャッシュから応答されます。Redis のレスポンスタイムはマイクロ秒〜ミリ秒で、RDS の通常のクエリ（数ミリ秒〜数十ミリ秒）より高速です。キャッシュ戦略としては、キャッシュに存在しない場合のみ DB に問い合わせる「キャッシュアサイド（Lazy Loading）」が一般的です。",
+    comparePoint:
+      "ElastiCache for Redis：インメモリキャッシュ・マイクロ秒レスポンス・TTL 設定・セッション管理にも使用。ElastiCache for Memcached：シンプルなキャッシュ・マルチスレッド・Redis より機能は少ない。RDS リードレプリカ：DB レベルのスケールアウト・非同期レプリケーション・ElastiCache よりレイテンシーは高い。",
+    rememberAxis:
+      "DB 読み取り負荷削減 + 高速レスポンス → ElastiCache（インメモリキャッシュ）。DB 読み取りのスケールアウト → リードレプリカ。静的コンテンツ・API レスポンスのエッジキャッシュ → CloudFront。",
+  },
+
+  // ── シナリオ: SQS・メッセージング（追加） ────────────────────────────────
+  {
+    id: "sqs-adv-1",
+    category: "Application Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が SQS を使って注文処理システムを構築している。メッセージの処理に失敗した場合、最大 3 回までリトライし、3 回失敗したメッセージは別のキューに移動して手動で調査したい。この要件を実現するために設定すべきものはどれか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "SQS メッセージの RetentionPeriod を 3 日に設定してリトライを待つ", hint: "RetentionPeriod はメッセージの保持期間で、リトライ回数の制御とは関係ない" },
+      { id: "b", label: "B", text: "SQS キューにデッドレターキュー（DLQ）を設定し、maxReceiveCount を 3 に設定する", hint: "maxReceiveCount が設定値を超えたメッセージは自動的に DLQ に移動される" },
+      { id: "c", label: "C", text: "Lambda で処理失敗時に別の SQS キューに手動でメッセージを送信する", hint: "手動送信は可能だが、処理ロジックにエラーハンドリングコードを追加する必要があり、DLQ より複雑" },
+      { id: "d", label: "D", text: "SQS の可視性タイムアウトを 0 秒に設定する", hint: "可視性タイムアウトを 0 にすると処理中のメッセージが即座に他のコンシューマーから見えてしまう" },
+    ],
+    explanation:
+      "SQS のデッドレターキュー（DLQ）は、処理に繰り返し失敗したメッセージを自動的に移動させる仕組みです。ソースキューのリドライブポリシーで `maxReceiveCount` を 3 に設定すると、同一メッセージが 3 回受信（処理試行）されても削除されなかった場合に DLQ に自動転送されます。DLQ に移動したメッセージは期限内（デフォルト 4 日）に手動で調査・再処理ができます。SQS DLQ は Lambda のイベントソースマッピングにも対応しており、Lambda の処理失敗時も自動的に DLQ に転送できます。",
+    comparePoint:
+      "SQS DLQ（デッドレターキュー）：maxReceiveCount 超過メッセージを自動隔離・手動調査・再処理可能。SQS 可視性タイムアウト：処理中のメッセージを他のコンシューマーから隠す時間。SQS RetentionPeriod：メッセージの最大保持期間（デフォルト 4 日、最大 14 日）。",
+    rememberAxis:
+      "繰り返し処理失敗したメッセージを隔離 → DLQ + maxReceiveCount。処理中メッセージの重複防止 → 可視性タイムアウト。メッセージの順序保証 → SQS FIFO キュー。",
+  },
+  {
+    id: "sqs-adv-2",
+    category: "Application Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある注文システムで、注文が作成されたとき在庫管理・メール通知・分析の 3 つのサービスに同時に通知したい。現在は SQS キューに送信しているが、1 つのキューを 3 サービスがポーリングしていると、1 サービスがメッセージを受け取ると他のサービスが受け取れない問題がある。最も適切な解決策はどれか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "SNS トピックを作成し、3 つの SQS キューをサブスクライブする（ファンアウトパターン）", hint: "SNS から複数の SQS キューへのファンアウトで、各サービスが独立してメッセージを受け取れる" },
+      { id: "b", label: "B", text: "SQS キューを 3 つ作成し、注文サービスから各キューに個別にメッセージを送信する", hint: "可能だが、送信先キューが増えるたびに注文サービスのコードを変更する必要があり疎結合でない" },
+      { id: "c", label: "C", text: "SQS FIFO キューを使用して 3 つのサービスが順番にメッセージを処理する", hint: "FIFO は順序保証だが、依然として 1 メッセージを 1 サービスしか受け取れない問題は解決しない" },
+      { id: "d", label: "D", text: "SQS の長時間ポーリングを有効化する", hint: "長時間ポーリングはポーリング効率の改善でコスト削減に有効だが、ファンアウトの問題は解決しない" },
+    ],
+    explanation:
+      "SNS（Simple Notification Service）+ SQS のファンアウトパターンは、1 つの SNS トピックに複数の SQS キューをサブスクライブすることで、1 つのメッセージをすべてのサブスクライバーに同時配信できます。注文サービスは SNS トピックに 1 回だけ発行（Publish）し、SNS が各 SQS キューにメッセージを複製します。これにより在庫管理・メール通知・分析の各サービスが独立した SQS キューからメッセージを受け取れます。新しいサービスを追加するときも注文サービスのコードを変更せず、SNS にサブスクライブするだけで対応できます（疎結合）。",
+    comparePoint:
+      "SNS + SQS ファンアウト：1 メッセージを複数サービスに同時配信・疎結合・新サービス追加が容易。EventBridge：イベントルーティング・フィルタリング・複数 AWS サービスとの統合。Kinesis：大量ストリーミングデータ・複数コンシューマーが同一ストリームを読める（シャードごと）。",
+    rememberAxis:
+      "1 メッセージを複数サービスに同時配信 → SNS ファンアウト + SQS。メッセージの順序保証 → SQS FIFO。大量イベントストリームを複数コンシューマーで処理 → Kinesis Data Streams。",
+  },
+
+  // ── シナリオ: Step Functions ──────────────────────────────────────────
+  {
+    id: "stepfunctions-1",
+    category: "Application Integration",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がデータ処理パイプラインを構築している。パイプラインは（1）S3 からファイルを取得、（2）バリデーション、（3）変換処理、（4）DB への書き込みの 4 ステップで構成される。バリデーションで失敗した場合は通知を送り、それ以降の処理はスキップしたい。また処理全体の状態を可視化したい。最適なアーキテクチャはどれか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Lambda 関数を 4 つ連鎖させて SQS でつなぎ、各 Lambda が次のキューにメッセージを送信する", hint: "SQS + Lambda の連鎖は実現可能だが、処理状態の可視化やエラー分岐の管理が複雑になる" },
+      { id: "b", label: "B", text: "単一の Lambda 関数ですべての処理を実装し、内部でステップを管理する", hint: "単一 Lambda では処理時間の上限（15 分）制約があり、状態管理も複雑になる" },
+      { id: "c", label: "C", text: "AWS Step Functions でステートマシンを定義し、各ステップを Lambda タスクとして実装する", hint: "Step Functions はワークフローの可視化・エラーハンドリング・分岐処理をマネージドで提供する" },
+      { id: "d", label: "D", text: "EventBridge スケジューラで各ステップを時間差で実行する", hint: "時間差実行は前ステップの完了を保証できず、エラー時の制御も困難" },
+    ],
+    explanation:
+      "AWS Step Functions は複数の処理ステップをステートマシンとして定義し、マネージドなワークフローとして実行するサービスです。各ステップ（Lambda・ECS・DynamoDB など）を定義し、成功・失敗・タイムアウトに応じた分岐処理を JSON（Amazon States Language）で記述できます。バリデーション失敗時に SNS 通知を送って後続処理をスキップする分岐も、Choice ステートと Catch ブロックで簡単に実装できます。AWS コンソールでステートマシンの実行状況がグラフィカルに可視化されるため、デバッグや監視も容易です。",
+    comparePoint:
+      "Step Functions：ワークフローのオーケストレーション・状態管理・可視化・エラーハンドリング・長時間処理対応。SQS + Lambda 連鎖：疎結合だがワークフロー全体の状態管理は自前実装が必要。EventBridge：イベント駆動のルーティング・スケジューリング・ワークフロー全体の状態管理には不向き。",
+    rememberAxis:
+      "複数ステップの処理フロー・分岐・エラーハンドリング → Step Functions。非同期メッセージキュー → SQS。複数サービスへのイベント配信 → EventBridge or SNS。",
+  },
+
+  // ── シナリオ: CloudFront（追加） ──────────────────────────────────────
+  {
+    id: "cloudfront-1",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が S3 に静的ウェブサイトをホスティングしており、CloudFront で配信している。S3 バケットへの直接アクセスを禁止し、CloudFront 経由のみアクセスを許可したい。また S3 バケットはプライベートにしたい。最適な設定はどれか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "S3 バケットポリシーで CloudFront の IP アドレス範囲を許可する", hint: "CloudFront の IP は変動するため IP 範囲での制御は管理が困難" },
+      { id: "b", label: "B", text: "CloudFront のオリジンアクセスコントロール（OAC）を設定し、S3 バケットポリシーで OAC を許可する", hint: "OAC は CloudFront サービスプリンシパルを使用して S3 へのアクセスを安全に制御する推奨の方法" },
+      { id: "c", label: "C", text: "S3 バケットポリシーですべてのパブリックアクセスを許可し、CloudFront キャッシュのみを信頼する", hint: "バケットをパブリックにすると CloudFront を経由せず S3 に直接アクセスできてしまう" },
+      { id: "d", label: "D", text: "CloudFront のカスタムヘッダーを S3 バケットポリシーの条件に使用する", hint: "S3 はリクエストヘッダーの条件でアクセス制御できないため、この方法は機能しない" },
+    ],
+    explanation:
+      "CloudFront のオリジンアクセスコントロール（OAC）は、S3 オリジンへのアクセスを CloudFront 経由のみに制限する推奨の仕組みです。OAC を設定すると、CloudFront は SigV4 で署名したリクエストを S3 に送信します。S3 バケットポリシーで `aws:PrincipalServiceName: cloudfront.amazonaws.com` を条件に特定の CloudFront ディストリビューションのみを許可することで、S3 バケットをプライベートに保ちつつ CloudFront 経由のアクセスのみを許可できます。OAC は旧来の OAI（オリジンアクセスアイデンティティ）の後継で、SSE-KMS 暗号化された S3 オブジェクトにも対応しています。",
+    comparePoint:
+      "OAC（オリジンアクセスコントロール）：CloudFront → S3 の推奨アクセス制御・SigV4 署名・SSE-KMS 対応。OAI（オリジンアクセスアイデンティティ）：旧来の方法・SSE-KMS 非対応・OAC に移行推奨。S3 バケットポリシー：IAM ポリシーベースのアクセス制御・CloudFront 以外にも適用可能。",
+    rememberAxis:
+      "CloudFront 経由のみ S3 アクセスを許可 → OAC（推奨）or OAI（旧来）。S3 の暗号化 + CloudFront → OAC 必須（OAI は SSE-KMS 非対応）。CloudFront でのアクセス制御（WAF・地理制限） → CloudFront ディストリビューション設定。",
+  },
+  {
+    id: "cloudfront-2",
+    category: "Networking",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある動画ストリーミングサービスが CloudFront で動画を配信している。特定のユーザー（有料会員）のみ動画ファイルにアクセスできるようにし、URLを第三者と共有されても期限切れ後はアクセスできないようにしたい。どの機能を使うべきか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "CloudFront の署名付き URL または署名付き Cookie を使用する", hint: "署名付き URL/Cookie は有効期限・IP 制限を含む署名で保護され、認可されたユーザーのみアクセス可能" },
+      { id: "b", label: "B", text: "S3 の事前署名付き URL（Presigned URL）を直接クライアントに返す", hint: "S3 Presigned URL は有効だが CloudFront キャッシュを経由しないため配信パフォーマンスが低下する" },
+      { id: "c", label: "C", text: "CloudFront の地理制限（Geo Restriction）を設定する", hint: "地理制限は国単位のアクセス制御で、個別ユーザーの認可には使えない" },
+      { id: "d", label: "D", text: "Lambda@Edge でリクエストを検証してアクセスを制御する", hint: "Lambda@Edge も可能だが、署名付き URL/Cookie の方がシンプルで CloudFront の組み込み機能として提供される" },
+    ],
+    explanation:
+      "CloudFront の署名付き URL（Signed URL）は、特定のコンテンツへのアクセスを特定のユーザーに限定し、有効期限・IP アドレス制限を含む署名で保護する機能です。署名付き Cookie は複数のファイルへのアクセスを一括で制御できます。サーバー側で有料会員であることを確認してから署名付き URL を生成してクライアントに返し、クライアントはその URL で CloudFront からコンテンツを取得します。URL の有効期限が切れると、同じ URL を使ってもアクセスできなくなります。",
+    comparePoint:
+      "CloudFront 署名付き URL：個別ファイルへの期限付きアクセス。CloudFront 署名付き Cookie：複数ファイルへの一括アクセス制御（ストリーミング全体など）。S3 Presigned URL：S3 直接アクセス・CloudFront キャッシュ非経由・パフォーマンス不利。Lambda@Edge：カスタム認証ロジック・JWT 検証など高度な制御が必要な場合。",
+    rememberAxis:
+      "CloudFront コンテンツの認可ユーザー限定アクセス → 署名付き URL or Cookie。国・地域単位のアクセス制限 → CloudFront 地理制限。S3 への一時アクセス → S3 Presigned URL（CloudFront なし）。",
+  },
+
+  // ── シナリオ: Kinesis・ストリーミング ────────────────────────────────────
+  {
+    id: "kinesis-1",
+    category: "Analytics",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が IoT デバイスから毎秒 50,000 件のイベントを受信しており、リアルタイムで異常検知処理を行い、結果を S3 に保存したい。処理遅延は 30 秒以内が要件。最適なアーキテクチャはどれか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Kinesis Data Streams でデータを受信し、Kinesis Data Analytics（Apache Flink）でリアルタイム処理し、S3 に出力する", hint: "Kinesis Data Streams は大量リアルタイムデータの取り込みに最適。Flink でウィンドウ処理・異常検知ができる" },
+      { id: "b", label: "B", text: "SQS でイベントを受信し、Lambda で処理して S3 に保存する", hint: "SQS + Lambda は中規模処理に適しているが、毎秒 5 万件の大量リアルタイムストリームにはスループット限界がある" },
+      { id: "c", label: "C", text: "S3 にイベントを直接書き込み、Athena でバッチ集計する", hint: "Athena はアドホッククエリ向けでリアルタイム処理ではなく 30 秒以内の要件を満たせない" },
+      { id: "d", label: "D", text: "SNS でイベントを受信し、複数の Lambda をトリガーして並列処理する", hint: "SNS + Lambda はファンアウトに適しているが、大量連続ストリームのリアルタイム分析には Kinesis が適している" },
+    ],
+    explanation:
+      "Kinesis Data Streams は大量のリアルタイムデータを低レイテンシーで取り込むサービスです。シャード数を増やすことでスループットをスケールできます（1 シャード = 1,000 レコード/秒 or 1 MB/秒の書き込み）。Kinesis Data Analytics（Apache Flink）は Kinesis Streams からのデータをリアルタイムで処理し、ウィンドウ関数・集計・異常検知などを低レイテンシーで実行できます。処理結果を S3・DynamoDB・Redshift などに出力できます。このアーキテクチャは毎秒 5 万件のイベントを 30 秒以内に処理する要件を満たします。",
+    comparePoint:
+      "Kinesis Data Streams：大量リアルタイムストリーム取り込み・複数コンシューマー対応・7 日間データ保持。Kinesis Data Firehose：マネージドな S3/Redshift/OpenSearch 配信・バッファリングあり（最低 60 秒遅延）。Kinesis Data Analytics（Flink）：リアルタイムストリーム処理・ウィンドウ集計・異常検知。SQS：メッセージキュー・大量ストリームの連続処理には Kinesis が適切。",
+    rememberAxis:
+      "大量リアルタイムストリームの取り込み → Kinesis Data Streams。ストリームデータのリアルタイム分析 → Kinesis Data Analytics（Flink）。S3/Redshift へのマネージドデータ配信 → Kinesis Data Firehose。",
+  },
+  {
+    id: "kinesis-2",
+    category: "Analytics",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がアプリケーションログを S3 に継続的に保存し、Amazon Redshift で分析したい。ログは毎分数百 MB 生成される。できるだけシンプルな構成でほぼリアルタイム（5 分以内）に Redshift にデータを届けたい。最適なサービスはどれか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Kinesis Data Streams → Lambda → Redshift の順に処理する", hint: "可能だが Lambda で Redshift への COPY コマンドを実装する必要があり、管理が複雑" },
+      { id: "b", label: "B", text: "Kinesis Data Firehose で S3 と Redshift を配信先として設定する", hint: "Firehose は S3 バッファリング後に Redshift COPY を自動実行するマネージドサービスで設定がシンプル" },
+      { id: "c", label: "C", text: "AWS Glue ETL ジョブを 5 分ごとに実行して S3 から Redshift に COPY する", hint: "Glue は可能だが Firehose より設定が複雑でジョブ管理が必要" },
+      { id: "d", label: "D", text: "EMR で Spark ジョブを実行して S3 から Redshift に定期ロードする", hint: "EMR + Spark は大規模バッチ処理向けで、このユースケースではオーバースペック" },
+    ],
+    explanation:
+      "Amazon Kinesis Data Firehose は、ストリーミングデータを Amazon S3・Redshift・OpenSearch・Splunk に配信するフルマネージドサービスです。Redshift を配信先に設定すると、Firehose は自動的にデータを S3 にバッファリングし（バッファサイズや時間でトリガー）、その後 Redshift の COPY コマンドを自動実行してデータをロードします。バッファリング時間を最短 60 秒に設定すると、5 分以内の要件を満たせます。サーバー管理・ETL コード実装が不要でシンプルな構成が実現できます。",
+    comparePoint:
+      "Kinesis Data Firehose：マネージドな S3/Redshift 配信・COPY 自動実行・60 秒〜15 分のバッファリング。Kinesis Data Streams：低レイテンシーリアルタイム取り込み・複数コンシューマー対応・配信は自前実装。AWS Glue：マネージド ETL・複雑な変換処理・スケジュール実行・設定は Firehose より複雑。",
+    rememberAxis:
+      "S3/Redshift へのシンプルなストリーム配信 → Kinesis Data Firehose。複数コンシューマーでのリアルタイム処理 → Kinesis Data Streams。複雑な ETL・データ変換 → AWS Glue。",
+  },
+
+  // ── シナリオ: Systems Manager・運用 ──────────────────────────────────────
+  {
+    id: "ssm-1",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が複数のリージョンにわたって 200 台以上の EC2 インスタンスを管理している。定期的に OS パッチを適用する必要があるが、現在は各インスタンスに SSH して手動で実行している。最も効率的かつセキュアなパッチ管理方法はどれか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "AWS Systems Manager Patch Manager を使用し、パッチベースラインとメンテナンスウィンドウを設定して自動化する", hint: "Patch Manager はエージェントベースでSSH不要・複数リージョン対応・パッチコンプライアンスレポートも生成できる" },
+      { id: "b", label: "B", text: "EC2 UserData でパッチスクリプトを毎回起動時に実行する", hint: "UserData は初回起動時のみ実行されるためパッチの定期適用には適さない" },
+      { id: "c", label: "C", text: "Ansible を EC2 上の管理サーバーから実行してすべてのインスタンスにパッチを適用する", hint: "Ansible は有効だが AWS Systems Manager よりも自前のインフラ（管理サーバー）が必要で運用負荷が高い" },
+      { id: "d", label: "D", text: "AWS Lambda で SSM Run Command を呼び出して週次にパッチを実行する", hint: "Run Command も有効だが、Patch Manager + メンテナンスウィンドウの方がコンプライアンスレポートや自動化が優れている" },
+    ],
+    explanation:
+      "AWS Systems Manager Patch Manager は、EC2 インスタンス（および オンプレミスサーバー）のパッチを自動化するサービスです。パッチベースラインで「どのパッチを適用するか」を定義し、メンテナンスウィンドウで「いつ適用するか」をスケジュールします。SSM Agent がインストールされたインスタンスであれば SSH/RDP 接続不要でパッチを適用でき、インターネット接続なしでも VPC エンドポイント経由で動作します。パッチコンプライアンスレポートで各インスタンスのパッチ適用状況を一元確認できます。",
+    comparePoint:
+      "Systems Manager Patch Manager：AWS ネイティブ・SSH 不要・コンプライアンスレポート・メンテナンスウィンドウ対応。SSM Run Command：任意のコマンドをリモート実行・SSH 不要・1 回限りの実行向け。EC2 UserData：インスタンス起動時の初期設定・定期実行には不向き。",
+    rememberAxis:
+      "大規模 EC2 のパッチ自動化 → Systems Manager Patch Manager。SSH なしで EC2 にコマンド実行 → SSM Run Command or Session Manager。EC2 起動時の初期セットアップ → UserData。",
+  },
+  {
+    id: "ssm-2",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がアプリケーションの設定値（データベース接続文字列・API キー）を安全に管理したい。これらの値は環境（開発・ステージング・本番）ごとに異なり、コードに直接埋め込まずに実行時に取得したい。また、特定のパラメータへのアクセスは IAM で制御したい。最適なサービスはどれか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "S3 バケットに設定ファイルを保存し、EC2 インスタンスの IAM ロールでアクセスする", hint: "S3 での設定管理は可能だが、値の暗号化・バージョン管理・IAM での細粒度アクセス制御が複雑" },
+      { id: "b", label: "B", text: "AWS Systems Manager Parameter Store に SecureString タイプでパラメータを保存する", hint: "Parameter Store は KMS 暗号化・バージョン管理・IAM でのパラメータ単位アクセス制御・無料の基本階層あり" },
+      { id: "c", label: "C", text: "環境変数に設定値を格納し、EC2 起動時に UserData で読み込む", hint: "環境変数への直接格納はセキュリティ上の問題があり、暗号化や一元管理ができない" },
+      { id: "d", label: "D", text: "Secrets Manager を使用してすべての設定値を管理する", hint: "Secrets Manager も有効だが、API キー以外の一般的な設定値には Parameter Store の方がコスト効率が高い（Secrets Manager は有料）" },
+    ],
+    explanation:
+      "AWS Systems Manager Parameter Store は、アプリケーションの設定値や機密情報を安全に保存・管理するサービスです。SecureString タイプは KMS で暗号化され、IAM ポリシーでパラメータ単位のアクセス制御ができます。環境ごとに `/myapp/dev/db-url`・`/myapp/prod/db-url` のような階層型名前空間を使うことで、開発・本番の設定を整理できます。基本階層は無料で、高スループット階層は有料です。Secrets Manager との使い分けは、自動ローテーションが必要な DB 認証情報 → Secrets Manager、一般的な設定値・API キー → Parameter Store（コスト効率が高い）が一般的です。",
+    comparePoint:
+      "Systems Manager Parameter Store：設定値・機密情報の一元管理・KMS 暗号化・IAM 細粒度制御・基本階層無料。AWS Secrets Manager：DB 認証情報の自動ローテーション・クロスアカウント・有料。環境変数：シンプルだが暗号化・一元管理・アクセス制御が困難。",
+    rememberAxis:
+      "設定値・API キーの安全な一元管理 → Parameter Store（SecureString）。DB パスワードの自動ローテーション → Secrets Manager。設定変更をアプリに即時反映 → Parameter Store + AppConfig。",
+  },
+
+  // ── シナリオ: AWS Backup・データ保護 ────────────────────────────────────
+  {
+    id: "backup-1",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が複数の AWS サービス（RDS・EBS・EFS・DynamoDB）のバックアップを一元管理したい。規制要件でバックアップを 7 年間保持する必要があり、バックアップポリシーをすべてのアカウントに統一して適用したい。最適な方法はどれか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "各サービスの自動バックアップ設定（RDS 自動バックアップ・EBS スナップショット）を個別に設定する", hint: "各サービスの個別設定では一元管理が困難で、ポリシーの統一適用も難しい" },
+      { id: "b", label: "B", text: "Lambda で各サービスの API を呼び出してスナップショットを定期的に作成する", hint: "自前実装は可能だが複雑で管理コストが高い。AWS Backup の方がシンプル" },
+      { id: "c", label: "C", text: "AWS Backup でバックアッププランを作成し、AWS Organizations のバックアップポリシーで複数アカウントに適用する", hint: "AWS Backup は複数サービスのバックアップを一元管理でき、Organizations のバックアップポリシーで全アカウントに統一適用できる" },
+      { id: "d", label: "D", text: "S3 ライフサイクルポリシーで 7 年後に自動削除されるよう設定し、すべてのバックアップを S3 に保存する", hint: "S3 は汎用ストレージで、RDS スナップショットなどは直接 S3 に保存できない" },
+    ],
+    explanation:
+      "AWS Backup は RDS・EBS・EFS・DynamoDB・S3・FSx・Storage Gateway など複数の AWS サービスのバックアップを一元管理するサービスです。バックアッププランでバックアップの頻度・保持期間・コピー先リージョンを設定し、バックアップボールトでバックアップデータを保護します。AWS Organizations のバックアップポリシー（Backup Policy）を使用すると、組織内のすべてのアカウントに同じバックアッププランを自動的に適用できます。バックアップデータは Vault Lock（WORM）で変更・削除を防止でき、規制要件への対応にも使えます。",
+    comparePoint:
+      "AWS Backup：複数サービスの一元バックアップ管理・Organizations 統合・Vault Lock で変更保護。各サービス個別バックアップ：RDS 自動バックアップ・EBS スナップショット等・一元管理が難しい。AWS Organizations バックアップポリシー：複数アカウントへのバックアッププラン一括適用。",
+    rememberAxis:
+      "複数 AWS サービスのバックアップを一元管理 → AWS Backup。複数アカウントにバックアップポリシーを統一適用 → Organizations バックアップポリシー。バックアップの変更・削除を防止 → Vault Lock（WORM）。",
+  },
+  {
+    id: "backup-2",
+    category: "Storage",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が EC2 インスタンスと RDS データベースを us-east-1 で運用している。DR 要件として RPO 1 時間・RTO 4 時間が定められており、障害時は us-west-2 に切り替える計画だ。最もコスト効率が高い DR 戦略はどれか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "us-west-2 にも同じ EC2 と RDS を常時稼働させ、Active-Active 構成にする", hint: "Active-Active は最高の可用性だが常時 2 倍のコストがかかり、RTO 4 時間の要件には過剰" },
+      { id: "b", label: "B", text: "EBS スナップショットと RDS スナップショットを us-west-2 にクロスリージョンコピーし、障害時にそこから復元する", hint: "スナップショットのクロスリージョンコピーはコストが低く、RTO 4 時間の要件を満たせる Warm/Cold Standby に適している" },
+      { id: "c", label: "C", text: "Route 53 フェイルオーバールーティングだけを設定し、バックアップは取らない", hint: "Route 53 フェイルオーバーだけではデータのバックアップがないため、RDS データを復元できない" },
+      { id: "d", label: "D", text: "Glacier に毎日バックアップし、障害時に取り出して us-west-2 で復元する", hint: "Glacier からの取り出しは数時間かかる場合があり、RTO 4 時間の要件を確実に満たせない可能性がある" },
+    ],
+    explanation:
+      "RPO 1 時間・RTO 4 時間の要件は Warm Standby や Backup & Restore 戦略で対応できます。EBS スナップショットを 1 時間ごとに作成し、RDS のクロスリージョン自動バックアップ（または手動スナップショットのコピー）を us-west-2 に定期的にコピーします。障害時は us-west-2 でスナップショットから EC2 と RDS を復元します。復元・起動・テストで 4 時間以内に完了できます。常時稼働の Active-Active や Warm Standby（待機インスタンスあり）より安価です。Route 53 のフェイルオーバールーティングと組み合わせて DNS を切り替えます。",
+    comparePoint:
+      "Backup & Restore：コスト最小・RPO/RTO は時間単位・復元に時間がかかる。Pilot Light：最小構成を常時起動・RTO 数十分〜1 時間程度・コスト低め。Warm Standby：縮小版の完全なシステムを待機・RTO 分単位・コスト中程度。Active-Active（Multi-Site）：ゼロダウンタイム・最高コスト。",
+    rememberAxis:
+      "DR の 4 戦略（コスト低い順）→ Backup & Restore → Pilot Light → Warm Standby → Active-Active。RPO を短縮 → スナップショット頻度を上げる or レプリケーション。RTO を短縮 → 事前に起動済みのインスタンスを用意（Warm Standby）。",
+  },
 ];
