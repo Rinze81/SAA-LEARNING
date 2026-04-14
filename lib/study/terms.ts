@@ -7,6 +7,7 @@ export type StudyTerm = {
   examTip: string;
   related: string[];
   diagram?: string;
+  docsUrl?: string;
 };
 
 import { termDiagrams } from "@/lib/study/term-diagrams";
@@ -14,6 +15,7 @@ import { termDiagrams } from "@/lib/study/term-diagrams";
 export const studyTerms: StudyTerm[] = [
   {
     id: "high-availability",
+    docsUrl: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/six-advantages-of-cloud-computing.html",
     name: "High Availability",
     category: "設計原則",
     shortDefinition: "障害が起きてもサービスを継続しやすい状態を保つ考え方です。",
@@ -25,6 +27,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "fault-tolerance",
+    docsUrl: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/six-advantages-of-cloud-computing.html",
     name: "Fault Tolerance",
     category: "設計原則",
     shortDefinition: "一部に障害が起きても、全体として動き続けられる性質です。",
@@ -36,6 +39,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "scalability",
+    docsUrl: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/six-advantages-of-cloud-computing.html",
     name: "Scalability",
     category: "設計原則",
     shortDefinition: "負荷の増減に合わせてシステム規模を拡張しやすい性質です。",
@@ -47,6 +51,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "elasticity",
+    docsUrl: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/six-advantages-of-cloud-computing.html",
     name: "Elasticity",
     category: "設計原則",
     shortDefinition: "必要なときに増やし、不要になったら減らせる柔軟性です。",
@@ -58,6 +63,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "iam-role",
+    docsUrl: "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html",
     name: "IAM Role",
     category: "セキュリティ",
     shortDefinition: "必要なときだけ一時的な権限を引き受けるための IAM の仕組みです。",
@@ -69,6 +75,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "security-group",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/userguide/security-groups.html",
     name: "Security Group",
     category: "ネットワーク",
     shortDefinition: "EC2 などに設定する仮想ファイアウォールです。",
@@ -80,6 +87,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "auto-scaling",
+    docsUrl: "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html",
     name: "Auto Scaling",
     category: "運用",
     shortDefinition: "負荷に応じて EC2 などの台数を自動調整する仕組みです。",
@@ -91,6 +99,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "load-balancer",
+    docsUrl: "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html",
     name: "Load Balancer",
     category: "ネットワーク",
     shortDefinition: "複数のサーバーへトラフィックを分散する仕組みです。",
@@ -103,6 +112,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "object-storage",
+    docsUrl: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
     name: "Object Storage",
     category: "ストレージ",
     shortDefinition: "データをオブジェクト単位で保存するストレージ方式です。",
@@ -114,6 +124,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "block-storage",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html",
     name: "Block Storage",
     category: "ストレージ",
     shortDefinition: "データをブロック単位で扱うストレージ方式です。",
@@ -125,6 +136,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "cdn",
+    docsUrl: "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html",
     name: "CDN",
     category: "配信",
     shortDefinition: "利用者に近い拠点からコンテンツを配信して高速化する仕組みです。",
@@ -137,6 +149,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "stateless",
+    docsUrl: "https://docs.aws.amazon.com/whitepapers/latest/microservices-on-aws/stateless-microservices.html",
     name: "Stateless",
     category: "設計原則",
     shortDefinition: "サーバー側に個別ユーザー状態を持たない設計です。",
@@ -148,6 +161,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "vpc",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html",
     name: "VPC",
     category: "ネットワーク",
     shortDefinition: "AWS 上に作る論理的に分離された仮想ネットワークです。",
@@ -160,6 +174,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "public-subnet",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html",
     name: "Public Subnet",
     category: "ネットワーク",
     shortDefinition: "インターネットとの直接通信経路を持つサブネットです。",
@@ -171,6 +186,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "private-subnet",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html",
     name: "Private Subnet",
     category: "ネットワーク",
     shortDefinition: "インターネットから直接は到達できないサブネットです。",
@@ -182,6 +198,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "multi-az",
+    docsUrl: "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html",
     name: "Multi-AZ",
     category: "可用性",
     shortDefinition: "複数の AZ にまたがって冗長化し、障害に強くする構成です。",
@@ -194,6 +211,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "read-replica",
+    docsUrl: "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html",
     name: "Read Replica",
     category: "データベース",
     shortDefinition: "読み取り専用の複製を作り、参照負荷を分散する仕組みです。",
@@ -205,6 +223,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "event-driven",
+    docsUrl: "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html",
     name: "Event-driven",
     category: "アーキテクチャ",
     shortDefinition: "イベントの発生をきっかけに処理を進める設計です。",
@@ -217,6 +236,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "serverless",
+    docsUrl: "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html",
     name: "Serverless",
     category: "アーキテクチャ",
     shortDefinition: "サーバー管理を意識せずにアプリを動かせる実行モデルです。",
@@ -228,6 +248,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "durability",
+    docsUrl: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/six-advantages-of-cloud-computing.html",
     name: "Durability",
     category: "ストレージ",
     shortDefinition: "保存したデータが失われにくい性質です。",
@@ -242,6 +263,7 @@ export const studyTerms: StudyTerm[] = [
 
   {
     id: "ec2",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html",
     name: "EC2",
     category: "コンピュート",
     shortDefinition: "AWS が提供する仮想サーバーサービスです。",
@@ -253,6 +275,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "ami",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html",
     name: "AMI",
     category: "コンピュート",
     shortDefinition: "EC2 インスタンスを起動するためのテンプレートイメージです。",
@@ -264,6 +287,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "auto-scaling-group",
+    docsUrl: "https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html",
     name: "Auto Scaling Group",
     category: "コンピュート",
     shortDefinition: "EC2 インスタンスの台数を自動で増減させるグループ設定です。",
@@ -275,6 +299,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "launch-template",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html",
     name: "Launch Template",
     category: "コンピュート",
     shortDefinition: "EC2 起動に必要な設定をまとめたテンプレートです。",
@@ -286,6 +311,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "elastic-ip",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html",
     name: "Elastic IP",
     category: "コンピュート",
     shortDefinition: "EC2 インスタンスに紐付けられる固定パブリック IP アドレスです。",
@@ -297,6 +323,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "ecs",
+    docsUrl: "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html",
     name: "ECS",
     category: "コンピュート",
     shortDefinition: "AWS のマネージドコンテナオーケストレーションサービスです。",
@@ -308,6 +335,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "fargate",
+    docsUrl: "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html",
     name: "Fargate",
     category: "コンピュート",
     shortDefinition: "コンテナをサーバーレスで実行できる ECS/EKS の起動タイプです。",
@@ -319,6 +347,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "eks",
+    docsUrl: "https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html",
     name: "EKS",
     category: "コンピュート",
     shortDefinition: "AWS が提供するマネージド Kubernetes サービスです。",
@@ -330,6 +359,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "lambda",
+    docsUrl: "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html",
     name: "Lambda",
     category: "コンピュート",
     shortDefinition: "イベント駆動でコードを実行するサーバーレス関数サービスです。",
@@ -341,6 +371,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "api-gateway",
+    docsUrl: "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html",
     name: "API Gateway",
     category: "コンピュート",
     shortDefinition: "REST/WebSocket API を構築・公開・管理するマネージドサービスです。",
@@ -352,6 +383,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "elastic-beanstalk",
+    docsUrl: "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/Welcome.html",
     name: "Elastic Beanstalk",
     category: "コンピュート",
     shortDefinition: "アプリのデプロイとインフラプロビジョニングを自動化するサービスです。",
@@ -363,6 +395,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "batch",
+    docsUrl: "https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html",
     name: "AWS Batch",
     category: "コンピュート",
     shortDefinition: "大規模バッチコンピューティングジョブを管理するマネージドサービスです。",
@@ -377,6 +410,7 @@ export const studyTerms: StudyTerm[] = [
 
   {
     id: "s3",
+    docsUrl: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
     name: "S3",
     category: "ストレージ",
     shortDefinition: "AWS のオブジェクトストレージサービスです。",
@@ -388,6 +422,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "s3-glacier",
+    docsUrl: "https://docs.aws.amazon.com/amazonglacier/latest/dev/introduction.html",
     name: "S3 Glacier",
     category: "ストレージ",
     shortDefinition: "長期アーカイブ向けの低コスト S3 ストレージクラスです。",
@@ -399,6 +434,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "s3-intelligent-tiering",
+    docsUrl: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering.html",
     name: "S3 Intelligent-Tiering",
     category: "ストレージ",
     shortDefinition: "アクセス頻度に応じて自動でストレージコストを最適化するクラスです。",
@@ -410,6 +446,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "ebs",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html",
     name: "EBS",
     category: "ストレージ",
     shortDefinition: "EC2 インスタンスに接続する永続ブロックストレージです。",
@@ -421,6 +458,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "efs",
+    docsUrl: "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html",
     name: "EFS",
     category: "ストレージ",
     shortDefinition: "複数の EC2 から同時にマウントできるマネージドファイルストレージです。",
@@ -432,6 +470,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "fsx-windows",
+    docsUrl: "https://docs.aws.amazon.com/fsx/latest/WindowsGuide/what-is.html",
     name: "FSx for Windows File Server",
     category: "ストレージ",
     shortDefinition: "Windows の SMB プロトコルに対応したマネージドファイルストレージです。",
@@ -443,6 +482,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "fsx-lustre",
+    docsUrl: "https://docs.aws.amazon.com/fsx/latest/LustreGuide/what-is.html",
     name: "FSx for Lustre",
     category: "ストレージ",
     shortDefinition: "HPC や機械学習向けの高スループットファイルシステムです。",
@@ -454,6 +494,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "storage-gateway",
+    docsUrl: "https://docs.aws.amazon.com/storagegateway/latest/userguide/WhatIsStorageGateway.html",
     name: "Storage Gateway",
     category: "ストレージ",
     shortDefinition: "オンプレミスと AWS ストレージをシームレスに接続するハイブリッドサービスです。",
@@ -465,6 +506,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "aws-backup",
+    docsUrl: "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html",
     name: "AWS Backup",
     category: "ストレージ",
     shortDefinition: "AWS リソースのバックアップを一元管理するサービスです。",
@@ -476,6 +518,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "snowball-edge",
+    docsUrl: "https://docs.aws.amazon.com/snowball/latest/developer-guide/whatisedge.html",
     name: "Snowball Edge",
     category: "ストレージ",
     shortDefinition: "物理デバイスを使ってオフラインで大容量データを AWS へ移行するサービスです。",
@@ -490,6 +533,7 @@ export const studyTerms: StudyTerm[] = [
 
   {
     id: "rds",
+    docsUrl: "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html",
     name: "RDS",
     category: "データベース",
     shortDefinition: "AWS のマネージドリレーショナルデータベースサービスです。",
@@ -501,6 +545,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "aurora",
+    docsUrl: "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_AuroraOverview.html",
     name: "Aurora",
     category: "データベース",
     shortDefinition: "AWS が独自開発した高性能マネージドリレーショナルデータベースです。",
@@ -512,6 +557,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "aurora-serverless",
+    docsUrl: "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html",
     name: "Aurora Serverless",
     category: "データベース",
     shortDefinition: "需要に応じてキャパシティを自動調整するサーバーレス版 Aurora です。",
@@ -523,6 +569,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "dynamodb",
+    docsUrl: "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html",
     name: "DynamoDB",
     category: "データベース",
     shortDefinition: "AWS のフルマネージドサーバーレス NoSQL データベースです。",
@@ -534,6 +581,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "dax",
+    docsUrl: "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html",
     name: "DynamoDB Accelerator (DAX)",
     category: "データベース",
     shortDefinition: "DynamoDB 専用のインメモリキャッシュサービスです。",
@@ -545,6 +593,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "elasticache",
+    docsUrl: "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html",
     name: "ElastiCache",
     category: "データベース",
     shortDefinition: "Redis または Memcached のマネージドインメモリキャッシュサービスです。",
@@ -556,6 +605,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "redshift",
+    docsUrl: "https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html",
     name: "Redshift",
     category: "データベース",
     shortDefinition: "AWS のマネージドデータウェアハウスサービスです。",
@@ -567,6 +617,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "neptune",
+    docsUrl: "https://docs.aws.amazon.com/neptune/latest/userguide/intro.html",
     name: "Neptune",
     category: "データベース",
     shortDefinition: "AWS のマネージドグラフデータベースサービスです。",
@@ -578,6 +629,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "documentdb",
+    docsUrl: "https://docs.aws.amazon.com/documentdb/latest/developerguide/what-is.html",
     name: "DocumentDB",
     category: "データベース",
     shortDefinition: "MongoDB 互換の AWS マネージドドキュメントデータベースです。",
@@ -589,6 +641,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "dms",
+    docsUrl: "https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html",
     name: "Database Migration Service (DMS)",
     category: "データベース",
     shortDefinition: "データベースを AWS へ移行するためのマネージドサービスです。",
@@ -603,6 +656,7 @@ export const studyTerms: StudyTerm[] = [
 
   {
     id: "subnet",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html",
     name: "Subnet",
     category: "ネットワーク",
     shortDefinition: "VPC 内を細分化した IP アドレス範囲の区画です。",
@@ -614,6 +668,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "internet-gateway",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html",
     name: "Internet Gateway",
     category: "ネットワーク",
     shortDefinition: "VPC とインターネットを接続する水平スケールなゲートウェイです。",
@@ -625,6 +680,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "nat-gateway",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html",
     name: "NAT Gateway",
     category: "ネットワーク",
     shortDefinition: "プライベートサブネットからインターネットへのアウトバウンド通信を可能にするゲートウェイです。",
@@ -636,6 +692,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "route-table",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html",
     name: "Route Table",
     category: "ネットワーク",
     shortDefinition: "サブネット内のトラフィックをどこへ転送するかを定義するテーブルです。",
@@ -647,6 +704,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "vpc-peering",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html",
     name: "VPC Peering",
     category: "ネットワーク",
     shortDefinition: "2 つの VPC をプライベートに接続する機能です。",
@@ -658,6 +716,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "transit-gateway",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html",
     name: "Transit Gateway",
     category: "ネットワーク",
     shortDefinition: "複数の VPC やオンプレミス接続を集中管理するネットワークハブです。",
@@ -669,6 +728,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "direct-connect",
+    docsUrl: "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html",
     name: "Direct Connect",
     category: "ネットワーク",
     shortDefinition: "オンプレミスと AWS を専用物理回線で接続するサービスです。",
@@ -680,6 +740,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "vpn-gateway",
+    docsUrl: "https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html",
     name: "VPN Gateway",
     category: "ネットワーク",
     shortDefinition: "オンプレミスと AWS VPC をインターネット経由で暗号化接続する仮想ゲートウェイです。",
@@ -691,6 +752,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "cloudfront",
+    docsUrl: "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html",
     name: "CloudFront",
     category: "ネットワーク",
     shortDefinition: "世界中のエッジロケーションでコンテンツを配信する AWS の CDN サービスです。",
@@ -702,6 +764,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "route-53",
+    docsUrl: "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html",
     name: "Route 53",
     category: "ネットワーク",
     shortDefinition: "AWS のマネージド DNS サービスです。",
@@ -713,6 +776,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "alb",
+    docsUrl: "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html",
     name: "ALB",
     category: "ネットワーク",
     shortDefinition: "HTTP/HTTPS を理解する L7 ロードバランサーです。",
@@ -724,6 +788,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "nlb",
+    docsUrl: "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html",
     name: "NLB",
     category: "ネットワーク",
     shortDefinition: "超低レイテンシの TCP/UDP L4 ロードバランサーです。",
@@ -735,6 +800,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "global-accelerator",
+    docsUrl: "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html",
     name: "Global Accelerator",
     category: "ネットワーク",
     shortDefinition: "AWS グローバルネットワークを使って TCP/UDP トラフィックを高速化するサービスです。",
@@ -746,6 +812,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "privatelink",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html",
     name: "PrivateLink",
     category: "ネットワーク",
     shortDefinition: "VPC 間または AWS サービスへをインターネットを経由せずプライベートに公開・接続する仕組みです。",
@@ -760,6 +827,7 @@ export const studyTerms: StudyTerm[] = [
 
   {
     id: "iam-policy",
+    docsUrl: "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html",
     name: "IAM Policy",
     category: "セキュリティ",
     shortDefinition: "AWS リソースへのアクセス権限を定義する JSON ドキュメントです。",
@@ -771,6 +839,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "iam-user",
+    docsUrl: "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users.html",
     name: "IAM User",
     category: "セキュリティ",
     shortDefinition: "AWS アカウント内の個人またはアプリケーションを表す恒久的な認証エンティティです。",
@@ -782,6 +851,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "mfa",
+    docsUrl: "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html",
     name: "MFA",
     category: "セキュリティ",
     shortDefinition: "パスワードに加えて追加の認証要素を要求する多要素認証の仕組みです。",
@@ -793,6 +863,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "kms",
+    docsUrl: "https://docs.aws.amazon.com/kms/latest/developerguide/overview.html",
     name: "KMS",
     category: "セキュリティ",
     shortDefinition: "AWS が管理する暗号化キーを作成・管理するサービスです。",
@@ -804,6 +875,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "cloudhsm",
+    docsUrl: "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html",
     name: "CloudHSM",
     category: "セキュリティ",
     shortDefinition: "顧客が専有するハードウェアセキュリティモジュール（HSM）を AWS 上で利用するサービスです。",
@@ -815,6 +887,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "secrets-manager",
+    docsUrl: "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html",
     name: "Secrets Manager",
     category: "セキュリティ",
     shortDefinition: "データベース認証情報や API キーなどのシークレットを安全に管理するサービスです。",
@@ -826,6 +899,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "parameter-store",
+    docsUrl: "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html",
     name: "Parameter Store",
     category: "セキュリティ",
     shortDefinition: "設定値やシークレットを階層構造で管理する AWS Systems Manager の機能です。",
@@ -837,6 +911,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "waf",
+    docsUrl: "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html",
     name: "WAF",
     category: "セキュリティ",
     shortDefinition: "Web アプリケーションへの攻撃を検出・ブロックする L7 ファイアウォールです。",
@@ -848,6 +923,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "shield",
+    docsUrl: "https://docs.aws.amazon.com/waf/latest/developerguide/shield-chapter.html",
     name: "Shield",
     category: "セキュリティ",
     shortDefinition: "AWS リソースを DDoS 攻撃から保護するサービスです。",
@@ -859,6 +935,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "guardduty",
+    docsUrl: "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html",
     name: "GuardDuty",
     category: "セキュリティ",
     shortDefinition: "機械学習で AWS 環境の脅威を継続的に検出するサービスです。",
@@ -870,6 +947,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "inspector",
+    docsUrl: "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html",
     name: "Inspector",
     category: "セキュリティ",
     shortDefinition: "EC2 インスタンスやコンテナイメージの脆弱性を自動スキャンするサービスです。",
@@ -881,6 +959,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "cognito",
+    docsUrl: "https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html",
     name: "Cognito",
     category: "セキュリティ",
     shortDefinition: "Web・モバイルアプリにユーザー認証・認可機能を追加するサービスです。",
@@ -892,6 +971,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "acm",
+    docsUrl: "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html",
     name: "ACM",
     category: "セキュリティ",
     shortDefinition: "AWS が管理する SSL/TLS 証明書を無料で発行・自動更新するサービスです。",
@@ -906,6 +986,7 @@ export const studyTerms: StudyTerm[] = [
 
   {
     id: "cloudwatch",
+    docsUrl: "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html",
     name: "CloudWatch",
     category: "監視・運用",
     shortDefinition: "AWS リソースのメトリクス収集・アラーム設定・ダッシュボード作成を行う監視サービスです。",
@@ -917,6 +998,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "cloudwatch-logs",
+    docsUrl: "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html",
     name: "CloudWatch Logs",
     category: "監視・運用",
     shortDefinition: "アプリケーションや AWS サービスのログを収集・保存・検索するサービスです。",
@@ -928,6 +1010,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "cloudtrail",
+    docsUrl: "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html",
     name: "CloudTrail",
     category: "監視・運用",
     shortDefinition: "AWS アカウントへの API コールを記録する監査ログサービスです。",
@@ -939,6 +1022,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "aws-config",
+    docsUrl: "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html",
     name: "AWS Config",
     category: "監視・運用",
     shortDefinition: "AWS リソースの設定変更を継続的に記録・評価するサービスです。",
@@ -950,6 +1034,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "systems-manager",
+    docsUrl: "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html",
     name: "Systems Manager",
     category: "監視・運用",
     shortDefinition: "EC2 インスタンスや オンプレミスサーバーを一元管理する運用サービスです。",
@@ -961,6 +1046,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "trusted-advisor",
+    docsUrl: "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html",
     name: "Trusted Advisor",
     category: "監視・運用",
     shortDefinition: "AWS 環境のコスト最適化・セキュリティ・パフォーマンス・耐障害性・サービス制限を自動チェックするサービスです。",
@@ -972,6 +1058,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "health-dashboard",
+    docsUrl: "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html",
     name: "Health Dashboard",
     category: "監視・運用",
     shortDefinition: "AWS サービスの状態と自アカウントへの影響を確認できるダッシュボードです。",
@@ -986,6 +1073,7 @@ export const studyTerms: StudyTerm[] = [
 
   {
     id: "sqs",
+    docsUrl: "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html",
     name: "SQS",
     category: "アプリ統合",
     shortDefinition: "マネージドなメッセージキューサービスで、コンポーネント間を疎結合にします。",
@@ -997,6 +1085,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "sns",
+    docsUrl: "https://docs.aws.amazon.com/sns/latest/dg/welcome.html",
     name: "SNS",
     category: "アプリ統合",
     shortDefinition: "Pub/Sub モデルでメッセージを複数のサブスクライバーに配信するサービスです。",
@@ -1008,6 +1097,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "eventbridge",
+    docsUrl: "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html",
     name: "EventBridge",
     category: "アプリ統合",
     shortDefinition: "AWS サービスや SaaS からのイベントをルーティングするサーバーレスイベントバスです。",
@@ -1019,6 +1109,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "step-functions",
+    docsUrl: "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
     name: "Step Functions",
     category: "アプリ統合",
     shortDefinition: "複数の Lambda 関数やサービスをワークフローとして orchestrate するサービスです。",
@@ -1030,6 +1121,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "appsync",
+    docsUrl: "https://docs.aws.amazon.com/appsync/latest/devguide/what-is-appsync.html",
     name: "AppSync",
     category: "アプリ統合",
     shortDefinition: "GraphQL API をマネージドで構築・実行するサービスです。",
@@ -1041,6 +1133,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "kinesis-data-streams",
+    docsUrl: "https://docs.aws.amazon.com/streams/latest/dev/introduction.html",
     name: "Kinesis Data Streams",
     category: "アプリ統合",
     shortDefinition: "リアルタイムのストリーミングデータを収集・処理するサービスです。",
@@ -1052,6 +1145,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "kinesis-firehose",
+    docsUrl: "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html",
     name: "Kinesis Firehose",
     category: "アプリ統合",
     shortDefinition: "ストリーミングデータを S3・Redshift・OpenSearch などへ自動配信するサービスです。",
@@ -1063,6 +1157,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "ses",
+    docsUrl: "https://docs.aws.amazon.com/ses/latest/dg/Welcome.html",
     name: "SES",
     category: "アプリ統合",
     shortDefinition: "大量のメールを送受信できるマネージドメールサービスです。",
@@ -1077,6 +1172,7 @@ export const studyTerms: StudyTerm[] = [
 
   {
     id: "reserved-instances",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-reserved-instances.html",
     name: "Reserved Instances",
     category: "コスト最適化",
     shortDefinition: "1 年または 3 年の使用を予約することでオンデマンドより割引を受ける購入オプションです。",
@@ -1088,6 +1184,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "savings-plans",
+    docsUrl: "https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html",
     name: "Savings Plans",
     category: "コスト最適化",
     shortDefinition: "一定量のコンピュート使用量をコミットすることで割引を受える柔軟な購入オプションです。",
@@ -1099,6 +1196,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "spot-instance",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html",
     name: "Spot Instance",
     category: "コスト最適化",
     shortDefinition: "AWS の余剰キャパシティを最大 90% 割引で利用できる購入オプションです。",
@@ -1110,6 +1208,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "cost-explorer",
+    docsUrl: "https://docs.aws.amazon.com/cost-management/latest/userguide/ce-what-is.html",
     name: "Cost Explorer",
     category: "コスト最適化",
     shortDefinition: "AWS のコストと使用量を可視化・分析するツールです。",
@@ -1121,6 +1220,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "budgets",
+    docsUrl: "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html",
     name: "Budgets",
     category: "コスト最適化",
     shortDefinition: "コスト・使用量・RI/Savings Plans の予算を設定し、超過時にアラートを送るサービスです。",
@@ -1132,6 +1232,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "compute-optimizer",
+    docsUrl: "https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html",
     name: "Compute Optimizer",
     category: "コスト最適化",
     shortDefinition: "機械学習で EC2・Lambda・EBS などの最適なリソースサイズを推奨するサービスです。",
@@ -1145,6 +1246,7 @@ export const studyTerms: StudyTerm[] = [
   // ── セキュリティ（追加）────────────────────────────────────────────────
   {
     id: "control-tower",
+    docsUrl: "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
     name: "AWS Control Tower",
     category: "セキュリティ",
     shortDefinition: "マルチアカウント環境を安全・標準的に構築・管理するサービスです。",
@@ -1156,6 +1258,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "security-hub",
+    docsUrl: "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html",
     name: "AWS Security Hub",
     category: "セキュリティ",
     shortDefinition: "複数の AWS セキュリティサービスの検出結果を一元集約・可視化するサービスです。",
@@ -1167,6 +1270,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "macie",
+    docsUrl: "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
     name: "Amazon Macie",
     category: "セキュリティ",
     shortDefinition: "S3 内の機密データ（PII など）を機械学習で自動検出するサービスです。",
@@ -1178,6 +1282,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "detective",
+    docsUrl: "https://docs.aws.amazon.com/detective/latest/adminguide/what-is-detective.html",
     name: "Amazon Detective",
     category: "セキュリティ",
     shortDefinition: "セキュリティインシデントの根本原因を視覚的に調査するサービスです。",
@@ -1189,6 +1294,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "firewall-manager",
+    docsUrl: "https://docs.aws.amazon.com/waf/latest/developerguide/fms-chapter.html",
     name: "AWS Firewall Manager",
     category: "セキュリティ",
     shortDefinition: "WAF・Shield・Network Firewall のルールを複数アカウントに一元適用するサービスです。",
@@ -1200,6 +1306,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "network-firewall",
+    docsUrl: "https://docs.aws.amazon.com/network-firewall/latest/developerguide/what-is-aws-network-firewall.html",
     name: "AWS Network Firewall",
     category: "セキュリティ",
     shortDefinition: "VPC 内のトラフィックをステートフルに検査・フィルタリングするマネージドファイアウォールです。",
@@ -1211,6 +1318,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "iam-identity-center",
+    docsUrl: "https://docs.aws.amazon.com/singlesignon/latest/userguide/what-is.html",
     name: "IAM Identity Center",
     category: "セキュリティ",
     shortDefinition: "複数の AWS アカウントやアプリへのシングルサインオン（SSO）を一元管理するサービスです。",
@@ -1222,6 +1330,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "verified-access",
+    docsUrl: "https://docs.aws.amazon.com/verified-access/latest/ug/what-is-verified-access.html",
     name: "AWS Verified Access",
     category: "セキュリティ",
     shortDefinition: "VPN なしで企業アプリへのゼロトラストアクセスを実現するサービスです。",
@@ -1233,6 +1342,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "resource-access-manager",
+    docsUrl: "https://docs.aws.amazon.com/ram/latest/userguide/what-is.html",
     name: "AWS Resource Access Manager (RAM)",
     category: "セキュリティ",
     shortDefinition: "AWS リソースを別アカウントや Organization 内で安全に共有するサービスです。",
@@ -1244,6 +1354,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "artifact",
+    docsUrl: "https://docs.aws.amazon.com/artifact/latest/ug/what-is-aws-artifact.html",
     name: "AWS Artifact",
     category: "セキュリティ",
     shortDefinition: "AWS のコンプライアンスレポートや規約文書をオンデマンドでダウンロードできるサービスです。",
@@ -1257,6 +1368,7 @@ export const studyTerms: StudyTerm[] = [
   // ── 移行・転送（追加）────────────────────────────────────────────────
   {
     id: "datasync",
+    docsUrl: "https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html",
     name: "AWS DataSync",
     category: "移行・転送",
     shortDefinition: "オンプレミスと AWS ストレージ間のデータ転送を高速・自動化するサービスです。",
@@ -1268,6 +1380,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "transfer-family",
+    docsUrl: "https://docs.aws.amazon.com/transfer/latest/userguide/what-is-aws-transfer-for-sftp.html",
     name: "AWS Transfer Family",
     category: "移行・転送",
     shortDefinition: "SFTP・FTPS・FTP で S3 や EFS にファイルを転送できるマネージドサービスです。",
@@ -1279,6 +1392,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "migration-hub",
+    docsUrl: "https://docs.aws.amazon.com/migrationhub/latest/ug/whatishub.html",
     name: "AWS Migration Hub",
     category: "移行・転送",
     shortDefinition: "AWS への移行プロジェクト全体の進捗を一元追跡するダッシュボードです。",
@@ -1290,6 +1404,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "application-discovery-service",
+    docsUrl: "https://docs.aws.amazon.com/application-discovery/latest/userguide/what-is-appdiscovery.html",
     name: "AWS Application Discovery Service",
     category: "移行・転送",
     shortDefinition: "オンプレミスのサーバー情報・依存関係を自動収集して移行計画を支援するサービスです。",
@@ -1301,6 +1416,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "mgn",
+    docsUrl: "https://docs.aws.amazon.com/mgn/latest/ug/what-is-application-migration-service.html",
     name: "AWS MGN（Application Migration Service）",
     category: "移行・転送",
     shortDefinition: "物理・仮想・クラウドのサーバーを AWS EC2 にリフト＆シフト移行するサービスです。",
@@ -1312,6 +1428,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "sct",
+    docsUrl: "https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/CHAP_Welcome.html",
     name: "AWS Schema Conversion Tool (SCT)",
     category: "移行・転送",
     shortDefinition: "異種データベース間のスキーマを自動変換してデータベース移行を支援するツールです。",
@@ -1323,6 +1440,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "snowcone",
+    docsUrl: "https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snowcone-what-is-snowcone.html",
     name: "AWS Snowcone",
     category: "移行・転送",
     shortDefinition: "小型・軽量なエッジコンピューティング・データ転送デバイスです。",
@@ -1336,6 +1454,7 @@ export const studyTerms: StudyTerm[] = [
   // ── 分析（追加）──────────────────────────────────────────────────────
   {
     id: "glue",
+    docsUrl: "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html",
     name: "AWS Glue",
     category: "分析",
     shortDefinition: "サーバーレスの ETL（抽出・変換・ロード）サービスです。",
@@ -1347,6 +1466,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "athena",
+    docsUrl: "https://docs.aws.amazon.com/athena/latest/ug/what-is.html",
     name: "Amazon Athena",
     category: "分析",
     shortDefinition: "S3 のデータを SQL でアドホックにクエリできるサーバーレス分析サービスです。",
@@ -1358,6 +1478,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "quicksight",
+    docsUrl: "https://docs.aws.amazon.com/quicksight/latest/user/welcome.html",
     name: "Amazon QuickSight",
     category: "分析",
     shortDefinition: "BI ツールとしてデータを可視化・ダッシュボード化するサーバーレスサービスです。",
@@ -1369,6 +1490,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "opensearch",
+    docsUrl: "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html",
     name: "Amazon OpenSearch Service",
     category: "分析",
     shortDefinition: "全文検索・ログ分析・リアルタイムモニタリングに使うマネージド検索エンジンです。",
@@ -1380,6 +1502,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "emr",
+    docsUrl: "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html",
     name: "Amazon EMR",
     category: "分析",
     shortDefinition: "Hadoop・Spark・Hive などのビッグデータフレームワークを実行するマネージドクラスターサービスです。",
@@ -1391,6 +1514,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "data-pipeline",
+    docsUrl: "https://docs.aws.amazon.com/datapipeline/latest/DeveloperGuide/what-is-datapipeline.html",
     name: "AWS Data Pipeline",
     category: "分析",
     shortDefinition: "異なる AWS サービス間でのデータ移動・変換をスケジュール実行するサービスです。",
@@ -1402,6 +1526,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "lake-formation",
+    docsUrl: "https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html",
     name: "AWS Lake Formation",
     category: "分析",
     shortDefinition: "S3 ベースのデータレイクの構築・セキュリティ・アクセス制御を一元管理するサービスです。",
@@ -1413,6 +1538,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "clean-rooms",
+    docsUrl: "https://docs.aws.amazon.com/clean-rooms/latest/userguide/what-is.html",
     name: "AWS Clean Rooms",
     category: "分析",
     shortDefinition: "生データを共有せずに複数企業がデータを安全に共同分析できるサービスです。",
@@ -1426,6 +1552,7 @@ export const studyTerms: StudyTerm[] = [
   // ── コンテナ・開発（追加）────────────────────────────────────────────
   {
     id: "ecr",
+    docsUrl: "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html",
     name: "Amazon ECR",
     category: "コンテナ",
     shortDefinition: "Docker コンテナイメージを保存・管理するフルマネージドレジストリです。",
@@ -1437,6 +1564,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "app-mesh",
+    docsUrl: "https://docs.aws.amazon.com/app-mesh/latest/userguide/what-is-app-mesh.html",
     name: "AWS App Mesh",
     category: "コンテナ",
     shortDefinition: "マイクロサービス間の通信を可視化・制御するサービスメッシュです。",
@@ -1448,6 +1576,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "cloud-map",
+    docsUrl: "https://docs.aws.amazon.com/cloud-map/latest/dg/what-is-cloud-map.html",
     name: "AWS Cloud Map",
     category: "コンテナ",
     shortDefinition: "マイクロサービスの場所（IP・エンドポイント）を登録・検索するサービスディスカバリです。",
@@ -1459,6 +1588,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "codepipeline",
+    docsUrl: "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome.html",
     name: "AWS CodePipeline",
     category: "開発者ツール",
     shortDefinition: "ソースからデプロイまでの CI/CD パイプラインを自動化するサービスです。",
@@ -1470,6 +1600,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "codebuild",
+    docsUrl: "https://docs.aws.amazon.com/codebuild/latest/userguide/welcome.html",
     name: "AWS CodeBuild",
     category: "開発者ツール",
     shortDefinition: "コードのビルド・テストをサーバーレスで実行するマネージドビルドサービスです。",
@@ -1481,6 +1612,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "codedeploy",
+    docsUrl: "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html",
     name: "AWS CodeDeploy",
     category: "開発者ツール",
     shortDefinition: "EC2・Lambda・ECS へのデプロイを自動化・安全にロールアウトするサービスです。",
@@ -1492,6 +1624,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "xray",
+    docsUrl: "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html",
     name: "AWS X-Ray",
     category: "開発者ツール",
     shortDefinition: "マイクロサービスのリクエストを追跡・可視化する分散トレーシングサービスです。",
@@ -1505,6 +1638,7 @@ export const studyTerms: StudyTerm[] = [
   // ── ガバナンス・運用（追加）──────────────────────────────────────────
   {
     id: "organizations",
+    docsUrl: "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html",
     name: "AWS Organizations",
     category: "ガバナンス",
     shortDefinition: "複数の AWS アカウントを階層的に管理し、ポリシーを一元適用するサービスです。",
@@ -1516,6 +1650,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "service-catalog",
+    docsUrl: "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html",
     name: "AWS Service Catalog",
     category: "ガバナンス",
     shortDefinition: "承認済みの AWS リソース構成（製品）をセルフサービスでプロビジョニングできる仕組みです。",
@@ -1527,6 +1662,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "opsworks",
+    docsUrl: "https://docs.aws.amazon.com/opsworks/latest/userguide/welcome.html",
     name: "AWS OpsWorks",
     category: "ガバナンス",
     shortDefinition: "Chef・Puppet を使ったインフラ構成管理をマネージドで提供するサービスです。",
@@ -1538,6 +1674,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "patch-manager",
+    docsUrl: "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-patch.html",
     name: "AWS Systems Manager Patch Manager",
     category: "ガバナンス",
     shortDefinition: "EC2 やオンプレサーバーへの OS パッチ適用を自動化する Systems Manager の機能です。",
@@ -1551,6 +1688,7 @@ export const studyTerms: StudyTerm[] = [
   // ── 追加：機械学習・AI ──────────────────────────────────────────────
   {
     id: "sagemaker",
+    docsUrl: "https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html",
     name: "Amazon SageMaker",
     category: "機械学習",
     shortDefinition: "機械学習モデルの構築・学習・デプロイをフルマネージドで提供するサービスです。",
@@ -1562,6 +1700,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "rekognition",
+    docsUrl: "https://docs.aws.amazon.com/rekognition/latest/dg/what-is.html",
     name: "Amazon Rekognition",
     category: "機械学習",
     shortDefinition: "画像・動画の物体検出・顔認識・テキスト抽出を API で提供するサービスです。",
@@ -1573,6 +1712,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "comprehend",
+    docsUrl: "https://docs.aws.amazon.com/comprehend/latest/dg/what-is.html",
     name: "Amazon Comprehend",
     category: "機械学習",
     shortDefinition: "テキストから感情・エンティティ・言語・キーフレーズを抽出する NLP サービスです。",
@@ -1584,6 +1724,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "translate",
+    docsUrl: "https://docs.aws.amazon.com/translate/latest/dg/what-is.html",
     name: "Amazon Translate",
     category: "機械学習",
     shortDefinition: "テキストを 75 以上の言語間でリアルタイム翻訳する NMT ベースのサービスです。",
@@ -1595,6 +1736,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "textract",
+    docsUrl: "https://docs.aws.amazon.com/textract/latest/dg/what-is.html",
     name: "Amazon Textract",
     category: "機械学習",
     shortDefinition: "スキャン画像や PDF からテキスト・フォーム・テーブルを自動抽出するサービスです。",
@@ -1608,6 +1750,7 @@ export const studyTerms: StudyTerm[] = [
   // ── 追加：IoT・エッジ ──────────────────────────────────────────────
   {
     id: "iot-core",
+    docsUrl: "https://docs.aws.amazon.com/iot/latest/developerguide/what-is-aws-iot.html",
     name: "AWS IoT Core",
     category: "IoT",
     shortDefinition: "IoT デバイスと AWS クラウドを安全に接続・管理するマネージドサービスです。",
@@ -1619,6 +1762,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "iot-greengrass",
+    docsUrl: "https://docs.aws.amazon.com/greengrass/v2/developerguide/what-is-iot-greengrass.html",
     name: "AWS IoT Greengrass",
     category: "IoT",
     shortDefinition: "エッジデバイス上で Lambda 関数・ML 推論・ローカルデータ処理を実行するランタイムです。",
@@ -1630,6 +1774,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "amazon-mq",
+    docsUrl: "https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/welcome.html",
     name: "Amazon MQ",
     category: "アプリケーション統合",
     shortDefinition: "Apache ActiveMQ・RabbitMQ をマネージドで提供するメッセージブローカーサービスです。",
@@ -1641,6 +1786,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "lightsail",
+    docsUrl: "https://docs.aws.amazon.com/lightsail/latest/userguide/what-is-amazon-lightsail.html",
     name: "Amazon Lightsail",
     category: "コンピューティング",
     shortDefinition: "仮想サーバー・ストレージ・データベースをシンプルな固定料金で使えるサービスです。",
@@ -1652,6 +1798,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "outposts",
+    docsUrl: "https://docs.aws.amazon.com/outposts/latest/userguide/what-is-outposts.html",
     name: "AWS Outposts",
     category: "ハイブリッド",
     shortDefinition: "AWS のインフラをオンプレミスのデータセンターに設置して使えるハイブリッドサービスです。",
@@ -1663,6 +1810,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "global-accelerator-adv",
+    docsUrl: "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html",
     name: "AWS Global Accelerator（詳細）",
     category: "ネットワーク",
     shortDefinition: "静的エニーキャスト IP でユーザーを最適な AWS エンドポイントに誘導するサービスです。",
@@ -1674,6 +1822,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "transcribe",
+    docsUrl: "https://docs.aws.amazon.com/transcribe/latest/dg/what-is.html",
     name: "Amazon Transcribe",
     category: "機械学習",
     shortDefinition: "音声ファイルをテキストに自動変換する音声認識サービスです。",
@@ -1685,6 +1834,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "polly",
+    docsUrl: "https://docs.aws.amazon.com/polly/latest/dg/what-is.html",
     name: "Amazon Polly",
     category: "機械学習",
     shortDefinition: "テキストを自然な音声に変換する TTS（テキスト読み上げ）サービスです。",
@@ -1696,6 +1846,7 @@ export const studyTerms: StudyTerm[] = [
   },
   {
     id: "kinesis-data-analytics",
+    docsUrl: "https://docs.aws.amazon.com/kinesisanalytics/latest/java/what-is.html",
     name: "Amazon Kinesis Data Analytics",
     category: "分析",
     shortDefinition: "Kinesis ストリームのデータを Apache Flink で リアルタイム処理するサービスです。",
