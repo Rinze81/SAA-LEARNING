@@ -2,7 +2,8 @@ import type { HomeSnapshot, PersistedHomeState } from "@/lib/home/types";
 import { quizQuestions } from "@/lib/quiz/data";
 import { buildStudyAnalytics } from "@/lib/study/analytics";
 import type { StudyAnalytics } from "@/lib/study/types";
-import { ROADMAP_TERM_TOTAL } from "@/lib/study/roadmap-data";
+import { ROADMAP_STEPS, ROADMAP_TERM_TOTAL } from "@/lib/study/roadmap-data";
+import { studyTerms } from "@/lib/study/terms";
 import { comparisonItems } from "@/lib/study/comparisons";
 
 const ROADMAP_READ_KEY = "saa-roadmap-read";
@@ -20,6 +21,31 @@ function readTermsMastery(): number {
   }
 }
 
+function readRoadmapProgress(): {
+  completedTopics: number;
+  totalTopics: number;
+  overallPercent: number;
+} {
+  const totalTopics = ROADMAP_STEPS.length;
+  if (typeof window === "undefined") {
+    return { completedTopics: 0, totalTopics, overallPercent: 0 };
+  }
+  try {
+    const raw = localStorage.getItem(ROADMAP_READ_KEY);
+    const readIds = new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
+    const completedTopics = ROADMAP_STEPS.filter((step) => {
+      const validIds = step.termIds.filter((id) =>
+        studyTerms.some((t) => t.id === id),
+      );
+      return validIds.length > 0 && validIds.every((id) => readIds.has(id));
+    }).length;
+    const overallPercent = Math.round((completedTopics / totalTopics) * 100);
+    return { completedTopics, totalTopics, overallPercent };
+  } catch {
+    return { completedTopics: 0, totalTopics, overallPercent: 0 };
+  }
+}
+
 function readComparisonMastery(): number {
   if (typeof window === "undefined") return 0;
   try {
@@ -34,39 +60,40 @@ function readComparisonMastery(): number {
 const STORAGE_KEY = "saa-home-state";
 
 const defaultState: Required<PersistedHomeState> = {
-  overallPercent: 42,
-  completedTopics: 11,
-  totalTopics: 26,
-  studyHours: 18,
-  quizAccuracy: 68,
-  termsMastery: 54,
-  comparisonMastery: 47,
-  streakDays: 4,
-  reviewedToday: 12,
-  weakDomain: "Networking",
+  overallPercent: 0,
+  completedTopics: 0,
+  totalTopics: ROADMAP_STEPS.length,
+  studyHours: 0,
+  quizAccuracy: 0,
+  termsMastery: 0,
+  comparisonMastery: 0,
+  streakDays: 0,
+  reviewedToday: 0,
+  weakDomain: "データなし",
   lastVisitedPath: "/quiz",
 };
 
 function createFallbackAnalytics(): StudyAnalytics {
   const fallbackQuestion = quizQuestions[0];
+  const fallbackCategory = fallbackQuestion?.category ?? "Storage";
 
   return {
     priorities: [
       {
-        category: defaultState.weakDomain,
+        category: fallbackCategory,
         score: 0,
         reviewCount: 0,
         recentMistakes: 0,
         recentAttempts: 0,
         accuracy: null,
         unattemptedCount: quizQuestions.filter(
-          (q) => q.category === defaultState.weakDomain,
+          (q) => q.category === fallbackCategory,
         ).length,
         lastAttemptAt: null,
       },
     ],
     recommendation: {
-      focusCategory: defaultState.weakDomain,
+      focusCategory: fallbackCategory,
       nextQuestionId: fallbackQuestion?.id ?? "",
       quizHref: fallbackQuestion ? `/quiz?questionId=${fallbackQuestion.id}` : "/quiz",
       reviewHref: "/review",
@@ -278,8 +305,9 @@ export function buildHomeSnapshot(
 export function buildClientHomeSnapshot(state: PersistedHomeState): HomeSnapshot {
   const termsMastery = readTermsMastery();
   const comparisonMastery = readComparisonMastery();
+  const { completedTopics, totalTopics, overallPercent } = readRoadmapProgress();
   return buildHomeSnapshot(
-    { ...state, termsMastery, comparisonMastery },
+    { ...state, termsMastery, comparisonMastery, completedTopics, totalTopics, overallPercent },
     { analytics: buildStudyAnalytics() },
   );
 }
