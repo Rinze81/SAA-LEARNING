@@ -111,34 +111,25 @@ function VerifyResultPanel({
 }
 
 async function callVerifyApi(term: StudyTerm): Promise<VerifyResult> {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const response = await fetch("/api/verify-term", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
-      system:
-        'あなたはAWS認定ソリューションアーキテクト試験の専門家です。ユーザーが提示するAWSサービスの説明文を検証し、以下のJSON形式のみで回答してください。前置きや補足テキストは一切不要です。\n\n{"status": "correct" | "warning" | "incorrect", "summary": "20文字以内の一言評価", "details": "具体的な補足・訂正内容（200文字以内）", "officialNote": "公式ドキュメントで確認すべきポイント（100文字以内）"}',
-      messages: [
-        {
-          role: "user",
-          content: `サービス名：${term.name}\n説明文：${term.description}\n\nこの説明文をAWS公式情報と照合して検証してください。`,
-        },
-      ],
+      termName: term.name,
+      description: term.description,
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    const errorData = (await response.json().catch(() => ({}))) as {
+      error?: string;
+    };
+    throw new Error(errorData.error ?? `Server error: ${response.status}`);
   }
 
-  const data = (await response.json()) as {
-    content: { text: string }[];
-  };
-  const text = data.content[0]?.text ?? "";
-  const result = JSON.parse(text) as VerifyResult;
+  const result = (await response.json()) as VerifyResult;
   return result;
 }
 
