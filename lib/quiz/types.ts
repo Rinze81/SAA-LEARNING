@@ -1,3 +1,15 @@
+export type QuizFilter = {
+  category: string;       // "all" or specific category name
+  untriedOnly: boolean;   // show only questions not in saa-quiz-attempts
+  reviewOnly: boolean;    // show only questions in saa-review-records
+};
+
+export const DEFAULT_QUIZ_FILTER: QuizFilter = {
+  category: "all",
+  untriedOnly: false,
+  reviewOnly: false,
+};
+
 export type QuizOption = {
   id: string;
   label: string;
