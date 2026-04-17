@@ -17,6 +17,20 @@ function emitStudySync() {
   window.dispatchEvent(new CustomEvent(STUDY_SYNC_EVENT));
 }
 
+function isValidRecord(value: unknown): value is ReviewRecord {
+  if (!value || typeof value !== "object") return false;
+  const r = value as Record<string, unknown>;
+  return (
+    typeof r.questionId === "string" &&
+    typeof r.selectedAnswer === "string" &&
+    typeof r.correctAnswer === "string" &&
+    typeof r.isCorrect === "boolean" &&
+    typeof r.category === "string" &&
+    typeof r.timestamp === "number" &&
+    Number.isFinite(r.timestamp)
+  );
+}
+
 function readRawRecords(): ReviewRecord[] {
   if (!isBrowser()) {
     return [];
@@ -29,8 +43,9 @@ function readRawRecords(): ReviewRecord[] {
   }
 
   try {
-    const parsed = JSON.parse(raw) as ReviewRecord[];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidRecord);
   } catch {
     return [];
   }

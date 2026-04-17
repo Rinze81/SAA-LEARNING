@@ -9,6 +9,7 @@ import { readReviewRecords, removeReviewRecord, STUDY_SYNC_EVENT } from "@/lib/r
 import type { ReviewRecord } from "@/lib/review/types";
 
 function formatDate(timestamp: number) {
+  if (!Number.isFinite(timestamp)) return "---";
   return new Intl.DateTimeFormat("ja-JP", {
     month: "numeric",
     day: "numeric",
@@ -35,10 +36,12 @@ export function ReviewBoard() {
 
   const enrichedRecords = useMemo(
     () =>
-      records.map((record) => ({
-        ...record,
-        question: quizQuestions.find((question) => question.id === record.questionId) ?? null,
-      })),
+      records
+        .filter((record) => record != null && typeof record.questionId === "string")
+        .map((record) => ({
+          ...record,
+          question: quizQuestions.find((question) => question.id === record.questionId) ?? null,
+        })),
     [records],
   );
 
@@ -46,6 +49,7 @@ export function ReviewBoard() {
     const grouped = new Map<string, number>();
 
     for (const record of records) {
+      if (!record?.category) continue;
       grouped.set(record.category, (grouped.get(record.category) ?? 0) + 1);
     }
 

@@ -18,6 +18,18 @@ function emitStudySync() {
   window.dispatchEvent(new CustomEvent(STUDY_SYNC_EVENT));
 }
 
+function isValidAttempt(value: unknown): value is QuizAttemptRecord {
+  if (!value || typeof value !== "object") return false;
+  const r = value as Record<string, unknown>;
+  return (
+    typeof r.questionId === "string" &&
+    typeof r.category === "string" &&
+    typeof r.isCorrect === "boolean" &&
+    typeof r.timestamp === "number" &&
+    Number.isFinite(r.timestamp)
+  );
+}
+
 function readRawAttempts(): QuizAttemptRecord[] {
   if (!isBrowser()) {
     return [];
@@ -30,8 +42,9 @@ function readRawAttempts(): QuizAttemptRecord[] {
   }
 
   try {
-    const parsed = JSON.parse(raw) as QuizAttemptRecord[];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidAttempt);
   } catch {
     return [];
   }
