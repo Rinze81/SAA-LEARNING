@@ -16,12 +16,13 @@ test('クイズの基本フロー', async ({ page }) => {
   const options = optionsSection.locator('button');
   await expect(options).toHaveCount(4);
 
-  // 選択肢をクリックする
+  // 選択肢が描画されるのを待ってからクリック
+  await expect(options.first()).toBeVisible();
   await options.first().click();
 
-  // 「この回答で提出する」ボタンが有効になる
+  // 「この回答で提出する」ボタンが有効になるまで待つ
   const submitBtn = page.getByRole('button', { name: 'この回答で提出する' });
-  await expect(submitBtn).toBeEnabled();
+  await expect(submitBtn).toBeEnabled({ timeout: 5000 });
 
   // 提出する
   await submitBtn.click();
