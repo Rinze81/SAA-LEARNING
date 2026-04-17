@@ -1,14 +1,23 @@
 "use client";
 
+import { ActivityHeatmap } from "@/components/home/activity-heatmap";
 import { HomeHero } from "@/components/home/home-hero";
 import { LearningPaths } from "@/components/home/learning-paths";
 import { ProgressOverview } from "@/components/home/progress-overview";
 import { TodayFocus } from "@/components/home/today-focus";
 import { StudyTimer } from "@/components/timer/study-timer";
 import { useHomeDashboard } from "@/lib/home/use-home-dashboard";
+import { readQuizAttempts } from "@/lib/study/storage";
+import { useEffect, useState } from "react";
+import type { QuizAttemptRecord } from "@/lib/study/types";
 
 export function HomeDashboard() {
   const { snapshot, isHydrated } = useHomeDashboard();
+  const [attempts, setAttempts] = useState<QuizAttemptRecord[]>([]);
+
+  useEffect(() => {
+    setAttempts(readQuizAttempts());
+  }, [isHydrated]);
 
   return (
     <main className="min-h-screen px-4 pb-16 pt-6 sm:px-6 lg:px-8">
@@ -53,6 +62,7 @@ export function HomeDashboard() {
           <LearningPaths snapshot={snapshot} />
         </div>
         <TodayFocus snapshot={snapshot} isHydrated={isHydrated} />
+        <ActivityHeatmap attempts={attempts} />
       </div>
     </main>
   );
