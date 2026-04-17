@@ -7,7 +7,7 @@ type ErrorProps = {
   reset: () => void;
 };
 
-export default function GlobalError({ error, reset }: ErrorProps) {
+export default function RouteError({ error, reset }: ErrorProps) {
   useEffect(() => {
     // ChunkLoadError はブラウザキャッシュの古いチャンクが原因。
     // 自動リロードで最新チャンクを取得して解決する。

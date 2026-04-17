@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 const pages = [
   { path: '/', name: 'ホーム' },
   { path: '/quiz', name: 'クイズ' },
+  { path: '/review', name: '復習' },
   { path: '/terms', name: '用語集' },
   { path: '/comparisons', name: 'サービス比較' },
   { path: '/roadmap', name: 'ロードマップ' },
