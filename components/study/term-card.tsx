@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { StatusChip } from "@/components/ui/status-chip";
+import type { VerifyResult } from "@/app/api/verify-term/route";
 import type { StudyTerm } from "@/lib/study/terms";
 
 const TERM_TO_QUIZ_CATEGORY: Record<string, string> = {
@@ -32,13 +33,103 @@ function ChevronIcon({ open }: { open: boolean }) {
   );
 }
 
+function SpinnerIcon() {
+  return (
+    <svg
+      className="h-4 w-4 animate-spin"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
+  );
+}
+
+const STATUS_STYLES = {
+  correct: {
+    container: "border-emerald-800/60 bg-emerald-950/40",
+    header: "text-emerald-300",
+    icon: "✓",
+    iconClass: "text-emerald-400",
+  },
+  warning: {
+    container: "border-yellow-800/60 bg-yellow-950/30",
+    header: "text-yellow-300",
+    icon: "⚠",
+    iconClass: "text-yellow-400",
+  },
+  incorrect: {
+    container: "border-rose-800/60 bg-rose-950/40",
+    header: "text-rose-300",
+    icon: "✗",
+    iconClass: "text-rose-400",
+  },
+} as const;
+
 export function TermCard({ term, isHighlighted = false }: TermCardProps) {
   const [isOpen, setIsOpen] = useState(isHighlighted);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<VerifyResult | null>(null);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const cacheRef = useRef<VerifyResult | null>(null);
+
   const quizCategory = TERM_TO_QUIZ_CATEGORY[term.category];
 
   useEffect(() => {
     if (isHighlighted) setIsOpen(true);
   }, [isHighlighted]);
+
+  async function handleVerify(forceRefresh = false) {
+    if (!forceRefresh && cacheRef.current) {
+      setVerifyResult(cacheRef.current);
+      return;
+    }
+
+    setIsVerifying(true);
+    setVerifyError(null);
+    if (forceRefresh) {
+      cacheRef.current = null;
+      setVerifyResult(null);
+    }
+
+    try {
+      const res = await fetch("/api/verify-term", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          termName: term.name,
+          description: term.description,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = (await res.json()) as { error: string };
+        setVerifyError(err.error ?? "検証に失敗しました");
+        return;
+      }
+
+      const result = (await res.json()) as VerifyResult;
+      cacheRef.current = result;
+      setVerifyResult(result);
+    } catch {
+      setVerifyError("ネットワークエラーが発生しました");
+    } finally {
+      setIsVerifying(false);
+    }
+  }
 
   return (
     <article
@@ -124,6 +215,7 @@ export function TermCard({ term, isHighlighted = false }: TermCardProps) {
               </div>
             ) : null}
 
+            {/* ── アクションボタン行 ── */}
             <div className="flex flex-wrap gap-2">
               {quizCategory ? (
                 <Link
@@ -144,7 +236,83 @@ export function TermCard({ term, isHighlighted = false }: TermCardProps) {
                   AWS公式ドキュメント →
                 </a>
               ) : null}
+
+              <button
+                type="button"
+                onClick={() => handleVerify(false)}
+                disabled={isVerifying}
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-slate-700 bg-slate-900/60 px-5 text-sm font-medium text-slate-200 transition hover:border-violet-700 hover:bg-violet-950/40 hover:text-violet-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isVerifying ? (
+                  <>
+                    <SpinnerIcon />
+                    検証中...
+                  </>
+                ) : (
+                  "この説明を検証する"
+                )}
+              </button>
             </div>
+
+            {/* ── 検証結果パネル ── */}
+            {verifyError ? (
+              <div className="rounded-[1.25rem] border border-rose-800/50 bg-rose-950/30 p-4 text-sm text-rose-300">
+                {verifyError}
+              </div>
+            ) : null}
+
+            {verifyResult ? (
+              <div
+                className={`rounded-[1.25rem] border p-4 ${STATUS_STYLES[verifyResult.status].container}`}
+              >
+                {/* ヘッダー */}
+                <div className="flex items-center gap-2">
+                  <span className={`text-lg font-bold ${STATUS_STYLES[verifyResult.status].iconClass}`}>
+                    {STATUS_STYLES[verifyResult.status].icon}
+                  </span>
+                  <p className={`text-base font-semibold ${STATUS_STYLES[verifyResult.status].header}`}>
+                    {verifyResult.summary}
+                  </p>
+                </div>
+
+                {/* 詳細 */}
+                <p className="mt-3 text-sm leading-6 text-slate-300">
+                  {verifyResult.details}
+                </p>
+
+                {/* 公式ドキュメント確認ポイント */}
+                <div className="mt-3 rounded-[0.75rem] border border-slate-700/50 bg-slate-900/40 p-3">
+                  <p className="text-[11px] tracking-[0.14em] text-slate-500">公式ドキュメントで確認</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-400">
+                    {verifyResult.officialNote}
+                  </p>
+                </div>
+
+                {/* 公式ドキュメントリンク */}
+                {term.docsUrl ? (
+                  <a
+                    href={term.docsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-1 text-xs text-slate-400 underline-offset-2 transition hover:text-slate-200 hover:underline"
+                  >
+                    AWS公式ドキュメントで確認する →
+                  </a>
+                ) : null}
+
+                {/* 再検証ボタン */}
+                <div className="mt-3 border-t border-slate-700/40 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => handleVerify(true)}
+                    disabled={isVerifying}
+                    className="text-xs text-slate-500 transition hover:text-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    再検証する
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
