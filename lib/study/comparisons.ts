@@ -1122,4 +1122,424 @@ export const comparisonItems: ComparisonItem[] = [
     conclusion:
       "Lambda などの大量接続でコネクションエラーが出るなら RDS Proxy、同じデータへの繰り返しクエリで DB 負荷が高いなら ElastiCache です。",
   },
+  {
+    id: "step-functions-vs-sqs-vs-eventbridge",
+    title: "Step Functions vs SQS vs EventBridge",
+    category: "アプリ統合",
+    summary:
+      "ワークフローの状態管理が必要か、メッセージのキューイングが必要か、イベントのルーティングが必要かで使い分けます。",
+    services: [
+      {
+        name: "Step Functions",
+        summary: "複数のステップを順序・分岐・リトライ付きで制御したいときに向いています。",
+        points: [
+          { label: "役割", value: "ステートマシンによるワークフローオーケストレーション" },
+          { label: "向いている用途", value: "複数 Lambda の連鎖処理、ヒューマン承認フロー、注文処理パイプライン" },
+          { label: "特徴", value: "実行状態の可視化・分岐・並列・エラーリトライを標準機能で管理" },
+          { label: "キーワード", value: "「複数ステップを順番に実行したい」「処理の進行状況を追跡したい」" },
+        ],
+      },
+      {
+        name: "SQS",
+        summary: "メッセージをバッファリングして非同期に処理させたいときに向いています。",
+        points: [
+          { label: "役割", value: "プロデューサーとコンシューマーを切り離すメッセージキュー" },
+          { label: "向いている用途", value: "バッチ処理の平滑化、マイクロサービス間の疎結合、負荷の平準化" },
+          { label: "特徴", value: "最大14日間のメッセージ保持・可視性タイムアウトで重複処理制御" },
+          { label: "キーワード", value: "「処理が追いつかない時にためておきたい」「コンポーネントを疎結合にしたい」" },
+        ],
+      },
+      {
+        name: "EventBridge",
+        summary: "イベントを条件でフィルタリングして複数のターゲットにルーティングしたいときに向いています。",
+        points: [
+          { label: "役割", value: "イベントバスによるイベントルーティング・ファンアウト" },
+          { label: "向いている用途", value: "SaaS 連携、クロスアカウントイベント、スケジュール実行" },
+          { label: "特徴", value: "ルールでイベントをフィルタして複数ターゲットに同時配信" },
+          { label: "キーワード", value: "「イベントを条件で振り分けたい」「複数サービスに同時通知したい」" },
+        ],
+      },
+    ],
+    examTip:
+      "「複数ステップの順序制御・状態管理」→ Step Functions、「非同期バッファリング・負荷平準化」→ SQS、「イベントのフィルタ・ルーティング・ファンアウト」→ EventBridge と処理の性質で判断します。",
+    conclusion:
+      "ステップ間の依存関係や状態追跡が必要なら Step Functions、メッセージを溜めて後処理するなら SQS、イベント駆動の配信・振り分けなら EventBridge です。",
+  },
+  {
+    id: "aurora-serverless-vs-provisioned",
+    title: "Aurora Serverless v2 vs Aurora Provisioned",
+    category: "データベース",
+    summary:
+      "ワークロードが予測しにくく変動が大きいか、安定した高負荷が続くかで使い分けます。",
+    services: [
+      {
+        name: "Aurora Serverless v2",
+        summary: "負荷に応じて自動でキャパシティが増減する可変負荷向けの構成です。",
+        points: [
+          { label: "キャパシティ管理", value: "ACU（Aurora Capacity Unit）で自動スケール" },
+          { label: "向いている用途", value: "開発・テスト環境、夜間バッチ、アクセス数が不規則なアプリ" },
+          { label: "コスト特性", value: "アイドル時は最小 ACU まで縮小してコストを抑えられる" },
+          { label: "制限", value: "スケールアップに数秒かかるため急激なスパイクには注意" },
+        ],
+      },
+      {
+        name: "Aurora Provisioned",
+        summary: "インスタンスサイズを固定して安定した大規模負荷をさばく構成です。",
+        points: [
+          { label: "キャパシティ管理", value: "インスタンスクラスを手動で選択・変更する" },
+          { label: "向いている用途", value: "本番 OLTP、安定したスループットが必要なシステム" },
+          { label: "コスト特性", value: "使用率にかかわらずインスタンス稼働時間で課金" },
+          { label: "制限", value: "スケールアップはインスタンス変更が必要（短時間のダウンタイムあり）" },
+        ],
+      },
+    ],
+    examTip:
+      "「負荷が予測できない」「夜間は無負荷で昼間だけ高負荷」→ Serverless v2、「高トラフィックが常時続く」「最大性能を固定で確保したい」→ Provisioned と負荷パターンで判断します。",
+    conclusion:
+      "変動が大きく節約も重視するなら Serverless v2、安定した大規模負荷には Provisioned を選びます。",
+  },
+  {
+    id: "vpc-peering-vs-transit-gateway-vs-privatelink",
+    title: "VPC Peering vs Transit Gateway vs PrivateLink",
+    category: "ネットワーク",
+    summary:
+      "接続するVPC数・方向・公開範囲によって最適な接続方式が変わります。",
+    services: [
+      {
+        name: "VPC Peering",
+        summary: "2つのVPCを1対1でシンプルに接続する方式です。",
+        points: [
+          { label: "接続形態", value: "2 VPC 間の 1 対 1 ピアリング接続" },
+          { label: "向いている用途", value: "少数 VPC 間の通信、クロスアカウント接続" },
+          { label: "制限", value: "推移的ルーティング不可（A↔B・B↔C でも A↔C は通信不可）" },
+          { label: "キーワード", value: "「2 つの VPC を直接接続したい」「シンプルな VPC 間通信」" },
+        ],
+      },
+      {
+        name: "Transit Gateway",
+        summary: "多数のVPCをハブアンドスポーク型で集中管理する方式です。",
+        points: [
+          { label: "接続形態", value: "中央の TGW に多数の VPC・VPN・Direct Connect を接続" },
+          { label: "向いている用途", value: "多数の VPC 管理、クロスリージョン接続、オンプレ統合" },
+          { label: "制限", value: "接続数に応じてコストが増加する" },
+          { label: "キーワード", value: "「VPC が 3 つ以上」「推移的ルーティングが必要」" },
+        ],
+      },
+      {
+        name: "PrivateLink",
+        summary: "サービスを VPC に閉じた形で他のVPCやアカウントに安全に公開する方式です。",
+        points: [
+          { label: "接続形態", value: "エンドポイントサービス（NLB）とインターフェース型 VPC エンドポイントで接続" },
+          { label: "向いている用途", value: "マネージドサービスへのプライベートアクセス、SaaS 提供" },
+          { label: "制限", value: "双方向の全通信ではなく、特定サービスへの単方向アクセス" },
+          { label: "キーワード", value: "「サービスを公開したいが IP を重複させたくない」「プライベートに API を提供」" },
+        ],
+      },
+    ],
+    examTip:
+      "「2 VPC だけ繋ぐ」→ Peering、「VPC が多く推移的ルーティングが必要」→ Transit Gateway、「特定サービスをプライベートに公開」→ PrivateLink と接続規模・方向で判断します。",
+    conclusion:
+      "小規模な VPC 間接続は Peering、多対多の集中管理は Transit Gateway、サービス公開には PrivateLink を選びます。",
+  },
+  {
+    id: "ebs-volume-types",
+    title: "EBS gp2 vs gp3 vs io1 vs io2",
+    category: "ストレージ",
+    summary:
+      "汎用ワークロードか I/O 集約型かで選択肢が変わり、同じ性能なら gp3 が最もコスト効率に優れます。",
+    services: [
+      {
+        name: "gp2（汎用 SSD・旧世代）",
+        summary: "ベースラインの IOPS がボリュームサイズに連動する汎用ボリュームです。",
+        points: [
+          { label: "IOPS", value: "3 IOPS/GB、最大 16,000 IOPS（バースト最大 3,000）" },
+          { label: "向いている用途", value: "一般的な Web サーバー、小規模 DB（新規では gp3 推奨）" },
+          { label: "コスト", value: "gp3 より高く、性能はサイズに依存するため調整しにくい" },
+          { label: "キーワード", value: "既存の汎用 SSD ボリューム、旧世代のデフォルト選択" },
+        ],
+      },
+      {
+        name: "gp3（汎用 SSD・新世代）",
+        summary: "IOPS とスループットをサイズと独立して設定できるコスト効率の高い汎用ボリュームです。",
+        points: [
+          { label: "IOPS", value: "ベースライン 3,000 IOPS を無料で提供、最大 16,000 IOPS まで追加可能" },
+          { label: "向いている用途", value: "ほとんどの一般ワークロード、コスト最適化が重要な場合" },
+          { label: "コスト", value: "gp2 より最大 20% 安価で AWS 推奨の汎用ボリューム" },
+          { label: "キーワード", value: "「コスト効率よく高い IOPS が必要」「新規ボリューム作成」" },
+        ],
+      },
+      {
+        name: "io1 / io2（プロビジョンド IOPS SSD）",
+        summary: "最大 64,000〜256,000 IOPS をプロビジョンして保証する超高 I/O ワークロード向けです。",
+        points: [
+          { label: "IOPS", value: "io1: 最大 64,000 IOPS、io2 Block Express: 最大 256,000 IOPS" },
+          { label: "向いている用途", value: "大規模 OLTP、Oracle・SAP など I/O 集約型 DB" },
+          { label: "コスト", value: "gp 系より高価だが IOPS を確実に保証できる" },
+          { label: "キーワード", value: "「高い IOPS を安定して保証したい」「I/O 集約型データベース」" },
+        ],
+      },
+    ],
+    examTip:
+      "「コスト効率よく汎用的に使いたい」→ gp3（新規のデフォルト）、「高 IOPS を確実に保証したい」→ io1/io2 と I/O 要件の厳格さで判断します。gp3 が gp2 より安価で高性能な点は頻出です。",
+    conclusion:
+      "ほとんどのワークロードは gp3、I/O 集約型の本番 DB では io1/io2 を選びます。gp2 は新規ではほぼ選びません。",
+  },
+  {
+    id: "cicd-services",
+    title: "CodeCommit vs CodeBuild vs CodeDeploy vs CodePipeline",
+    category: "開発者ツール",
+    summary:
+      "AWS のCI/CDサービスはそれぞれ独立した役割をもち、組み合わせることでエンドツーエンドのパイプラインを構成します。",
+    services: [
+      {
+        name: "CodeCommit",
+        summary: "Git リポジトリをホストするソースコード管理サービスです。",
+        points: [
+          { label: "役割", value: "Git 互換のプライベートリポジトリホスティング" },
+          { label: "向いている用途", value: "ソースコードの保管、バージョン管理、ブランチ戦略" },
+          { label: "キーワード", value: "「Git リポジトリを AWS 内に置きたい」" },
+          { label: "備考", value: "2024年以降は新規リポジトリ作成不可（GitHub等への移行推奨）" },
+        ],
+      },
+      {
+        name: "CodeBuild",
+        summary: "ソースコードをビルド・テストするマネージド CI サービスです。",
+        points: [
+          { label: "役割", value: "ビルド・テストの実行（コンパイル・単体テスト・パッケージング）" },
+          { label: "向いている用途", value: "Dockerfile のビルド、テスト自動化、成果物の生成" },
+          { label: "キーワード", value: "「コードをビルドしてテストしたい」「CI を自動化したい」" },
+          { label: "特徴", value: "buildspec.yml でビルド手順を定義、分単位の課金" },
+        ],
+      },
+      {
+        name: "CodeDeploy",
+        summary: "EC2・Lambda・ECS へアプリケーションをデプロイするサービスです。",
+        points: [
+          { label: "役割", value: "EC2 / Lambda / ECS へのアプリケーションデプロイ自動化" },
+          { label: "向いている用途", value: "ブルーグリーンデプロイ、ローリングアップデート" },
+          { label: "キーワード", value: "「ダウンタイムなしでデプロイしたい」「段階的なリリース」" },
+          { label: "特徴", value: "appspec.yml でデプロイ手順とライフサイクルフックを定義" },
+        ],
+      },
+      {
+        name: "CodePipeline",
+        summary: "ソース→ビルド→テスト→デプロイの一連のフローを自動化するオーケストレーターです。",
+        points: [
+          { label: "役割", value: "CI/CD パイプライン全体のオーケストレーション" },
+          { label: "向いている用途", value: "CodeCommit/Build/Deploy を組み合わせたパイプライン構築" },
+          { label: "キーワード", value: "「コードプッシュから自動デプロイまでを一貫して管理したい」" },
+          { label: "特徴", value: "各ステージに GitHub・S3・CodeBuild・CodeDeploy などを柔軟に接続" },
+        ],
+      },
+    ],
+    examTip:
+      "「ソース管理」→ CodeCommit、「ビルド・テスト」→ CodeBuild、「デプロイ」→ CodeDeploy、「パイプライン全体の自動化」→ CodePipeline と役割で対応付けます。試験では組み合わせの正誤を問う形式が多いです。",
+    conclusion:
+      "それぞれが独立したサービスであり、CodePipeline がオーケストレーターとして全体を繋ぐ構成が典型パターンです。",
+  },
+  {
+    id: "dynamodb-vs-elasticache",
+    title: "DynamoDB vs ElastiCache",
+    category: "データベース",
+    summary:
+      "永続化が必要な高速ストレージか、DB の読み取り負荷を下げる一時キャッシュかで使い分けます。",
+    services: [
+      {
+        name: "DynamoDB",
+        summary: "ミリ秒単位の低レイテンシーと高い耐久性を両立する NoSQL データベースです。",
+        points: [
+          { label: "データ永続性", value: "永続化（3 AZ に自動レプリケーション）" },
+          { label: "レイテンシー", value: "ミリ秒レベル（DAX 併用でマイクロ秒も可能）" },
+          { label: "向いている用途", value: "セッション管理、ゲームスコア、IoT、カタログデータ" },
+          { label: "キーワード", value: "「データを永続化しながら高速に読み書きしたい」" },
+        ],
+      },
+      {
+        name: "ElastiCache",
+        summary: "インメモリでデータをキャッシュして DB クエリを削減する高速キャッシュです。",
+        points: [
+          { label: "データ永続性", value: "基本は一時的（Redis は永続化オプションあり）" },
+          { label: "レイテンシー", value: "マイクロ秒レベル" },
+          { label: "向いている用途", value: "DB 読み取りキャッシュ、セッションストア、リーダーボード" },
+          { label: "キーワード", value: "「同じ DB クエリが繰り返し実行されて負荷が高い」" },
+        ],
+      },
+    ],
+    examTip:
+      "「データを永続化しながら低レイテンシーで扱いたい」→ DynamoDB、「既存 DB の読み取り負荷を下げて高速化したい」→ ElastiCache と永続化の要否で判断します。",
+    conclusion:
+      "新規の高速ストレージなら DynamoDB、既存 DB のフロントキャッシュなら ElastiCache を選びます。",
+  },
+  {
+    id: "api-gateway-types",
+    title: "API Gateway REST API vs HTTP API vs WebSocket API",
+    category: "アプリ統合",
+    summary:
+      "機能の豊富さとコスト・レイテンシーのトレードオフ、またはリアルタイム双方向通信の要否で選択します。",
+    services: [
+      {
+        name: "REST API",
+        summary: "API Gateway の全機能を使えるが、HTTP API より高コストの従来型 API です。",
+        points: [
+          { label: "機能", value: "使用量プラン・API キー・リソースポリシー・WAF 統合など全機能" },
+          { label: "向いている用途", value: "きめ細かいアクセス制御、API キー管理、企業向け API" },
+          { label: "コスト・性能", value: "HTTP API より高価で遅い（最大 30 秒タイムアウト）" },
+          { label: "キーワード", value: "「API キー管理」「使用量プラン（スロットリング）」「WAF で保護」" },
+        ],
+      },
+      {
+        name: "HTTP API",
+        summary: "シンプルで高速・低コストなモダン API です。",
+        points: [
+          { label: "機能", value: "JWT 認証・Lambda 統合・CORS・ルーティングに特化" },
+          { label: "向いている用途", value: "Lambda バックエンド、シンプルな RESTful API、低コスト重視" },
+          { label: "コスト・性能", value: "REST API より最大 71% 安価でレイテンシーも低い" },
+          { label: "キーワード", value: "「シンプルな Lambda バックエンド」「コストを抑えたい」" },
+        ],
+      },
+      {
+        name: "WebSocket API",
+        summary: "クライアントとサーバーの双方向リアルタイム通信を実現する API です。",
+        points: [
+          { label: "機能", value: "持続的な接続を管理し、サーバーからクライアントへもプッシュ可能" },
+          { label: "向いている用途", value: "チャット、リアルタイム通知、ゲーム、株価ストリーミング" },
+          { label: "コスト・性能", value: "接続数とメッセージ数で課金" },
+          { label: "キーワード", value: "「リアルタイム双方向通信」「サーバーからプッシュしたい」" },
+        ],
+      },
+    ],
+    examTip:
+      "「API キー・使用量プランなど高度な管理が必要」→ REST API、「シンプルで安い Lambda バックエンド」→ HTTP API、「リアルタイム双方向通信」→ WebSocket API と要件で判断します。",
+    conclusion:
+      "高度な制御が不要なら HTTP API（コスト最小）、きめ細かいアクセス制御は REST API、双方向通信は WebSocket API です。",
+  },
+  {
+    id: "redshift-vs-athena-vs-emr",
+    title: "Redshift vs Athena vs EMR",
+    category: "分析",
+    summary:
+      "データウェアハウスとして常時クエリするか、S3 に対してアドホック分析するか、カスタム分散処理が必要かで使い分けます。",
+    services: [
+      {
+        name: "Redshift",
+        summary: "ペタバイト規模のデータウェアハウスで定型・高速分析に向いています。",
+        points: [
+          { label: "仕組み", value: "列指向の MPP データウェアハウス、クラスターを事前プロビジョン" },
+          { label: "向いている用途", value: "BI ツール連携、定期レポート、複雑な集計クエリ" },
+          { label: "コスト特性", value: "クラスター稼働時間で課金。常時クエリするなら費用対効果が高い" },
+          { label: "キーワード", value: "「大規模 DWH」「BI ツールから高速クエリ」「JDBC/ODBC 接続」" },
+        ],
+      },
+      {
+        name: "Athena",
+        summary: "S3 に保存されたデータをサーバーレスで SQL クエリするサービスです。",
+        points: [
+          { label: "仕組み", value: "S3 データを直接クエリ（インフラ管理不要）" },
+          { label: "向いている用途", value: "ログ分析、アドホック調査、データレイク上の分析" },
+          { label: "コスト特性", value: "スキャンしたデータ量で課金（Parquet/ORC 形式でコスト削減）" },
+          { label: "キーワード", value: "「S3 のデータをそのまま SQL で分析したい」「サーバーレス」" },
+        ],
+      },
+      {
+        name: "EMR",
+        summary: "Hadoop・Spark などのフレームワークでカスタム分散処理を実行するサービスです。",
+        points: [
+          { label: "仕組み", value: "マネージド Hadoop/Spark クラスターで柔軟な分散処理" },
+          { label: "向いている用途", value: "ML 前処理、ETL 処理、カスタムな大規模データ変換" },
+          { label: "コスト特性", value: "クラスター稼働時間で課金。Spot インスタンス活用でコスト削減可" },
+          { label: "キーワード", value: "「Spark/Hadoop を使いたい」「柔軟なカスタム分散処理」" },
+        ],
+      },
+    ],
+    examTip:
+      "「DWH・定型 BI クエリ」→ Redshift、「S3 データのアドホック分析・サーバーレス」→ Athena、「Spark/Hadoop でカスタム ETL・ML 前処理」→ EMR と分析の目的と管理コストで判断します。",
+    conclusion:
+      "常時高速クエリするなら Redshift、S3 のアドホック分析なら Athena、カスタム分散処理なら EMR を選びます。",
+  },
+  {
+    id: "iam-policy-types",
+    title: "IAM Policy vs Resource Policy vs Permission Boundary",
+    category: "セキュリティ",
+    summary:
+      "誰に権限を付けるか・リソース側で制御するか・付与できる権限の上限を設定するかで使い分けます。",
+    services: [
+      {
+        name: "IAM Policy（アイデンティティベース）",
+        summary: "IAM ユーザー・グループ・ロールにアタッチして、そのエンティティが「何をできるか」を定義します。",
+        points: [
+          { label: "アタッチ先", value: "IAM ユーザー・グループ・ロール" },
+          { label: "制御の方向", value: "主体（誰が）→ リソース（何を）の方向で権限を付与" },
+          { label: "向いている用途", value: "通常の権限管理、最小権限の原則の実装" },
+          { label: "キーワード", value: "「このユーザーに S3 への読み取りを許可する」" },
+        ],
+      },
+      {
+        name: "Resource Policy（リソースベース）",
+        summary: "S3・KMS・SQS などのリソース側にアタッチして、「誰からのアクセスを許可するか」を定義します。",
+        points: [
+          { label: "アタッチ先", value: "S3 バケット・KMS キー・SQS キュー・Lambda など" },
+          { label: "制御の方向", value: "リソース側から特定のプリンシパルへのアクセスを許可" },
+          { label: "向いている用途", value: "クロスアカウントアクセス、特定 IP からのみ許可" },
+          { label: "キーワード", value: "「他のアカウントの Lambda から S3 にアクセスさせたい」" },
+        ],
+      },
+      {
+        name: "Permission Boundary",
+        summary: "IAM エンティティが持てる権限の最大範囲を設定するガードレールです。",
+        points: [
+          { label: "役割", value: "権限の上限を定義（実際の権限は IAM Policy との AND 結果）" },
+          { label: "向いている用途", value: "開発者が作成するロールの権限逸脱を防ぐ委任管理" },
+          { label: "特徴", value: "Permission Boundary + IAM Policy の両方で Allow されないと実行不可" },
+          { label: "キーワード", value: "「開発者がロールを作れるが Admin 権限は付与させたくない」" },
+        ],
+      },
+    ],
+    examTip:
+      "「通常の権限付与」→ IAM Policy、「クロスアカウントや特定リソースへのアクセス制御」→ Resource Policy、「付与できる権限の上限設定」→ Permission Boundary と制御の目的で判断します。",
+    conclusion:
+      "3つは独立ではなく組み合わせて機能します。特に Permission Boundary は IAM Policy との AND 条件が重要です。",
+  },
+  {
+    id: "snow-family",
+    title: "Snowcone vs Snowball Edge vs Snowmobile",
+    category: "移行",
+    summary:
+      "移行するデータ量と設置環境によって Snow ファミリーのデバイスを選択します。",
+    services: [
+      {
+        name: "Snowcone",
+        summary: "8〜14 TB の小型・軽量デバイスで、狭い場所やエッジ環境向けです。",
+        points: [
+          { label: "容量", value: "HDD: 8 TB、SSD: 14 TB" },
+          { label: "形状・重量", value: "小型・約 2.1 kg、バッテリー動作も可能" },
+          { label: "向いている用途", value: "エッジデータ収集、帯域の限られた遠隔地、少量データ転送" },
+          { label: "キーワード", value: "「数 TB」「狭い場所」「持ち運びたい」" },
+        ],
+      },
+      {
+        name: "Snowball Edge",
+        summary: "数十〜数百 TB の中規模データを転送できる標準デバイスです。",
+        points: [
+          { label: "容量", value: "Storage Optimized: 最大 210 TB、Compute Optimized: 最大 104 TB" },
+          { label: "形状・重量", value: "スーツケースサイズ、クラスタリング対応（最大 16 台）" },
+          { label: "向いている用途", value: "大規模 DC 移行、オフラインデータ転送、現地エッジコンピューティング" },
+          { label: "キーワード", value: "「数十〜数百 TB」「大量データのオフライン転送」" },
+        ],
+      },
+      {
+        name: "Snowmobile",
+        summary: "エクサバイト規模（最大 100 PB）の超大規模データセンター移行向けの輸送コンテナです。",
+        points: [
+          { label: "容量", value: "最大 100 PB（1 台のコンテナトラック）" },
+          { label: "形状・重量", value: "大型コンテナトラック、AWS が専任チームと共に設置・回収" },
+          { label: "向いている用途", value: "データセンター全体の AWS 移行、エクサバイト規模" },
+          { label: "キーワード", value: "「100 PB 以上」「データセンターまるごと移行」" },
+        ],
+      },
+    ],
+    examTip:
+      "「数 TB・エッジ・小型」→ Snowcone、「数十〜数百 TB・標準的なオフライン移行」→ Snowball Edge、「100 PB 以上・DC 丸ごと移行」→ Snowmobile とデータ量で判断します。ネットワーク転送が数週間〜数ヶ月かかる場合に Snow ファミリーが選ばれます。",
+    conclusion:
+      "データ量でそのまま選択します。Snowcone（数TB）→ Snowball Edge（数百TB）→ Snowmobile（100PB以上）の順です。",
+  },
 ];
