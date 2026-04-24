@@ -5019,6 +5019,28 @@ export const quizQuestions: QuizQuestion[] = [
     rememberAxis:
       "S3 をプライベートネットワークのみに制限 → VPC エンドポイント ＋ バケットポリシーの aws:SourceVpce 条件。",
   },
+  {
+    id: "security-56",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が EC2 インスタンスから社内の機密ドキュメントを S3 に保存している。監査要件として「誰がいつどのオブジェクトをダウンロードしたか」をすべて記録する必要がある。最も適切な設定はどれですか。",
+    context:
+      "S3 へのアクセスログには管理イベントとデータイベントの 2 種類があります。デフォルトで記録される範囲を把握することが重要です。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "CloudTrail の管理イベント記録を有効にする", hint: "管理イベントはバケット作成・削除などの操作を記録するが、オブジェクトの GET/PUT は記録しない" },
+      { id: "b", label: "B", text: "CloudTrail のデータイベントで対象 S3 バケットの読み取り（GetObject）を有効にする", hint: "データイベントはオブジェクトレベルの操作（GET/PUT/DELETE）を記録できる" },
+      { id: "c", label: "C", text: "S3 サーバーアクセスログを有効にして CloudWatch Logs に送信する", hint: "S3 サーバーアクセスログは記録されるがベストエフォート配信で欠損の可能性がある・CloudWatch への直接送信はできない" },
+      { id: "d", label: "D", text: "VPC フローログを有効にして S3 へのトラフィックを記録する", hint: "VPC フローログは IP/ポートレベルの情報のみ・誰がどのオブジェクトをダウンロードしたかは記録しない" },
+    ],
+    explanation:
+      "CloudTrail のデータイベント（S3 オブジェクトレベルのログ）を有効にすると、GetObject・PutObject・DeleteObject などのオブジェクト操作が記録され、誰が（IAM プリンシパル）・いつ・どのオブジェクトを操作したかを追跡できます。デフォルトでは無効のため明示的に有効化が必要です。S3 サーバーアクセスログはベストエフォート配信で監査には不向きです。",
+    comparePoint:
+      "CloudTrail 管理イベント：バケット作成・ポリシー変更などコントロールプレーン操作。CloudTrail データイベント：オブジェクト GET/PUT/DELETE などデータプレーン操作（デフォルト無効・追加料金）。",
+    rememberAxis:
+      "オブジェクトレベルのアクセス監査 → CloudTrail データイベント（S3）を有効化。",
+  },
 
   // IAM
   {
