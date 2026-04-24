@@ -2180,6 +2180,195 @@ export const studyTerms: StudyTerm[] = [
       "「インフラ管理なしでコンテナアプリを素早く公開したい」という要件で選びます。Fargate（ECS/EKS）との違いは、App Runner はさらに抽象化されており VPC やクラスター設定が不要な点です。",
     related: ["Fargate", "ECS", "Elastic Beanstalk", "Lambda"],
   },
+
+  // ── ストレージ（追加分） ──────────────────────────────────────────────────
+
+  {
+    id: "s3-object-lock",
+    docsUrl: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+    name: "S3 Object Lock",
+    category: "ストレージ",
+    shortDefinition: "S3 オブジェクトを指定した保持期間中に削除・上書きできなくする WORM（Write Once Read Many）保護機能です。",
+    description:
+      "Governance モード（特権ユーザーは解除可）と Compliance モード（root 含め誰も解除不可）の 2 種類があります。金融・医療・法規制など記録改ざん防止が求められる用途に使います。",
+    examTip:
+      "「規制要件で記録の改ざん・削除を防止したい」「監査ログを保護したい」という要件で選びます。Compliance モードは保持期間中 root でも削除不可である点が最重要ポイントです。",
+    related: ["S3", "S3 Glacier", "AWS Backup", "CloudTrail"],
+  },
+  {
+    id: "s3-replication",
+    docsUrl: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html",
+    name: "S3 Replication（CRR / SRR）",
+    category: "ストレージ",
+    shortDefinition: "S3 オブジェクトを別バケットへ自動的にレプリケーションする機能です。",
+    description:
+      "クロスリージョンレプリケーション（CRR）は別リージョンのバケットへ、同一リージョンレプリケーション（SRR）は同一リージョンの別バケットへコピーします。バージョニングの有効化が前提です。",
+    examTip:
+      "「DR のためにデータを別リージョンへ自動コピーしたい」→ CRR。「本番と分析用バケットを同期したい」→ SRR。どちらもバージョニング必須である点が頻出です。",
+    related: ["S3", "S3 Object Lock", "Object Storage", "Durability"],
+  },
+  {
+    id: "s3-transfer-acceleration",
+    docsUrl: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/transfer-acceleration.html",
+    name: "S3 Transfer Acceleration",
+    category: "ストレージ",
+    shortDefinition: "CloudFront のエッジロケーション経由で S3 へのアップロードを高速化する機能です。",
+    description:
+      "世界各地のクライアントからのアップロードを最寄りのエッジロケーションで受け取り、AWS バックボーンネットワーク経由で S3 に転送します。長距離・高レイテンシ環境でのアップロード速度を大幅に改善します。",
+    examTip:
+      "「海外拠点から S3 へのアップロードが遅い」という要件で選びます。ダウンロードの高速化には CloudFront を使い、Transfer Acceleration はアップロード専用である点を区別しましょう。",
+    related: ["S3", "CloudFront", "Global Accelerator", "DataSync"],
+  },
+  {
+    id: "ebs-snapshot",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSSnapshots.html",
+    name: "EBS Snapshot",
+    category: "ストレージ",
+    shortDefinition: "EBS ボリュームの時点コピーを S3 に保存するバックアップ機能です。",
+    description:
+      "初回は完全コピー、以降は増分バックアップです。スナップショットから新しい EBS ボリュームや AMI を作成でき、別リージョンへのコピーも可能です。AWS Backup でライフサイクル管理を自動化できます。",
+    examTip:
+      "「EC2 のバックアップ」「リージョン間の AMI 移行」「EBS の復元」という要件で選びます。スナップショットは S3 に保存されるためリージョン障害でも安全である点も重要です。",
+    related: ["EBS", "AMI", "AWS Backup", "EC2"],
+  },
+
+  // ── アプリ統合（追加分） ──────────────────────────────────────────────────
+
+  {
+    id: "sqs-dlq",
+    docsUrl: "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html",
+    name: "SQS Dead Letter Queue（DLQ）",
+    category: "アプリ統合",
+    shortDefinition: "処理に繰り返し失敗したメッセージを隔離して保存するためのキューです。",
+    description:
+      "最大受信回数（maxReceiveCount）を超えたメッセージを DLQ に移動します。障害原因の調査・デバッグや、問題を修正した後の再処理（再ドライブ）に使います。SNS・Lambda でも同様の DLQ 設定が可能です。",
+    examTip:
+      "「処理に失敗したメッセージを失わずに調査したい」という要件で選びます。DLQ のメッセージを修正後に元キューへ再送する「メッセージ再ドライブ」の仕組みもセットで押さえましょう。",
+    related: ["SQS", "Lambda", "SNS", "Step Functions"],
+  },
+  {
+    id: "sqs-long-polling",
+    docsUrl: "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-long-polling.html",
+    name: "SQS Long Polling",
+    category: "アプリ統合",
+    shortDefinition: "メッセージが到着するまで最大 20 秒待機してから応答する SQS のポーリング方式です。",
+    description:
+      "短いポーリング（Short Polling）はメッセージがなくても即座に空の応答を返すため、API 呼び出し料金が増加します。Long Polling はメッセージが届くまで待機するため、空の応答を減らしコストと CPU 使用率を削減できます。",
+    examTip:
+      "「SQS のコストを削減したい」「空のポーリングを減らしたい」という要件で選びます。ReceiveMessageWaitTimeSeconds を 1〜20 秒に設定することで有効化できます。",
+    related: ["SQS", "SQS DLQ", "Lambda", "EC2"],
+  },
+  {
+    id: "sns-fanout",
+    docsUrl: "https://docs.aws.amazon.com/sns/latest/dg/sns-common-scenarios.html",
+    name: "SNS Fan-out パターン",
+    category: "アプリ統合",
+    shortDefinition: "SNS トピックに 1 回発行したメッセージを複数の SQS キューや Lambda へ同時配信するパターンです。",
+    description:
+      "SNS トピックに複数のサブスクライバー（SQS・Lambda・HTTP エンドポイントなど）を登録することで、1 つのイベントを複数の処理系へ並列に配信できます。疎結合かつ拡張性の高い非同期アーキテクチャの基本パターンです。",
+    examTip:
+      "「1 つのイベントを複数のシステムへ同時に配信したい」「注文イベントを在庫・請求・通知の各システムに並列処理させたい」という要件で選びます。SNS + SQS の組み合わせが試験の典型構成です。",
+    related: ["SNS", "SQS", "Lambda", "EventBridge"],
+  },
+
+  // ── 設計原則（追加分） ────────────────────────────────────────────────────
+
+  {
+    id: "well-architected",
+    docsUrl: "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html",
+    name: "Well-Architected Framework（6本柱）",
+    category: "設計原則",
+    shortDefinition: "AWS が定義したクラウドシステムを設計・評価するための 6 つの柱からなるフレームワークです。",
+    description:
+      "運用上の優秀性・セキュリティ・信頼性・パフォーマンス効率・コスト最適化・持続可能性の 6 本柱で構成されます。AWS Well-Architected Tool を使うと現在のアーキテクチャのリスクと改善点を評価できます。",
+    examTip:
+      "各柱の定義と代表的なベストプラクティスが問われます。「信頼性」は障害への備えと復旧、「パフォーマンス効率」は適切なリソース選択、「コスト最適化」は不要な支出の削減と対応付けて覚えましょう。",
+    related: ["High Availability", "Fault Tolerance", "Scalability", "Elasticity"],
+  },
+  {
+    id: "loose-coupling",
+    docsUrl: "https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_prevent_interaction_failure_loosely_coupled_system.html",
+    name: "疎結合（Loose Coupling）",
+    category: "設計原則",
+    shortDefinition: "コンポーネント間の依存を最小化し、一部の障害が全体に波及しない設計です。",
+    description:
+      "コンポーネントがお互いを直接呼び出すのではなく、キューやメッセージバスを介してやりとりすることで、個々のコンポーネントが独立して変更・スケール・障害回復できるようになります。",
+    examTip:
+      "「特定コンポーネントの障害が全体に影響しないようにしたい」という設問で、SQS・SNS・EventBridge などメッセージング経由の非同期通信が正解になるパターンが頻出です。",
+    related: ["SQS", "SNS", "EventBridge", "Serverless"],
+  },
+  {
+    id: "scale-out-vs-up",
+    docsUrl: "https://docs.aws.amazon.com/wellarchitected/latest/framework/perf_compute_hardware_select_best.html",
+    name: "スケールアウト vs スケールアップ",
+    category: "設計原則",
+    shortDefinition: "負荷増加への対応として、インスタンスを増やす（スケールアウト）か、より大きなインスタンスに替える（スケールアップ）かの設計判断です。",
+    description:
+      "スケールアウト（水平スケール）は複数インスタンスを並列に追加する方法で、Auto Scaling と組み合わせて柔軟に対応できます。スケールアップ（垂直スケール）はインスタンスサイズを上げる方法で、上限がありダウンタイムが生じる場合があります。",
+    examTip:
+      "クラウド設計では一般的にスケールアウトが推奨されます。「ステートレスなアプリは水平スケールしやすい」「ステートフルなモノリスは垂直スケールに頼りやすい」という対比が試験に出ます。",
+    related: ["Auto Scaling Group", "Scalability", "Elasticity", "Load Balancer"],
+  },
+  {
+    id: "idempotency",
+    docsUrl: "https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_idempotent_requests.html",
+    name: "冪等性（Idempotency）",
+    category: "設計原則",
+    shortDefinition: "同じ操作を何度繰り返しても結果が変わらない性質です。",
+    description:
+      "分散システムでは通信失敗時のリトライが発生するため、同じリクエストが複数回届いても副作用が生じないよう設計します。DynamoDB の条件付き書き込みや SQS の冪等性トークンなどで実装できます。",
+    examTip:
+      "「リトライによる重複処理を防ぎたい」「At-least-once 配信の SQS でメッセージが重複した場合にどう対処するか」という問題で関連します。SQS FIFO キューの重複排除 ID も冪等性の実装例です。",
+    related: ["SQS", "DynamoDB", "Lambda", "Fault Tolerance"],
+  },
+  {
+    id: "eliminate-spof",
+    docsUrl: "https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_prevent_interaction_failure_no_single_point.html",
+    name: "単一障害点の排除（Eliminate Single Point of Failure）",
+    category: "設計原則",
+    shortDefinition: "その1箇所が壊れるとシステム全体が停止してしまうコンポーネントをなくす設計原則です。",
+    description:
+      "ロードバランサーの冗長化・Multi-AZ 配置・Auto Scaling による自動置き換えなど、すべてのレイヤーで冗長化を行います。クラウドでは複数 AZ に分散配置することで物理的な単一障害点を排除できます。",
+    examTip:
+      "「単一インスタンスの EC2」「1 台の NAT インスタンス」「シングル AZ 構成」が問題に登場したら、Multi-AZ や Auto Scaling で冗長化するのが正解になります。",
+    related: ["Multi-AZ", "Auto Scaling Group", "Load Balancer", "High Availability"],
+  },
+  {
+    id: "design-for-failure",
+    docsUrl: "https://docs.aws.amazon.com/wellarchitected/latest/framework/reliability.html",
+    name: "デザインフォーフェイラー（Design for Failure）",
+    category: "設計原則",
+    shortDefinition: "障害が必ず起きるものとして前提に置き、障害時でもサービスを継続できる設計をする考え方です。",
+    description:
+      "AWS では「Everything fails, all the time」の思想に基づき、ハードウェア障害・AZ 障害・リージョン障害を想定した設計が求められます。自動復旧・リトライ・フェイルオーバー・Circuit Breaker パターンなどで実装します。",
+    examTip:
+      "「単一 AZ」「リトライなし」「手動フェイルオーバー」という選択肢は Design for Failure に反します。Multi-AZ・Auto Scaling・自動フェイルオーバーの組み合わせが模範解答になるパターンを押さえましょう。",
+    related: ["Fault Tolerance", "High Availability", "Multi-AZ", "Eliminate SPOF"],
+  },
+  {
+    id: "cache-strategy",
+    docsUrl: "https://docs.aws.amazon.com/wellarchitected/latest/framework/perf_data_use_caching.html",
+    name: "キャッシュ戦略（Cache Strategy）",
+    category: "設計原則",
+    shortDefinition: "頻繁にアクセスされるデータを高速なストレージに一時保存して応答速度を向上させる設計手法です。",
+    description:
+      "Cache-aside（アプリがキャッシュを管理）・Write-through（書き込みと同時にキャッシュ更新）・Write-back（キャッシュへ書き込み後に非同期でDB反映）などのパターンがあります。AWS では ElastiCache・CloudFront・DAX などでキャッシュを実装します。",
+    examTip:
+      "「DB の読み取り負荷を下げたい」「同じクエリの繰り返しを高速化したい」という要件でキャッシュを導入します。ElastiCache（汎用）・DAX（DynamoDB専用）・CloudFront（静的コンテンツ）の使い分けが頻出です。",
+    related: ["ElastiCache", "DAX", "CloudFront", "DynamoDB"],
+  },
+  {
+    id: "event-driven-architecture",
+    docsUrl: "https://docs.aws.amazon.com/wellarchitected/latest/framework/perf_data_use_event_driven.html",
+    name: "イベント駆動アーキテクチャ",
+    category: "設計原則",
+    shortDefinition: "状態変化（イベント）を起点として処理を連鎖させる疎結合なアーキテクチャパターンです。",
+    description:
+      "イベントプロデューサーがイベントを発行し、イベントブローカー（SNS・EventBridge・SQS）を介してコンシューマーが非同期に処理します。コンポーネント間の直接依存がなく、新しいコンシューマーを追加しても既存の処理に影響しません。",
+    examTip:
+      "「S3 へのファイルアップロードをきっかけに複数の処理を並行実行したい」「マイクロサービス間を疎結合にしたい」という要件でこのパターンを選びます。EventBridge + Lambda の組み合わせが典型例です。",
+    related: ["EventBridge", "SNS", "SQS", "Loose Coupling"],
+  },
 ];
 
 export const studyTermCategories = Array.from(
