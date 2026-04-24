@@ -5517,4 +5517,440 @@ export const quizQuestions: QuizQuestion[] = [
     rememberAxis:
       "プライベートサブネットからのアウトバウンドのみ（IPv4）→ NAT Gateway。",
   },
+
+  // ── Cost Optimization（追加20問） ─────────────────────────────────────────
+
+  // 購入オプション
+  {
+    id: "cost-2",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がバッチ処理ジョブを EC2 で実行している。ジョブは 1〜6 時間で完了し、途中で中断されても再開できる設計になっている。コストを最大限に削減したい。最も適切な購入オプションはどれか。",
+    context:
+      "ジョブはステートレスで途中中断・再実行に対応済み。実行タイミングは柔軟で特定の時間帯にこだわらない。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "オンデマンドインスタンス", hint: "いつでも起動できるが最も割引が少ない" },
+      { id: "b", label: "B", text: "1年コンバーティブル Reserved Instance", hint: "長期コミットメントが必要・バッチの不定期実行には不向き" },
+      { id: "c", label: "C", text: "スポットインスタンス", hint: "最大 90% の割引・中断可能なワークロードに最適" },
+      { id: "d", label: "D", text: "Dedicated Host（1年）", hint: "物理サーバー専有・ライセンス要件向け・コスト削減の方向性が違う" },
+    ],
+    explanation:
+      "スポットインスタンスは AWS の余剰キャパシティを活用するため最大 90% の割引が得られます。AWS が容量を必要とする場合に 2 分前通知で中断されますが、ジョブが再実行可能な設計であれば問題ありません。中断・再開に対応したバッチ処理・CI/CD・ビッグデータ処理などは Spot の最適なユースケースです。",
+    comparePoint:
+      "スポット：最大 90% 割引・中断リスクあり・フォールトトレラントなワークロード向け。オンデマンド：割引なし・中断なし・短期・予測不可能なワークロード向け。Savings Plans/RI：長期コミットメント・安定ワークロード向け。",
+    rememberAxis:
+      "中断可能・再実行可能なバッチ → スポットインスタンス。常時稼働で安定 → Savings Plans / RI。すぐ使いたい・短期 → オンデマンド。",
+  },
+  {
+    id: "cost-3",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある Web アプリが EC2（常時稼働・インスタンスファミリー変更の予定なし）と RDS（常時稼働）で運用されている。両サービスの1年間コストを最大限に削減したい。最も適切な購入オプションの組み合わせはどれか。",
+    context:
+      "EC2 のインスタンスファミリーは変更しない。RDS は同じエンジンとインスタンスクラスを維持する予定。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "EC2 は EC2 Instance Savings Plans（1年）、RDS は Reserved Instance（1年）を購入する", hint: "EC2 Instance Savings Plans は同一ファミリー内で最大 72% 割引。RDS RI は最大 69% 割引" },
+      { id: "b", label: "B", text: "EC2・RDS 両方に Compute Savings Plans（1年）を適用する", hint: "Compute Savings Plans は RDS には適用されない（EC2・Fargate・Lambda のみ）" },
+      { id: "c", label: "C", text: "EC2 はスポットインスタンス、RDS は Reserved Instance（1年）にする", hint: "Web アプリの EC2 をスポットにすると中断リスクがあり可用性が損なわれる" },
+      { id: "d", label: "D", text: "EC2 はオンデマンド、RDS は Reserved Instance（1年）にする", hint: "RDS の節約は得られるが EC2 側の割引が得られない" },
+    ],
+    explanation:
+      "EC2 Instance Savings Plans はインスタンスファミリーとリージョンを固定することで Compute Savings Plans より高い割引（最大 72%）が得られます。ファミリー変更の予定がなければこちらが有利です。RDS には Savings Plans が適用されないため、RDS Reserved Instance（1〜3年）を別途購入します。",
+    comparePoint:
+      "Compute Savings Plans：EC2+Fargate+Lambda・最大 66%・最も柔軟。EC2 Instance Savings Plans：EC2 特定ファミリー・最大 72%・高割引。RDS RI：RDS 専用・最大 69%。",
+    rememberAxis:
+      "EC2 のファミリー変更なし → EC2 Instance Savings Plans（最大 72%）。RDS のコスト削減 → RDS Reserved Instance。",
+  },
+  {
+    id: "cost-4",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の開発チームが検証環境の EC2 インスタンス（複数台）を月〜金の 9〜18 時のみ使用している。コストを最小化したい。最も効果的な方法はどれか。",
+    context:
+      "開発環境のため中断・停止は許容される。夜間・週末はまったく使用しない。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "1年の Reserved Instance を購入する", hint: "割引は得られるが停止中も費用が発生する構造は変わらない" },
+      { id: "b", label: "B", text: "Instance Scheduler を使って平日 9〜18 時以外は自動停止する", hint: "停止中は EC2 の時間課金がゼロになり、稼働時間を約 75% 削減できる" },
+      { id: "c", label: "C", text: "スポットインスタンスに変更する", hint: "スポットは中断リスクがあり開発作業の妨げになる可能性がある" },
+      { id: "d", label: "D", text: "インスタンスサイズを最小化する", hint: "サイズ削減は有効だが稼働時間そのものは変わらない" },
+    ],
+    explanation:
+      "AWS Instance Scheduler（または EventBridge + Lambda）でスケジュールを設定すると、平日 9〜18 時（45時間/週）のみ起動し、それ以外の 123時間/週は停止できます。EC2 は停止中はインスタンス料金がゼロになるため、稼働時間を約 73% 削減でき、コストを同程度削減できます。Reserved Instance は割引率は高くても 24 時間稼働前提の設計です。",
+    comparePoint:
+      "スケジュール停止：稼働時間そのものを削減・最大コスト削減効果。RI/Savings Plans：稼働時間の単価を削減・24時間稼働に最適。",
+    rememberAxis:
+      "使わない時間が長い開発環境 → スケジュール自動停止（稼働時間削減）。常時稼働の本番環境 → RI / Savings Plans（単価削減）。",
+  },
+
+  // S3 ストレージクラス
+  {
+    id: "cost-5",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が S3 に画像ファイルを保存している。アップロード直後の 30 日間は頻繁にアクセスされるが、30 日以降はほとんどアクセスされない。削除はしたくない。S3 のコストを最適化するには何をすべきか。",
+    context:
+      "アクセス頻度が時間で明確に変わる。アクセス時のレイテンシーは問わない。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "すべてのオブジェクトを S3 Standard に保存し続ける", hint: "アクセス頻度が低い期間もフルコストがかかる" },
+      { id: "b", label: "B", text: "S3 ライフサイクルルールで 30 日後に S3 Standard-IA に移行する", hint: "Standard-IA はアクセス頻度が低いデータに最適・ストレージ料金が安い" },
+      { id: "c", label: "C", text: "すべてのオブジェクトを最初から S3 Glacier に保存する", hint: "Glacier は取り出しに数分〜数時間かかるため、アップロード直後の頻繁なアクセスに対応できない" },
+      { id: "d", label: "D", text: "S3 Intelligent-Tiering を使う", hint: "アクセスパターンが予測できない場合に最適・明確なパターンがある場合はライフサイクルルールの方が安い" },
+    ],
+    explanation:
+      "S3 Standard-IA（Infrequent Access）は Standard と同じ低レイテンシーでアクセスできますが、ストレージ料金が Standard の約 45% 安くなります。ただし取り出し料金がかかるため、アクセス頻度が低い（月 1 回未満程度）データに適しています。ライフサイクルルールで 30 日後に自動移行することで管理の手間もかかりません。",
+    comparePoint:
+      "S3 Standard：高頻度アクセス向け・取り出し無料。S3 Standard-IA：低頻度アクセス向け・ストレージ安・取り出し有料。S3 Intelligent-Tiering：アクセスパターン不明の場合・自動最適化。S3 Glacier：アーカイブ向け・最安・取り出しに時間がかかる。",
+    rememberAxis:
+      "アクセスパターンが明確（30日後に低頻度）→ ライフサイクルルール + Standard-IA。パターン不明 → Intelligent-Tiering。長期アーカイブ → Glacier。",
+  },
+  {
+    id: "cost-6",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がコンプライアンス要件で過去 7 年分のログを S3 に保存しなければならない。ログは監査時にしか参照されず、取り出しに 12 時間かかっても問題ない。ストレージコストを最小化したい。最適なストレージクラスはどれか。",
+    context:
+      "アクセス頻度は年 1〜2 回程度。取り出しのリードタイムは許容できる。削除はできない。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "S3 Standard", hint: "高頻度アクセス向け・長期保存には高コスト" },
+      { id: "b", label: "B", text: "S3 Standard-IA", hint: "低頻度アクセス向けだが Glacier より高い" },
+      { id: "c", label: "C", text: "S3 Glacier Flexible Retrieval", hint: "低コストだが取り出しは 1〜12 時間。Glacier Deep Archive より高い" },
+      { id: "d", label: "D", text: "S3 Glacier Deep Archive", hint: "S3 の中で最低コスト・取り出しは最大 12 時間・長期アーカイブ向け" },
+    ],
+    explanation:
+      "S3 Glacier Deep Archive は S3 の中で最もストレージコストが安く（Standard の約 1/23）、長期保存に特化しています。取り出しには最大 12 時間かかりますが、年 1〜2 回の監査アクセスであれば問題ありません。ライフサイクルルールで Standard から Deep Archive へ自動移行することで、コンプライアンス要件を満たしながら最小コストで保存できます。",
+    comparePoint:
+      "Standard → Standard-IA → Glacier Flexible Retrieval → Glacier Deep Archive の順でストレージ料金が安くなり、取り出し時間が長くなる。",
+    rememberAxis:
+      "年数回の監査用長期保存・取り出し遅延 OK → Glacier Deep Archive（最安）。数分〜数時間で取り出したい → Glacier Flexible Retrieval。",
+  },
+  {
+    id: "cost-7",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が S3 に大量のオブジェクトを保存しているが、各オブジェクトのアクセス頻度が不規則で予測できない。アクセスパターンに応じて自動的にコスト最適なストレージクラスに移動させたい。最適なアプローチはどれか。",
+    context:
+      "一部のオブジェクトは頻繁にアクセスされ、一部はほとんどアクセスされない。アクセスパターンは事前に予測できない。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "S3 Intelligent-Tiering を使用する", hint: "アクセスパターンを自動監視し、適切なアクセス層（頻繁・低頻度・アーカイブ）に自動移動する" },
+      { id: "b", label: "B", text: "S3 ライフサイクルルールで 30 日後に Standard-IA、90 日後に Glacier へ移行する", hint: "アクセスパターンが固定なら有効。しかし頻繁にアクセスされるオブジェクトが Glacier に移されると取り出しコストが増加する" },
+      { id: "c", label: "C", text: "Lambda で毎日 S3 アクセスログを分析してストレージクラスを手動で変更する", hint: "自前実装でコストと運用負荷がかかる。Intelligent-Tiering で自動化できる" },
+      { id: "d", label: "D", text: "すべてのオブジェクトを S3 Standard に残す", hint: "低頻度アクセスのオブジェクトにも Standard のコストがかかる" },
+    ],
+    explanation:
+      "S3 Intelligent-Tiering はアクセスパターンを監視し、30 日間アクセスがなければ低頻度アクセス層へ、さらに長期間アクセスがなければアーカイブ層へ自動移動します。再びアクセスされると頻繁アクセス層に戻ります。アクセスパターンが不規則・予測困難な場合に最適で、取り出し料金はかかりません（ティアリング管理料金が小さいオブジェクトでは割高になることに注意）。",
+    comparePoint:
+      "Intelligent-Tiering：自動最適化・アクセス層移動に料金なし・管理料金（オブジェクトあたり）あり。ライフサイクルルール：固定スケジュール・予測可能パターン向け。",
+    rememberAxis:
+      "アクセスパターンが不規則・予測不可 → S3 Intelligent-Tiering。アクセスパターンが明確 → ライフサイクルルール。",
+  },
+
+  // EC2 サイジング・Compute Optimizer
+  {
+    id: "cost-8",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が複数の EC2 インスタンスを運用しているが、適切なサイズかどうかわからない。機械学習ベースの分析で各インスタンスのサイズダウンや変更を推奨してほしい。最適なサービスはどれか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "AWS Cost Explorer の節約プランの推奨機能を使う", hint: "Cost Explorer は購入オプション（Savings Plans/RI）の推奨を提供するが、インスタンスサイズの適正化は行わない" },
+      { id: "b", label: "B", text: "Amazon CloudWatch のメトリクスを手動で確認して判断する", hint: "手動分析は時間がかかり見落としも生じる" },
+      { id: "c", label: "C", text: "AWS Compute Optimizer を使う", hint: "機械学習で EC2・Lambda・EBS・ECS の使用状況を分析し最適なサイズを推奨する" },
+      { id: "d", label: "D", text: "AWS Trusted Advisor のコストチェックを使う", hint: "Trusted Advisor は低使用率の EC2 を検出できるが Compute Optimizer より詳細な推奨はない" },
+    ],
+    explanation:
+      "AWS Compute Optimizer は CloudWatch メトリクスを機械学習で分析し、EC2 インスタンス・Auto Scaling グループ・EBS ボリューム・Lambda 関数・ECS サービスに対して最適なリソースサイズの推奨を提供します。過剰プロビジョニング（サイズが大きすぎる）と不足プロビジョニング（性能不足）の両方を検出し、節約可能なコストの試算も提示します。",
+    comparePoint:
+      "Compute Optimizer：リソースサイズの最適化推奨（機械学習ベース）。Cost Explorer：コストの可視化と購入オプションの推奨。Trusted Advisor：ベストプラクティス全般のチェック（コスト・セキュリティ・性能など）。",
+    rememberAxis:
+      "EC2 の適切なサイジング推奨 → Compute Optimizer。購入オプション（RI/Savings Plans）の推奨 → Cost Explorer。",
+  },
+  {
+    id: "cost-9",
+    category: "Cost Optimization",
+    modeLabel: "設計判断",
+    prompt:
+      "ある Web アプリが m5.4xlarge（16 vCPU・64 GB）を常時 1 台で稼働しているが、CPU 使用率は平均 15% 程度。コストを最適化しながら可用性も向上させたい。最適な変更はどれか。",
+    context:
+      "ピーク時でも CPU 使用率は 40% 程度。アプリはステートレスで水平スケールに対応している。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "m5.4xlarge のまま Reserved Instance（1年）を購入する", hint: "割引は得られるが過剰プロビジョニングの問題は解決しない" },
+      { id: "b", label: "B", text: "より小さいインスタンス（m5.xlarge 等）の複数台に変更し Auto Scaling を設定する", hint: "サイズダウンでコスト削減・複数台化で可用性向上・Auto Scaling でピーク対応" },
+      { id: "c", label: "C", text: "m5.4xlarge を 2 台に増やして負荷分散する", hint: "可用性は向上するがコストが倍増する" },
+      { id: "d", label: "D", text: "m5.4xlarge を c5.4xlarge に変更する", hint: "インスタンスファミリー変更はアプリの特性次第・CPU 使用率が低い原因を考慮していない" },
+    ],
+    explanation:
+      "CPU 使用率 15% は過剰プロビジョニングのサインです。Compute Optimizer の推奨に従い、より小さいインスタンスサイズ（例：m5.xlarge）に複数台ダウンサイズし、Auto Scaling グループを設定することで、ピーク時は自動でスケールアウトし、平時は最小台数で稼働できます。単一インスタンスから複数台化することで可用性（AZ 障害への耐性）も向上します。",
+    comparePoint:
+      "垂直スケール（サイズアップ）：シンプルだが過剰プロビジョニングになりやすい。水平スケール（Auto Scaling）：コスト効率・可用性・柔軟性のバランスが取れる。",
+    rememberAxis:
+      "CPU 低使用率の大インスタンス → 小インスタンス複数台 + Auto Scaling でコスト削減＆可用性向上。",
+  },
+
+  // サーバーレスによるコスト削減
+  {
+    id: "cost-10",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が画像のリサイズ処理を行う API サーバーを EC2（t3.medium）で 24 時間稼働させているが、実際のリクエストは 1 日平均 500 件（1 件あたり処理時間 200ms）しかない。コストを最小化したい。最適なアーキテクチャへの変更はどれか。",
+    context:
+      "処理はステートレスで各リクエストが独立している。レイテンシーの許容範囲は数秒以内。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "API Gateway + Lambda に移行し、リクエストごとに課金される構成にする", hint: "Lambda はリクエスト数と実行時間で課金。1 日 500 件なら EC2 常時稼働より大幅に安い" },
+      { id: "b", label: "B", text: "EC2 を t3.nano に変更して Reserved Instance（1年）を購入する", hint: "コスト削減にはなるが、アイドル時間のコストは発生し続ける" },
+      { id: "c", label: "C", text: "EC2 をスポットインスタンスに変更する", hint: "スポットは中断リスクがあり API サーバーの可用性が損なわれる" },
+      { id: "d", label: "D", text: "Auto Scaling で最小 0 台に設定する", hint: "EC2 Auto Scaling の最小は 0 台にできるが、スタートアップ時間があり小規模トラフィックにはコスト効率が悪い" },
+    ],
+    explanation:
+      "Lambda は実行時間（100ms 単位）とリクエスト数で課金されます。1 日 500 件 × 200ms = 100 秒の実行時間のみの課金となり、EC2 を 24 時間常時稼働させるより大幅にコストが下がります。Lambda の無料枠（月 100 万リクエスト・40 万 GB-秒）の範囲内に収まる可能性もあります。サーバーレス化によりインフラ管理の手間も削減できます。",
+    comparePoint:
+      "EC2 常時稼働：時間課金・アイドル時もコスト発生。Lambda：リクエスト/実行時間課金・アイドル時コストゼロ・小〜中規模トラフィックに最適。",
+    rememberAxis:
+      "リクエスト数が少なくアイドル時間が長い API → Lambda サーバーレス化でコスト最小化。",
+  },
+  {
+    id: "cost-11",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がコンテナアプリをECS on EC2 で運用している。複数サービスが稼働するが、ワークロードは不規則で EC2 の使用率にむらがある。インフラ管理の手間も減らしつつ、アイドル時のコストを削減したい。最適な変更はどれか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "EC2 インスタンスを Reserved Instance（1年）で購入する", hint: "割引は得られるが EC2 の管理は引き続き必要で、アイドル時のコストも発生する" },
+      { id: "b", label: "B", text: "EC2 インスタンスをスポットに変更して Auto Scaling を設定する", hint: "コスト削減にはなるが EC2 の管理は必要で、中断リスクも考慮が必要" },
+      { id: "c", label: "C", text: "EC2 インスタンスを大型に変更してパッキング効率を上げる", hint: "パッキング改善は有効だが EC2 の管理は引き続き必要" },
+      { id: "d", label: "D", text: "ECS on Fargate（または Fargate Spot）に移行する", hint: "Fargate はコンテナのリソース（vCPU・メモリ）に対してのみ課金され EC2 の管理が不要" },
+    ],
+    explanation:
+      "ECS on Fargate はタスクに割り当てた vCPU・メモリの使用量に対してのみ課金され、EC2 インスタンスの管理が不要です。Fargate Spot を使えばさらに最大 70% の割引が適用されます。EC2 ベースより細かい粒度でリソースを消費するため、使用率のむらが大きいワークロードでは特にコスト効率が高くなります。",
+    comparePoint:
+      "ECS on EC2：EC2 インスタンス全体の時間課金・インフラ管理必要。ECS on Fargate：タスクリソース単位の課金・インフラ管理不要。Fargate Spot：さらに最大 70% 割引・中断許容が必要。",
+    rememberAxis:
+      "コンテナのインフラ管理を廃止しコスト最適化 → Fargate（またはFargate Spot）。",
+  },
+  {
+    id: "cost-12",
+    category: "Cost Optimization",
+    modeLabel: "設計判断",
+    prompt:
+      "ある企業が Lambda 関数のコストを削減したい。関数の実行時間は平均 3 秒で、メモリを 128 MB から 1024 MB に増やすと実行時間が 1 秒になることがわかった。コストの観点で最適な設定はどれか。",
+    context:
+      "Lambda の課金は「リクエスト数」+「実行時間（GB-秒）」。GB-秒 = メモリ(GB) × 実行時間(秒)。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "メモリ 128 MB・実行時間 3 秒のまま維持する", hint: "GB-秒 = 0.125 × 3 = 0.375 GB-秒/リクエスト" },
+      { id: "b", label: "B", text: "メモリを 1024 MB に増やして実行時間を 1 秒に短縮する", hint: "GB-秒 = 1 × 1 = 1.0 GB-秒（より高い）→ 実はコスト増になる計算だが..." },
+      { id: "c", label: "C", text: "AWS Lambda Power Tuning を使ってコスト最適なメモリ設定を見つける", hint: "実際には複数のメモリ設定でテストし、コストと性能のバランスを最適化するアプローチ" },
+      { id: "d", label: "D", text: "Lambda を常にウォーム状態にする Provisioned Concurrency を設定する", hint: "Provisioned Concurrency はコールドスタート対策であり、コスト削減にはならない（むしろ増加）" },
+    ],
+    explanation:
+      "Lambda のコスト最適化は単純にメモリを増減するだけでは判断できません。AWS Lambda Power Tuning（オープンソースの Step Functions ワークフロー）を使って複数のメモリ設定で実際にテストし、実行時間・コスト・性能のトレードオフを可視化することが推奨されます。メモリを増やすと実行時間が短縮されコストが下がるケースもあれば、上がるケースもあります。",
+    comparePoint:
+      "Lambda 課金 = リクエスト数 × 単価 + (メモリGB × 実行秒数) × 単価。メモリ増加で実行時間が減ればコストは下がることもある。Lambda Power Tuning で最適値を探す。",
+    rememberAxis:
+      "Lambda のコスト最適なメモリ設定 → Lambda Power Tuning で実測。メモリ増でも速くなれば GB-秒コストが下がる場合がある。",
+  },
+
+  // データ転送コストの最小化
+  {
+    id: "cost-13",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業がマルチ AZ 構成で EC2 インスタンスを複数の AZ に配置し、各インスタンス間でデータを頻繁にやり取りしている。データ転送コストが高騰している。コストを削減するにはどうすべきか。",
+    context:
+      "現在、異なる AZ の EC2 間でデータを転送している。同一 AZ 内の通信コストと AZ をまたぐ通信コストの違いを理解することが重要。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "頻繁にデータをやり取りするインスタンスを同一 AZ に配置する", hint: "同一 AZ 内のデータ転送は無料・AZ 間はデータ転送料金が発生する" },
+      { id: "b", label: "B", text: "インスタンス間の通信を HTTPS で暗号化する", hint: "暗号化はデータ転送料金に影響しない" },
+      { id: "c", label: "C", text: "VPC ピアリングを設定する", hint: "VPC ピアリングは異なる VPC 間の接続であり、同一 VPC 内の AZ 間コストには影響しない" },
+      { id: "d", label: "D", text: "CloudFront を経由してデータを転送する", hint: "CloudFront はコンテンツ配信向け・インスタンス間通信には適さない" },
+    ],
+    explanation:
+      "AWS の料金体系では、同一 AZ 内のプライベート IP アドレスを使ったデータ転送は無料ですが、AZ をまたぐデータ転送（同一リージョン内でも）は双方向で $0.01/GB の料金が発生します。頻繁にデータをやり取りするコンポーネント（例：アプリサーバーと DB キャッシュ）は同一 AZ に配置することでこのコストを削減できます。ただし可用性とのトレードオフを考慮する必要があります。",
+    comparePoint:
+      "同一 AZ 通信（プライベート IP）：無料。AZ 間通信（同一リージョン）：$0.01/GB（双方向）。リージョン間通信：より高いデータ転送料金。インターネット経由：$0.09/GB（送信）。",
+    rememberAxis:
+      "AZ 間データ転送コスト削減 → 頻繁に通信するリソースを同一 AZ に配置。",
+  },
+  {
+    id: "cost-14",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の VPC 内 EC2 インスタンスが毎日大量のデータを Amazon S3 に書き込んでいる。現在は NAT Gateway 経由でアクセスしており、データ転送コストが高い。EC2 から S3 へのデータ転送コストを最小化する最も適切な方法はどれか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "S3 バケットを EC2 と同じ AZ に作成する", hint: "S3 はリージョナルサービスで特定の AZ に配置する概念がない" },
+      { id: "b", label: "B", text: "NAT Gateway を削除してパブリックサブネットの EC2 に移行する", hint: "インターネット経由の S3 アクセスでもデータ転送料金は発生し、セキュリティリスクも増える" },
+      { id: "c", label: "C", text: "S3 ゲートウェイ型 VPC エンドポイントを作成し NAT Gateway を経由しないようにする", hint: "ゲートウェイ型エンドポイントは無料で EC2→S3 のデータ転送料金（NAT 分）を削減できる" },
+      { id: "d", label: "D", text: "S3 Transfer Acceleration を有効にする", hint: "Transfer Acceleration は長距離転送の高速化サービスで追加料金がかかる" },
+    ],
+    explanation:
+      "S3 ゲートウェイ型 VPC エンドポイントは無料で作成でき、EC2 から S3 へのトラフィックを AWS のプライベートネットワーク経由でルーティングします。NAT Gateway のデータ処理料金（$0.045/GB）がなくなり、さらに同一リージョン内の EC2→S3 データ転送自体も料金がかかりません（インターネット経由は $0.09/GB の送信料金あり）。ルートテーブルにエンドポイントのルートを追加するだけで設定完了です。",
+    comparePoint:
+      "NAT Gateway 経由の S3：データ処理料金 $0.045/GB + NAT Gateway 時間料金。VPC エンドポイント経由：エンドポイント無料 + 同一リージョンの EC2→S3 転送も無料。",
+    rememberAxis:
+      "EC2 から S3 への大量データ転送のコスト削減 → S3 ゲートウェイ VPC エンドポイント（無料）。",
+  },
+  {
+    id: "cost-15",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が静的コンテンツ（画像・JS・CSS）を S3 から直接ユーザーに配信している。グローバルなユーザーへの配信でインターネットへのデータ転送料金（S3 アウトバウンド）が毎月数千ドルかかっている。コストを削減しつつレイテンシーも改善したい。最適な方法はどれか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "S3 バケットを各リージョンに複製して、ユーザーに最寄りのバケットから配信する", hint: "レプリケーションコストとバケット管理コストが増加する" },
+      { id: "b", label: "B", text: "CloudFront を S3 オリジンとして設定し、エッジロケーションから配信する", hint: "CloudFront のアウトバウンド料金は S3 直接配信より安く、キャッシュ率が高ければ S3 へのリクエストも減る" },
+      { id: "c", label: "C", text: "S3 Transfer Acceleration を有効にする", hint: "Transfer Acceleration はアップロードの高速化向け・アウトバウンドコスト削減にはならない" },
+      { id: "d", label: "D", text: "S3 Intelligent-Tiering に移行してストレージコストを下げる", hint: "ストレージコスト削減にはなるが、アウトバウンドデータ転送料金の削減には直接効果がない" },
+    ],
+    explanation:
+      "CloudFront は世界中のエッジロケーションにコンテンツをキャッシュします。S3 から CloudFront へのオリジンデータ転送は無料で、CloudFront からユーザーへのアウトバウンド料金は S3 の直接配信より安い料金体系です。さらにキャッシュヒット率が高くなると S3 へのリクエスト数も減り、S3 リクエスト料金も削減されます。レイテンシーも大幅に改善されます。",
+    comparePoint:
+      "S3 直接配信：アウトバウンド $0.09/GB〜・キャッシュなし。CloudFront 経由：アウトバウンド $0.085/GB〜・エッジキャッシュでコスト削減・S3→CloudFront 転送無料。",
+    rememberAxis:
+      "グローバルな静的コンテンツ配信のコスト削減 → CloudFront（S3 オリジン）。S3 直接配信より安くレイテンシーも改善。",
+  },
+
+  // 不要リソースの停止・削除
+  {
+    id: "cost-16",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が AWS アカウントの請求を確認すると、使用されていない EBS ボリュームと古い EBS スナップショットに毎月コストが発生していることがわかった。最も効率的にこれらを特定・削除する方法はどれか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "毎月 AWS マネジメントコンソールで手動確認して削除する", hint: "手動作業は漏れが生じやすく、スケールしない" },
+      { id: "b", label: "B", text: "AWS Trusted Advisor と Cost Explorer で未アタッチ EBS・古いスナップショットを特定し削除する", hint: "Trusted Advisor はアイドルリソースを自動検出し、Cost Explorer でコスト影響を確認できる" },
+      { id: "c", label: "C", text: "すべての EBS ボリュームを gp2 から gp3 に変更してコストを削減する", hint: "gp3 への変更はコスト削減になるが、未使用ボリュームの削除の方が効果が大きい" },
+      { id: "d", label: "D", text: "EBS の自動スナップショット機能を無効にする", hint: "スナップショット削減は有効だが、既存の古いスナップショットは残る" },
+    ],
+    explanation:
+      "AWS Trusted Advisor の「Low Utilization Amazon EC2 Instances」「Unassociated Elastic IP Addresses」「Underutilized Amazon EBS Volumes」チェックを使うと、EC2 からアタッチされていない EBS ボリュームが自動的に識別されます。また、AWS Config と AWS Backup のライフサイクルポリシーで古いスナップショットを自動削除する仕組みも有効です。",
+    comparePoint:
+      "Trusted Advisor：アイドルリソースの自動チェック・ベストプラクティス違反の検出。Cost Explorer：コストの可視化・削減機会の特定。AWS Config：リソースの設定管理・コンプライアンス評価。",
+    rememberAxis:
+      "未使用 EBS・アイドルリソースの特定 → Trusted Advisor。コスト影響の確認 → Cost Explorer。定期的な自動削除 → Lambda + EventBridge スケジュール。",
+  },
+  {
+    id: "cost-17",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が EC2 インスタンスを終了した後、アタッチされていた EBS ボリューム（100 GB）がデタッチされたまま残っており、毎月コストが発生している。将来同様の問題を自動的に検出して通知したい。最も適切な仕組みはどれか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "EC2 のすべての EBS ボリュームに DeleteOnTermination フラグを有効にする", hint: "次回以降の終了時の対策にはなるが、現在の未アタッチボリュームの検出通知にはならない" },
+      { id: "b", label: "B", text: "月次で Cost Explorer を確認して EBS のコストが増えたら調査する", hint: "月次の確認では発見が遅れる" },
+      { id: "c", label: "C", text: "全 EBS ボリュームを定期的に手動でリスト確認する", hint: "スケールしない手動作業" },
+      { id: "d", label: "D", text: "AWS Config ルールで「EC2 にアタッチされていない EBS ボリューム」を検出し、SNS で通知する", hint: "Config の ec2-volume-inuse-check ルールで未アタッチ EBS を継続的に検出できる" },
+    ],
+    explanation:
+      "AWS Config のマネージドルール `ec2-volume-inuse-check` を使うと、EC2 インスタンスにアタッチされていない EBS ボリュームを継続的に検出できます。検出時に EventBridge + SNS で通知を送る仕組みを組み合わせることで、未使用 EBS が発生した際に即座にアラートを受け取れます。また EC2 終了時に EBS を自動削除する `DeleteOnTermination` 設定も併せて適用すると根本的な対策になります。",
+    comparePoint:
+      "Config ルール：継続的・自動検出・通知との連携が容易。Trusted Advisor：定期的なチェック。Cost Explorer：コストの事後分析。",
+    rememberAxis:
+      "未アタッチ EBS の継続的検出・通知 → AWS Config ルール（ec2-volume-inuse-check）+ SNS。",
+  },
+
+  // Cost Explorer / Budgets / Trusted Advisor
+  {
+    id: "cost-18",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が AWS の月次コストが予算を超えた場合に担当者へ自動でメール通知したい。また、コストが予算の 80% に達した時点で事前に警告も受け取りたい。最も適切なサービスはどれか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "AWS Budgets でコスト予算を設定し、80% と 100% の閾値でアラートを設定する", hint: "AWS Budgets は予算の閾値に応じた通知を SNS・メールで送れる" },
+      { id: "b", label: "B", text: "CloudWatch でコストメトリクスを監視してアラームを設定する", hint: "CloudWatch の請求アラームはアカウント全体のコストを監視できるが、Budgets ほど柔軟ではない" },
+      { id: "c", label: "C", text: "Cost Explorer でコストトレンドを確認し毎月手動でレポートする", hint: "手動確認では事前の自動通知はできない" },
+      { id: "d", label: "D", text: "Cost and Usage Report（CUR）を S3 に出力して Lambda で分析する", hint: "詳細な分析が可能だが、単純な予算アラートには過剰な実装" },
+    ],
+    explanation:
+      "AWS Budgets は月次・四半期・年次のコスト・使用量・Savings Plans の利用率などの予算を設定し、複数の閾値（例：80%、100%）で SNS トピックまたはメールに自動通知できます。サービス別・タグ別・リンクアカウント別など細かい粒度の予算設定も可能です。Cost Explorer は分析ツールで事後確認向け、CloudWatch の請求アラームはシンプルな全体コスト監視に使えますが Budgets の方が柔軟です。",
+    comparePoint:
+      "AWS Budgets：予算設定・複数閾値での自動通知・サービス別・タグ別設定可能。CloudWatch 請求アラーム：シンプルなアカウント全体コストアラーム。Cost Explorer：コストの可視化・分析（通知機能は限定的）。",
+    rememberAxis:
+      "コスト予算超過の自動通知 → AWS Budgets。詳細なコスト分析 → Cost Explorer。",
+  },
+  {
+    id: "cost-19",
+    category: "Cost Optimization",
+    modeLabel: "設計判断",
+    prompt:
+      "コスト最適化の施策として、AWS Trusted Advisor がチェックする項目として正しいものはどれか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "EC2 インスタンスのソースコードに含まれるセキュリティ脆弱性の検出", hint: "ソースコード解析は Trusted Advisor の機能ではない" },
+      { id: "b", label: "B", text: "RDS のスロークエリの検出とインデックス最適化の推奨", hint: "DB のクエリ最適化は Trusted Advisor の対象外" },
+      { id: "c", label: "C", text: "使用率の低い EC2 インスタンス・未使用の EIP・アイドル状態のロードバランサーの検出", hint: "Trusted Advisor はアイドルリソースを検出してコスト削減を推奨する" },
+      { id: "d", label: "D", text: "Lambda 関数の実行時間を短縮するためのコードリファクタリングの提案", hint: "コードのリファクタリング提案は Trusted Advisor の機能ではない" },
+    ],
+    explanation:
+      "AWS Trusted Advisor はコスト最適化・セキュリティ・耐障害性・パフォーマンス・サービス制限の 5 カテゴリでベストプラクティスをチェックします。コスト最適化カテゴリでは、低使用率の EC2 インスタンス・未使用の EIP・アイドルのロードバランサー・未アタッチの EBS ボリューム・Reserved Instance の購入推奨などを検出します。Business・Enterprise サポートプランでは全チェック項目が利用可能です。",
+    comparePoint:
+      "Trusted Advisor：5カテゴリのベストプラクティスチェック。Compute Optimizer：EC2 サイズ最適化の詳細推奨（ML ベース）。Cost Explorer：コストの可視化・RI/Savings Plans 購入推奨。",
+    rememberAxis:
+      "アイドルリソースの自動検出・コスト削減推奨 → Trusted Advisor。EC2 サイズ最適化の詳細分析 → Compute Optimizer。",
+  },
+  {
+    id: "cost-20",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業の CFO が「先月に比べてコストが急増した原因を調査したい」と依頼してきた。サービス別・リージョン別にコストの内訳と前月比の変化を確認するための最適なツールはどれか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "AWS CloudTrail で先月の API 呼び出し履歴を確認する", hint: "CloudTrail は API 操作の監査ログ・コストの内訳分析には不向き" },
+      { id: "b", label: "B", text: "AWS Cost Explorer でサービス別・リージョン別にフィルタリングしてコスト推移を分析する", hint: "Cost Explorer はサービス・リージョン・タグ別のコスト分析とトレンド可視化に最適" },
+      { id: "c", label: "C", text: "AWS Pricing Calculator でコストを再計算する", hint: "Pricing Calculator は将来の見積もりツール・過去のコスト分析はできない" },
+      { id: "d", label: "D", text: "AWS Health Dashboard でサービス障害の履歴を確認する", hint: "Health Dashboard はサービス稼働状況の確認・コスト分析は行わない" },
+    ],
+    explanation:
+      "AWS Cost Explorer は過去 12 ヶ月のコストデータを可視化・分析できます。サービス別・リージョン別・アカウント別・タグ別にフィルタリングでき、前月比や日次トレンドも確認できます。コスト急増の原因特定（例：特定サービスのデータ転送量増加、新規リソースの追加）に最適なツールです。異常検知機能（Cost Anomaly Detection）を有効にすると、コストの急増を自動検出して通知することもできます。",
+    comparePoint:
+      "Cost Explorer：過去コストの可視化・分析・トレンド確認。AWS Budgets：予算設定・アラート通知。Cost Anomaly Detection：コスト異常の自動検出。",
+    rememberAxis:
+      "コスト急増の原因分析 → Cost Explorer（サービス別・リージョン別フィルタリング）。自動的な異常検知 → Cost Anomaly Detection。",
+  },
+  {
+    id: "cost-21",
+    category: "Cost Optimization",
+    modeLabel: "シナリオ",
+    prompt:
+      "ある企業が AWS Organizations で複数のアカウントを管理している。全アカウントの Savings Plans 購入を一元化してコストを最大限に削減したい。また、未使用の Savings Plans の割引を他のアカウントの EC2 にも適用させたい。最適な設定はどれか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "各アカウントで個別に Savings Plans を購入する", hint: "アカウントごとの購入は管理が分散し、割引の利用効率が下がる" },
+      { id: "b", label: "B", text: "管理アカウントで Savings Plans を購入し、各アカウントへの適用は手動で設定する", hint: "Organizations の Savings Plans 共有は手動設定ではなく自動共有が可能" },
+      { id: "c", label: "C", text: "Savings Plans の代わりにすべてのアカウントで Reserved Instance を購入して統合請求で共有する", hint: "RI の共有は可能だが Savings Plans の柔軟性が失われる" },
+      { id: "d", label: "D", text: "管理アカウントまたは委任されたアカウントで Savings Plans を購入し、Organizations の統合請求で自動的に全アカウントに共有する", hint: "Organizations の統合請求では Savings Plans が全メンバーアカウントに自動適用される" },
+    ],
+    explanation:
+      "AWS Organizations の統合請求では、管理アカウント（または委任されたアカウント）で購入した Savings Plans が、使用量を持つメンバーアカウントに自動的に適用されます。1 つのアカウントで使いきれない割引が他のアカウントの利用量に自動で充てられるため、組織全体の Savings Plans の利用効率が最大化されます。アカウントレベルで共有を無効にすることも可能です。",
+    comparePoint:
+      "単一アカウントの Savings Plans：そのアカウントの利用量にのみ適用。Organizations 統合請求の Savings Plans：未使用分が他のアカウントに自動共有。",
+    rememberAxis:
+      "Organizations 全体で Savings Plans を効率化 → 管理アカウントで購入し統合請求で自動共有。",
+  },
 ];
