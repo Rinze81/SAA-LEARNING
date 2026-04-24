@@ -2369,6 +2369,150 @@ export const studyTerms: StudyTerm[] = [
       "「S3 へのファイルアップロードをきっかけに複数の処理を並行実行したい」「マイクロサービス間を疎結合にしたい」という要件でこのパターンを選びます。EventBridge + Lambda の組み合わせが典型例です。",
     related: ["EventBridge", "SNS", "SQS", "Loose Coupling"],
   },
+
+  // ── ネットワーク（追加分） ────────────────────────────────────────────────
+
+  {
+    id: "vpc-flow-logs",
+    docsUrl: "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html",
+    name: "VPC Flow Logs",
+    category: "ネットワーク",
+    shortDefinition: "VPC 内のネットワークインターフェースを通過するトラフィックを記録するログ機能です。",
+    description:
+      "ENI・サブネット・VPC 単位でキャプチャでき、送受信 IP・ポート・プロトコル・許可/拒否ステータスなどを記録します。ログは CloudWatch Logs または S3 に送信でき、セキュリティ分析・トラブルシューティング・コンプライアンス監査に活用します。",
+    examTip:
+      "「不審なトラフィックを調査したい」「セキュリティグループ・NACL の設定が正しいか確認したい」という要件で選びます。拒否（REJECT）ログで攻撃元 IP の特定も可能です。",
+    related: ["VPC", "CloudWatch Logs", "S3", "CloudWatch Contributor Insights"],
+  },
+  {
+    id: "gwlb",
+    docsUrl: "https://docs.aws.amazon.com/elasticloadbalancing/latest/gateway/introduction.html",
+    name: "Gateway Load Balancer（GWLB）",
+    category: "ネットワーク",
+    shortDefinition: "ファイアウォールや IDS/IPS などのサードパーティ仮想アプライアンスを透過的に挿入できるロードバランサーです。",
+    description:
+      "GENEVE プロトコル（ポート 6081）を使い、トラフィックをアプライアンス群に分散してから元の宛先に転送します。ゲートウェイとロードバランサーの機能を一体化しており、既存のネットワーク構成を変えずにセキュリティ検査を挿入できます。",
+    examTip:
+      "「すべてのインバウンドトラフィックをファイアウォールアプライアンスで検査してから EC2 に転送したい」という要件が出たら GWLB を選びます。NLB との違い（レイヤー3 vs レイヤー4）も確認してください。",
+    related: ["VPC", "NLB", "ALB", "Transit Gateway"],
+  },
+
+  // ── アプリ統合（追加分） ─────────────────────────────────────────────────
+
+  {
+    id: "eventbridge-pipes",
+    docsUrl: "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-pipes.html",
+    name: "Amazon EventBridge Pipes",
+    category: "アプリ統合",
+    shortDefinition: "イベントソースとターゲットをフィルタリング・変換付きで 1 対 1 に接続するマネージドパイプラインです。",
+    description:
+      "SQS・Kinesis・DynamoDB Streams などのソースから読み取り、オプションで Lambda によるエンリッチメントや EventBridge Transformer によるデータ整形を挟んで、Step Functions・ECS・API Gateway などのターゲットに送ります。カスタムコードなしでシンプルな統合を実現します。",
+    examTip:
+      "「イベントをフィルタして特定のものだけ別サービスに渡したい」「変換と転送を Lambda なしで実現したい」という要件で選びます。EventBridge Rules（1対多）との使い分けが問われます。",
+    related: ["EventBridge", "SQS", "Lambda", "Step Functions"],
+  },
+  {
+    id: "appflow",
+    docsUrl: "https://docs.aws.amazon.com/appflow/latest/userguide/what-is-appflow.html",
+    name: "AWS AppFlow",
+    category: "アプリ統合",
+    shortDefinition: "Salesforce・ServiceNow・Slack などの SaaS アプリと AWS サービス間でデータを安全に転送するマネージドサービスです。",
+    description:
+      "コードなしの設定ベースでフロー（転送ジョブ）を作成し、S3・Redshift・EventBridge などに SaaS データを取り込めます。スケジュール・イベント・オンデマンドの 3 種類の実行トリガーをサポートし、データのマッピング・フィルタリング・変換も GUI で設定できます。",
+    examTip:
+      "「Salesforce のデータを S3 に定期取り込みたい」「SaaS 連携を自動化したいが ETL コードを書きたくない」という要件で選びます。Glue や Lambda での自前実装との比較が問われることがあります。",
+    related: ["S3", "Redshift", "EventBridge", "Glue"],
+  },
+  {
+    id: "amazon-connect",
+    docsUrl: "https://docs.aws.amazon.com/connect/latest/adminguide/what-is-amazon-connect.html",
+    name: "Amazon Connect",
+    category: "アプリ統合",
+    shortDefinition: "クラウドベースのコンタクトセンターサービスで、音声・チャットの顧客対応を AWS 上で構築・運用できます。",
+    description:
+      "ハードウェア不要でコンタクトセンターを数分で立ち上げられます。コールフローを GUI の Contact Flow で設計でき、Lambda・Lex・Kinesis などと連携して AI 応答や通話録音・リアルタイム分析を実現します。従量課金で席数ライセンスが不要です。",
+    examTip:
+      "「コールセンターをクラウドに移行したい」「IVR（自動音声応答）に AI を組み込みたい」という要件で選びます。Lex との組み合わせによるチャットボット・自動応答の構成が頻出です。",
+    related: ["Amazon Lex", "Lambda", "Kinesis", "S3"],
+  },
+  {
+    id: "mwaa",
+    docsUrl: "https://docs.aws.amazon.com/mwaa/latest/userguide/what-is-mwaa.html",
+    name: "Amazon MWAA（Managed Workflows for Apache Airflow）",
+    category: "アプリ統合",
+    shortDefinition: "Apache Airflow をサーバーレスで運用できるマネージドワークフローオーケストレーションサービスです。",
+    description:
+      "Airflow のインストール・スケーリング・パッチ適用を AWS が管理します。Python の DAG（有向非巡回グラフ）でデータパイプラインや ML ワークフローを定義し、S3・Redshift・EMR・Glue など AWS サービスを組み合わせた複雑なバッチ処理を自動化できます。",
+    examTip:
+      "「既存の Airflow ワークフローをクラウドに移行したい」「複雑な依存関係をもつデータパイプラインをスケジュール実行したい」という要件で選びます。Step Functions との違い（Airflow DAG の再利用 vs ステートマシン）が問われます。",
+    related: ["Glue", "Step Functions", "EMR", "S3"],
+  },
+
+  // ── セキュリティ（追加分） ────────────────────────────────────────────────
+
+  {
+    id: "amazon-detective",
+    docsUrl: "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html",
+    name: "Amazon Detective",
+    category: "セキュリティ",
+    shortDefinition: "VPC フローログ・CloudTrail・GuardDuty 結果を自動収集・グラフ化し、セキュリティインシデントの根本原因調査を支援するサービスです。",
+    description:
+      "機械学習とグラフ理論を使ってリソース間の関係を可視化し、「この IP は過去にどのリソースと通信していたか」「この IAM ユーザーがどこから認証されたか」をタイムライン付きで調査できます。GuardDuty のアラートを起点に調査を開始できます。",
+    examTip:
+      "「GuardDuty で検出した脅威の詳細を掘り下げて調査したい」「セキュリティインシデントの影響範囲を特定したい」という要件で選びます。検出（GuardDuty）と調査（Detective）の役割分担を押さえてください。",
+    related: ["GuardDuty", "CloudTrail", "vpc-flow-logs", "Security Hub"],
+  },
+  {
+    id: "audit-manager",
+    docsUrl: "https://docs.aws.amazon.com/audit-manager/latest/userguide/what-is-aws-audit-manager.html",
+    name: "AWS Audit Manager",
+    category: "セキュリティ",
+    shortDefinition: "PCI DSS・HIPAA・SOC 2 などのコンプライアンスフレームワークに対する証跡収集と評価レポート作成を自動化するサービスです。",
+    description:
+      "AWS Config・CloudTrail・Security Hub などからコントロールの証跡を継続的に収集し、監査レポートを自動生成します。カスタムフレームワークを作成して社内ポリシーへの準拠確認にも使えます。",
+    examTip:
+      "「コンプライアンス監査の証跡収集を自動化したい」「監査レポートを定期的に作成したい」という要件で選びます。AWS Config（設定評価）と Audit Manager（監査証跡・レポート）の役割の違いを押さえてください。",
+    related: ["aws-config-rules", "CloudTrail", "Security Hub", "scp"],
+  },
+  {
+    id: "iam-access-analyzer",
+    docsUrl: "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html",
+    name: "IAM Access Analyzer",
+    category: "セキュリティ",
+    shortDefinition: "外部エンティティからアクセス可能なリソース（S3 バケット・IAM ロール・KMS キーなど）を自動検出して報告するサービスです。",
+    description:
+      "ゾーン・オブ・トラスト（信頼境界）の外部から到達可能なリソースポリシーを継続的に分析し、意図しない公開リソースを見つけます。ポリシー検証機能では、作成前の IAM ポリシーに過剰な権限がないかチェックできます。",
+    examTip:
+      "「S3 バケットやロールが外部に意図せず公開されていないか確認したい」「最小権限ポリシーを作成したい」という要件で選びます。Trusted Advisor の公開バケット確認との違いも問われます。",
+    related: ["IAM", "S3", "KMS", "aws-config-rules"],
+  },
+  {
+    id: "ram",
+    docsUrl: "https://docs.aws.amazon.com/ram/latest/userguide/what-is.html",
+    name: "AWS Resource Access Manager（RAM）",
+    category: "セキュリティ",
+    shortDefinition: "VPC サブネット・Transit Gateway・Route 53 Resolver ルールなどのリソースを複数の AWS アカウント間で安全に共有するサービスです。",
+    description:
+      "Organizations 内のアカウントまたは外部アカウントに対してリソースを共有できます。データコピーや VPC ピアリングを増やすことなく、中央管理のリソースを複数アカウントで利用できるため、コスト削減とガバナンス強化を両立します。",
+    examTip:
+      "「中央アカウントの Transit Gateway を他のアカウントでも使いたい」「共有サブネットに複数アカウントのリソースをデプロイしたい」という要件で選びます。Organizations と組み合わせた共有が頻出です。",
+    related: ["Transit Gateway", "VPC", "Organizations", "scp"],
+  },
+
+  // ── 分析（追加分） ──────────────────────────────────────────────────────
+
+  {
+    id: "data-exchange",
+    docsUrl: "https://docs.aws.amazon.com/data-exchange/latest/userguide/what-is-aws-data-exchange.html",
+    name: "AWS Data Exchange",
+    category: "分析",
+    shortDefinition: "サードパーティのデータセットを AWS 上でサブスクリプション契約して安全に入手・利用できるデータマーケットプレイスです。",
+    description:
+      "気象・金融・医療・地理情報などのデータプロバイダーが公開するデータセットを検索・購入し、S3 や Redshift に直接配信できます。データプロバイダーはライセンス管理や配信インフラを AWS に委託できます。",
+    examTip:
+      "「外部の有償データセットを S3 に取り込んで分析したい」「データプロバイダーとして AWS でデータを販売したい」という要件で選びます。Marketplace のデータ版と捉えると分かりやすいです。",
+    related: ["S3", "Redshift", "Glue", "Lake Formation"],
+  },
 ];
 
 export const studyTermCategories = Array.from(
