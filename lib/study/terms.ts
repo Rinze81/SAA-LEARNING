@@ -1856,6 +1856,120 @@ export const studyTerms: StudyTerm[] = [
       "「Kinesis のリアルタイムストリームをミリ秒単位で集計・分析したい」という要件で選びます。Firehose（60 秒以上のバッファで S3 配信）との違いは、KDA はリアルタイム変換・集計ができる点です。",
     related: ["Kinesis Data Streams", "Kinesis Firehose", "EMR", "Lambda"],
   },
+
+  // ── データベース（追加分） ────────────────────────────────────────────────
+
+  {
+    id: "aurora-global-database",
+    docsUrl: "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html",
+    name: "Aurora Global Database",
+    category: "データベース",
+    shortDefinition: "複数リージョンにまたがる Aurora のグローバル構成で、低レイテンシの読み取りとリージョン障害時のフェイルオーバーを実現します。",
+    description:
+      "プライマリリージョンで書き込みを行い、最大 5 つのセカンダリリージョンへ 1 秒未満のレイテンシでレプリケーションします。リージョン障害時はセカンダリを昇格させ RTO 1 分未満でフェイルオーバーできます。",
+    examTip:
+      "「クロスリージョンの DR」「グローバルな低レイテンシ読み取り」「RPO 秒単位・RTO 1 分未満」という要件で選びます。Aurora Multi-AZ（同一リージョン内 AZ 冗長）との違いを区別することが重要です。",
+    related: ["Aurora", "RDS", "Multi-AZ", "Read Replica"],
+  },
+  {
+    id: "dynamodb-streams",
+    docsUrl: "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html",
+    name: "DynamoDB Streams",
+    category: "データベース",
+    shortDefinition: "DynamoDB テーブルの変更（追加・更新・削除）を時系列に記録するストリームです。",
+    description:
+      "テーブルへの書き込みイベントを最大 24 時間保持し、Lambda などのコンシューマーがポーリングして変更を処理できます。クロスリージョンレプリケーションやイベント駆動処理の起点として使われます。",
+    examTip:
+      "「DynamoDB の変更をリアルタイムに別システムへ連携したい」「DynamoDB テーブルのレプリケーション」という要件で選びます。Lambda トリガーとの組み合わせが頻出です。",
+    related: ["DynamoDB", "Lambda", "Kinesis Data Streams", "DAX"],
+  },
+  {
+    id: "redshift-spectrum",
+    docsUrl: "https://docs.aws.amazon.com/redshift/latest/dg/c-getting-started-using-spectrum.html",
+    name: "Redshift Spectrum",
+    category: "データベース",
+    shortDefinition: "Redshift クラスターから S3 上のデータを直接クエリできる機能です。",
+    description:
+      "S3 に保存された Parquet・ORC・CSV などのデータをクラスターにロードせずに SQL でクエリできます。Redshift クラスターとデータレイク（S3）を組み合わせた分析基盤を低コストで構築できます。",
+    examTip:
+      "「S3 のデータを Redshift で分析したいがクラスターにロードしたくない」「データレイクと DWH の統合」という要件で選びます。Athena との違いは、既存の Redshift テーブルと S3 データを JOIN できる点です。",
+    related: ["Redshift", "S3", "Athena", "Glue"],
+  },
+
+  // ── コンピュート（追加分） ────────────────────────────────────────────────
+
+  {
+    id: "placement-group",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html",
+    name: "EC2 Placement Group",
+    category: "コンピュート",
+    shortDefinition: "EC2 インスタンスの物理的な配置戦略を制御する設定です。",
+    description:
+      "Cluster（同一ラック集約・超低レイテンシ）・Spread（異なるハードウェアに分散・障害分離）・Partition（ラック単位のグループ分離・Hadoop/Kafka 向け）の 3 種類があります。",
+    examTip:
+      "「HPC・低レイテンシのインスタンス間通信」→ Cluster。「ハードウェア障害の影響を限定したい」→ Spread。「Hadoop・Kafka など大規模分散処理」→ Partition。それぞれの違いが頻出です。",
+    related: ["EC2", "Auto Scaling Group", "EFA"],
+  },
+  {
+    id: "lambda-layer",
+    docsUrl: "https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html",
+    name: "AWS Lambda Layer",
+    category: "コンピュート",
+    shortDefinition: "Lambda 関数間で共有するライブラリや依存パッケージをまとめたアーカイブです。",
+    description:
+      "共通ライブラリ・カスタムランタイム・設定ファイルを Layer としてまとめ、複数の Lambda 関数で再利用できます。関数のデプロイパッケージサイズを小さく保ちながら依存関係を一元管理できます。",
+    examTip:
+      "「複数の Lambda で同じライブラリを共有したい」「デプロイパッケージを軽量にしたい」という要件で選びます。Lambda 関数あたり最大 5 Layer まで追加できます。",
+    related: ["Lambda", "Lambda@Edge", "Serverless", "API Gateway"],
+  },
+  {
+    id: "lambda-edge",
+    docsUrl: "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html",
+    name: "Lambda@Edge",
+    category: "コンピュート",
+    shortDefinition: "CloudFront のエッジロケーションで Lambda 関数を実行するサービスです。",
+    description:
+      "ユーザーに最も近いエッジで HTTP リクエスト・レスポンスを加工できます。ビューワーリクエスト・オリジンリクエスト・オリジンレスポンス・ビューワーレスポンスの 4 つのイベントで実行できます。",
+    examTip:
+      "「エッジで認証・認可を行いたい」「URL の書き換え・リダイレクト」「A/B テスト」「ユーザーの地域に応じたコンテンツ切り替え」という要件で選びます。通常の Lambda より実行環境の制約が厳しい点も注意です。",
+    related: ["Lambda", "CloudFront", "API Gateway", "Lambda Layer"],
+  },
+  {
+    id: "wavelength",
+    docsUrl: "https://docs.aws.amazon.com/wavelength/latest/developerguide/what-is-wavelength.html",
+    name: "AWS Wavelength",
+    category: "コンピュート",
+    shortDefinition: "5G 通信キャリアのネットワーク内に AWS コンピュートとストレージを配置するサービスです。",
+    description:
+      "通信キャリアのデータセンター内に AWS インフラを埋め込むことで、5G デバイスからのトラフィックがインターネットを経由せずにアプリケーションへ到達し、1 桁ミリ秒のレイテンシを実現します。",
+    examTip:
+      "「5G デバイス向けの超低レイテンシアプリ」「自動運転・AR/VR・ゲームストリーミング」というキーワードが出たら Wavelength を選びます。Outposts（オンプレミス）との違いを区別しましょう。",
+    related: ["Outposts", "EC2", "VPC", "Global Accelerator"],
+  },
+  {
+    id: "vmware-cloud",
+    docsUrl: "https://docs.aws.amazon.com/vmware/",
+    name: "VMware Cloud on AWS",
+    category: "コンピュート",
+    shortDefinition: "VMware の仮想化環境をそのまま AWS 上で稼働させるハイブリッドクラウドサービスです。",
+    description:
+      "vSphere・vSAN・NSX を使った VMware 環境を AWS のベアメタルインフラ上で動かします。オンプレミスの VMware ワークロードをリファクタリングなしに AWS へ移行・拡張できます。",
+    examTip:
+      "「VMware 環境をそのまま AWS に移行したい」「オンプレの VMware と AWS を統合したい」という要件で選びます。AWS Outposts との違いは、VMware の管理ツール（vCenter 等）をそのまま使える点です。",
+    related: ["Outposts", "EC2", "Migration Hub", "Direct Connect"],
+  },
+  {
+    id: "app-runner",
+    docsUrl: "https://docs.aws.amazon.com/apprunner/latest/dg/what-is-apprunner.html",
+    name: "AWS App Runner",
+    category: "コンピュート",
+    shortDefinition: "コンテナやソースコードから Web アプリを自動でデプロイ・スケールするフルマネージドサービスです。",
+    description:
+      "ECR のコンテナイメージや GitHub のソースコードを指定するだけで、ロードバランサー・Auto Scaling・TLS 証明書の設定が自動化されます。インフラ管理が不要で Web アプリの迅速な公開に適しています。",
+    examTip:
+      "「インフラ管理なしでコンテナアプリを素早く公開したい」という要件で選びます。Fargate（ECS/EKS）との違いは、App Runner はさらに抽象化されており VPC やクラスター設定が不要な点です。",
+    related: ["Fargate", "ECS", "Elastic Beanstalk", "Lambda"],
+  },
 ];
 
 export const studyTermCategories = Array.from(
