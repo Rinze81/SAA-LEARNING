@@ -26,6 +26,16 @@
 
 ---
 
+## データ件数
+
+| データ         | 件数  |
+| -------------- | ----- |
+| クイズ問題     | 250問 |
+| 用語           | 150件 |
+| 比較表         | 30件  |
+
+---
+
 ## localStorageキー一覧
 
 | キー                 | 内容                           |
@@ -62,14 +72,13 @@ sessionStorage:
 ### 「マージして」と指示された場合、以下を自動実行する
 
 ```bash
-npm run build          # ビルドエラーがないことを確認
-npm run test:e2e       # E2Eテストが全パスすることを確認
+npm run build          # エラーがないことを確認
 git checkout main
 git merge feature/xxx
 git push origin main
 ```
 
-完了後、テスト結果・マージ完了・VercelデプロイURL（https://saa-learning.vercel.app）を報告する。
+完了後、マージ完了とVercelデプロイURL（https://saa-learning.vercel.app）を報告する。
 
 ### 次のブランチを作成する場合
 
