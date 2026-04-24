@@ -4469,4 +4469,1030 @@ export const quizQuestions: QuizQuestion[] = [
     rememberAxis:
       "DR の 4 戦略（コスト低い順）→ Backup & Restore → Pilot Light → Warm Standby → Active-Active。RPO を短縮 → スナップショット頻度を上げる or レプリケーション。RTO を短縮 → 事前に起動済みのインスタンスを用意（Warm Standby）。",
   },
+
+  // ── Security (追加50問) ───────────────────────────────────────────────────
+
+  // WAF / Shield / GuardDuty / Inspector / Macie
+  {
+    id: "security-29",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "Amazon GuardDuty が脅威検出に使用するデータソースとして正しいものはどれですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "EC2 インスタンス内のアプリケーションログ", hint: "GuardDuty はインスタンス内のアプリログを直接読まない" },
+      { id: "b", label: "B", text: "IAM ポリシーの設定内容", hint: "ポリシーの静的分析は Access Analyzer の役割" },
+      { id: "c", label: "C", text: "VPC フローログ・CloudTrail ログ・DNS クエリログ", hint: "GuardDuty はこれらのログを機械学習で分析する" },
+      { id: "d", label: "D", text: "EC2 インスタンスの CPU・メモリ使用率", hint: "メトリクス分析は CloudWatch の役割" },
+    ],
+    explanation:
+      "GuardDuty は VPC フローログ・CloudTrail 管理イベント・Route 53 DNS クエリログなどを機械学習・脅威インテリジェンスで分析し、不審な通信や異常な API 呼び出しを検出します。エージェントのインストールは不要でマネージドに動作します。",
+    comparePoint:
+      "GuardDuty：ログを分析して脅威検出・ブロックはしない。WAF：L7 リクエストをリアルタイムにブロック。Inspector：EC2・コンテナの脆弱性スキャン。",
+    rememberAxis:
+      "GuardDuty のデータソース → VPC フローログ・CloudTrail・DNS ログ。",
+  },
+  {
+    id: "security-30",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "大規模な DDoS 攻撃（L3/L4 および L7）への自動緩和と、AWS DDoS レスポンスチーム（DRT）へのサポートアクセスが必要です。最も適切なサービスはどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "AWS Shield Standard", hint: "L3/L4 の基本的な DDoS 保護・自動のみ・DRT サポートなし" },
+      { id: "b", label: "B", text: "AWS Shield Advanced", hint: "L3〜L7 の高度な DDoS 緩和・DRT サポート・コスト保護あり" },
+      { id: "c", label: "C", text: "AWS WAF のみ", hint: "L7 の Web 攻撃対策・DDoS 緩和は限定的・DRT サポートなし" },
+      { id: "d", label: "D", text: "Amazon GuardDuty", hint: "脅威検出・DDoS 緩和はしない" },
+    ],
+    explanation:
+      "Shield Advanced は L3/L4 の容量枯渇攻撃から L7 の HTTP Flood まで幅広い DDoS に自動で対応し、DDoS コスト保護（攻撃による AWS 料金の急増を補償）と DRT（DDoS Response Team）への 24 時間サポートアクセスを提供します。",
+    comparePoint:
+      "Shield Standard：無料・L3/L4 基本保護。Shield Advanced：有料・L7 も含む高度な保護・DRT サポート・コスト保護。",
+    rememberAxis:
+      "DRT サポートとコスト保護が必要 → Shield Advanced。基本的な DDoS 保護のみ → Shield Standard（無料）。",
+  },
+  {
+    id: "security-31",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "EC2 インスタンスと ECR にプッシュされたコンテナイメージの OS・パッケージの脆弱性（CVE）を継続的にスキャンしたい。最も適切なサービスはどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Amazon Inspector", hint: "EC2・Lambda・コンテナイメージの脆弱性スキャンを提供" },
+      { id: "b", label: "B", text: "Amazon GuardDuty", hint: "脅威検出・脆弱性スキャンは行わない" },
+      { id: "c", label: "C", text: "AWS Security Hub", hint: "セキュリティ結果の集約・スキャン自体は行わない" },
+      { id: "d", label: "D", text: "AWS Config", hint: "リソース設定の監査・CVE スキャンは行わない" },
+    ],
+    explanation:
+      "Amazon Inspector は EC2 インスタンス・Lambda 関数・ECR コンテナイメージの脆弱性を継続的にスキャンし、CVE ベースのリスクスコアを付与して Security Hub に結果を送信できます。エージェント（SSM Agent）が必要ですが、ECR イメージは agentless でスキャンできます。",
+    comparePoint:
+      "Inspector：OS・パッケージの CVE スキャン。GuardDuty：ランタイムの脅威検出・不審な動作検知。",
+    rememberAxis:
+      "脆弱性スキャン（CVE）→ Inspector。脅威・異常検知 → GuardDuty。",
+  },
+  {
+    id: "security-32",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "S3 バケット内のデータに個人情報（PII）や機密データが含まれていないか自動的に検出して管理者にアラートしたい。最も適切なサービスはどれですか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "Amazon GuardDuty", hint: "脅威検出・データ分類は行わない" },
+      { id: "b", label: "B", text: "AWS Config", hint: "S3 の設定チェックは可能だが PII 検出はできない" },
+      { id: "c", label: "C", text: "Amazon Inspector", hint: "EC2・コンテナの脆弱性スキャン・S3 データの内容分析はしない" },
+      { id: "d", label: "D", text: "Amazon Macie", hint: "機械学習で S3 の PII・機密データを自動検出・分類する" },
+    ],
+    explanation:
+      "Amazon Macie は機械学習を使って S3 に保存されたデータを自動的にスキャンし、個人情報（氏名・クレジットカード番号・社会保障番号など）やその他の機密データを検出・分類します。コンプライアンス対応やデータガバナンスに活用されます。",
+    comparePoint:
+      "Macie：S3 の PII・機密データ検出・分類。GuardDuty：S3 への不審なアクセスや操作の検出。",
+    rememberAxis:
+      "S3 内の PII・機密データを検出 → Macie。S3 への不審なアクセスを検出 → GuardDuty。",
+  },
+  {
+    id: "security-33",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ALB に WAF を設定する際、SQL インジェクション・XSS などの一般的な Web 攻撃を最小限の設定で防ぎたい。最も効率的な方法はどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "WAF のカスタムルールを自力で記述して攻撃パターンを定義する", hint: "高度な専門知識と継続的なメンテナンスが必要" },
+      { id: "b", label: "B", text: "AWS マネージドルールグループ（AWSManagedRulesCommonRuleSet）を使う", hint: "AWS が管理する一般的な攻撃パターンのルールを即座に適用できる" },
+      { id: "c", label: "C", text: "Security Group でポート 80/443 のみ許可する", hint: "L4 制御・HTTP リクエスト内容の検査はできない" },
+      { id: "d", label: "D", text: "CloudFront の地理的制限を有効にする", hint: "特定の国からのアクセスを制限するもので WAF の代替にならない" },
+    ],
+    explanation:
+      "AWS WAF マネージドルールグループは AWS やサードパーティが管理するルールをワンクリックで適用できます。AWSManagedRulesCommonRuleSet（CRS）は OWASP Top 10 に対応した一般的な攻撃パターンをカバーしており、カスタムルールを自力で書かなくても即座に保護を開始できます。",
+    comparePoint:
+      "マネージドルール：AWS が管理・即時適用・更新自動。カスタムルール：細かい制御可能・自力でメンテナンス必要。",
+    rememberAxis:
+      "一般的な Web 攻撃を手軽に防ぐ → WAF マネージドルールグループ（CRS）。",
+  },
+  {
+    id: "security-34",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "GuardDuty が不審な EC2 インスタンスを検出したとき、自動的にそのインスタンスを隔離（Security Group を変更して通信を遮断）したい。最も適切なアーキテクチャはどれですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "GuardDuty の設定で自動隔離を有効にする", hint: "GuardDuty 自体に自動隔離機能はない" },
+      { id: "b", label: "B", text: "CloudTrail でイベントを検出して手動対応する", hint: "手動対応では対応が遅れる" },
+      { id: "c", label: "C", text: "GuardDuty の検出結果を EventBridge で受け取り、Lambda でSecurity Group を変更する", hint: "GuardDuty → EventBridge → Lambda の自動修復パターン" },
+      { id: "d", label: "D", text: "AWS Config のマネージドルールで EC2 を自動削除する", hint: "Config はリソース設定の評価・自動削除は適切でない" },
+    ],
+    explanation:
+      "GuardDuty の検出結果は EventBridge のイベントとして発行されます。EventBridge ルールで GuardDuty の特定の Finding タイプをトリガーに Lambda 関数を起動し、Lambda が EC2 の Security Group を隔離用 SG に変更することで自動修復が実現できます。GuardDuty 自身にはブロック・修復機能はありません。",
+    comparePoint:
+      "GuardDuty：検出のみ。自動修復：EventBridge + Lambda（または Systems Manager Automation）を組み合わせる。",
+    rememberAxis:
+      "GuardDuty で検出 → 自動修復 → EventBridge → Lambda パターン。",
+  },
+  {
+    id: "security-35",
+    category: "Governance & Compliance",
+    modeLabel: "設計判断",
+    prompt:
+      "Organizations 配下の複数アカウント全体に WAF ルール・Security Group・Shield Advanced を一元的にデプロイ・管理したい。最も適切なサービスはどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "AWS Firewall Manager", hint: "Organizations 全アカウントへのセキュリティポリシーを一元管理できる" },
+      { id: "b", label: "B", text: "AWS Security Hub", hint: "セキュリティ結果の集約・ポリシーのデプロイは行わない" },
+      { id: "c", label: "C", text: "AWS Config", hint: "コンプライアンス評価・WAF や Shield のデプロイは行わない" },
+      { id: "d", label: "D", text: "AWS Control Tower", hint: "ランディングゾーンのガバナンス・WAF 等の個別デプロイ管理は行わない" },
+    ],
+    explanation:
+      "AWS Firewall Manager は Organizations と統合し、WAF ルールグループ・Security Group ポリシー・Shield Advanced の保護・Network Firewall ポリシーを組織全体のアカウントに一括でデプロイ・施行できます。新しいアカウントが追加されても自動でポリシーが適用されます。",
+    comparePoint:
+      "Firewall Manager：WAF/Shield/SG の組織一括管理。Security Hub：セキュリティ結果の集約ダッシュボード。",
+    rememberAxis:
+      "組織全体にセキュリティポリシーを一元配布 → Firewall Manager。",
+  },
+  {
+    id: "security-36",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "API Gateway に対して、単一の IP アドレスから 5 分間に 1000 回以上リクエストが来た場合にブロックしたい。最も適切な設定はどれですか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "Security Group で対象 IP を Deny ルールに追加する", hint: "Security Group はリクエスト頻度を計測できない" },
+      { id: "b", label: "B", text: "Route 53 の地理的制限で対象国をブロックする", hint: "IP 単位のレート制限ではない" },
+      { id: "c", label: "C", text: "Lambda オーソライザーでリクエスト数を集計してブロックする", hint: "自前実装は複雑・専用機能を使うべき" },
+      { id: "d", label: "D", text: "WAF にレートベースルールを設定して閾値超過 IP を自動ブロックする", hint: "WAF のレートベースルールは IP ごとのレート制限が可能" },
+    ],
+    explanation:
+      "WAF のレートベースルール（Rate-based rule）は指定した時間窓（5 分）内の IP ごとのリクエスト数を追跡し、閾値を超えた IP アドレスを自動的にブロックします。ブロック解除も閾値を下回ると自動で行われます。",
+    comparePoint:
+      "WAF カスタムルール：静的なパターンでブロック。WAF レートベースルール：動的な頻度でブロック。",
+    rememberAxis:
+      "IP ごとのリクエスト頻度制限 → WAF レートベースルール。",
+  },
+
+  // CloudTrail / Config / Security Hub
+  {
+    id: "security-37",
+    category: "Governance & Compliance",
+    modeLabel: "設計判断",
+    prompt:
+      "CloudTrail のログファイルが改ざんされていないことを確認できる仕組みを設定したい。最も適切な機能はどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "CloudTrail ログを S3 でバージョニング有効で保存する", hint: "バージョン管理はできるが改ざん検出はできない" },
+      { id: "b", label: "B", text: "CloudTrail のログファイル整合性検証（Log File Validation）を有効にする", hint: "SHA-256 ハッシュとデジタル署名でログの整合性を確認できる" },
+      { id: "c", label: "C", text: "S3 オブジェクトロック（WORM）でログを書き込み不可にする", hint: "削除・上書きは防げるが改ざんの事後検証はできない" },
+      { id: "d", label: "D", text: "AWS Config でログファイルの変更を検出する", hint: "Config はリソース設定変更を追跡・ファイル内容の整合性検証はしない" },
+    ],
+    explanation:
+      "CloudTrail のログファイル整合性検証を有効にすると、各ログファイルの SHA-256 ハッシュが生成され、秘密鍵でデジタル署名されたダイジェストファイルが 1 時間ごとに S3 に保存されます。`validate-logs` コマンドでログが配信後に改ざんされていないかを検証できます。",
+    comparePoint:
+      "Log File Validation：ログ内容の改ざん検出。S3 オブジェクトロック：削除・上書きの防止（事前保護）。",
+    rememberAxis:
+      "CloudTrail ログの改ざん検出 → Log File Validation（ログファイル整合性検証）を有効化。",
+  },
+  {
+    id: "security-38",
+    category: "Governance & Compliance",
+    modeLabel: "シナリオ",
+    prompt:
+      "「すべての S3 バケットでパブリックアクセスがブロックされているか」を継続的に評価し、非準拠バケットを検出したら自動修復したい。最も適切なサービスはどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "AWS Config のマネージドルールと修復アクション（Remediation）を使う", hint: "継続的なコンプライアンス評価と自動修復が可能" },
+      { id: "b", label: "B", text: "CloudTrail で S3 の設定変更を検出して Lambda で修復する", hint: "検出から修復まで実装が必要・Config より複雑" },
+      { id: "c", label: "C", text: "IAM Access Analyzer で S3 の外部アクセスを検出する", hint: "検出はできるが自動修復機能はない" },
+      { id: "d", label: "D", text: "Amazon Macie で S3 バケットのパブリック設定を確認する", hint: "Macie は PII 検出向け・バケット設定の継続評価は Config が適切" },
+    ],
+    explanation:
+      "AWS Config の `s3-bucket-public-access-prohibited` などのマネージドルールを使うと S3 バケットのパブリックアクセス設定を継続的に評価できます。非準拠リソースが検出された際に修復アクション（Systems Manager Automation ドキュメントを実行）で自動修復できます。",
+    comparePoint:
+      "AWS Config：継続的なコンプライアンス評価＋自動修復。CloudTrail：API 操作の記録。両者を組み合わせることで検出から修復までを自動化。",
+    rememberAxis:
+      "リソース設定のコンプライアンス継続評価＋自動修復 → AWS Config ルール＋修復アクション。",
+  },
+  {
+    id: "security-39",
+    category: "Governance & Compliance",
+    modeLabel: "設計判断",
+    prompt:
+      "複数の AWS アカウントにまたがる GuardDuty・Inspector・Macie などのセキュリティサービスの検出結果を一元的に集約・可視化したい。最も適切なサービスはどれですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Amazon CloudWatch Dashboards", hint: "メトリクスの可視化・セキュリティ結果の集約は目的外" },
+      { id: "b", label: "B", text: "AWS CloudTrail Lake", hint: "CloudTrail ログの分析・セキュリティ結果の集約はしない" },
+      { id: "c", label: "C", text: "AWS Security Hub", hint: "複数アカウント・複数サービスのセキュリティ結果を集約・優先順位付け" },
+      { id: "d", label: "D", text: "Amazon Detective", hint: "インシデント調査のための可視化ツール・集約ダッシュボードとは異なる" },
+    ],
+    explanation:
+      "Security Hub は GuardDuty・Inspector・Macie・Config・IAM Access Analyzer などの検出結果を AWS Security Finding Format（ASFF）で一元集約し、コンプライアンス標準（CIS・PCI DSS など）への準拠状況もダッシュボードで確認できます。Organizations と統合して複数アカウントを横断管理できます。",
+    comparePoint:
+      "Security Hub：セキュリティ結果の集約・ダッシュボード。Amazon Detective：特定のセキュリティインシデントの詳細調査・グラフ分析。",
+    rememberAxis:
+      "複数サービス・複数アカウントのセキュリティ結果を集約 → Security Hub。インシデントの深掘り調査 → Detective。",
+  },
+  {
+    id: "security-40",
+    category: "Governance & Compliance",
+    modeLabel: "設計判断",
+    prompt:
+      "全リージョンの AWS API 操作を記録したい。新しいリージョンが追加されても自動でカバーされる設定はどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "使用するリージョンごとに CloudTrail を個別作成する", hint: "新リージョン追加時に都度設定が必要" },
+      { id: "b", label: "B", text: "マルチリージョントレイルを作成して全リージョンを対象にする", hint: "単一のトレイルで現在・将来のすべてのリージョンをカバー" },
+      { id: "c", label: "C", text: "CloudTrail Lake を使う", hint: "CloudTrail Lake はログの検索・分析向け・マルチリージョン収集設定とは別" },
+      { id: "d", label: "D", text: "AWS Config のグローバル記録を有効にする", hint: "Config はリソース設定の変更記録・API 操作ログは CloudTrail の役割" },
+    ],
+    explanation:
+      "CloudTrail のマルチリージョントレイルを作成すると、すべての既存リージョンと将来追加されるリージョンの API イベントが自動的にカバーされ、指定した S3 バケットに一元的に記録されます。組織全体のトレイルと組み合わせると全アカウント・全リージョンのログを集約できます。",
+    comparePoint:
+      "シングルリージョントレイル：1 リージョンのみ。マルチリージョントレイル：全リージョン・新リージョンも自動追加。",
+    rememberAxis:
+      "全リージョンを一括カバー → CloudTrail マルチリージョントレイル。",
+  },
+  {
+    id: "security-41",
+    category: "Governance & Compliance",
+    modeLabel: "使い分け重視",
+    prompt:
+      "「3ヶ月前に誰が S3 バケットポリシーを変更したか」を調査したい場合と「現在の S3 バケットポリシーが準拠しているか」を確認したい場合、それぞれ最適なサービスの組み合わせはどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "変更履歴の調査→CloudTrail、現在の準拠確認→AWS Config", hint: "CloudTrail は操作ログ・Config はリソース設定の状態管理" },
+      { id: "b", label: "B", text: "変更履歴の調査→AWS Config、現在の準拠確認→CloudTrail", hint: "役割が逆" },
+      { id: "c", label: "C", text: "どちらも CloudTrail で対応できる", hint: "Config の役割を確認する" },
+      { id: "d", label: "D", text: "どちらも AWS Config で対応できる", hint: "CloudTrail の役割を確認する" },
+    ],
+    explanation:
+      "CloudTrail は AWS API 呼び出しのログ（誰が・いつ・何をしたか）を記録します。AWS Config はリソースの設定状態を継続的に記録し、設定変更の履歴と現在の設定がルールに準拠しているかを評価します。過去の変更操作の調査は CloudTrail、リソース設定の状態と準拠性は Config を使います。",
+    comparePoint:
+      "CloudTrail：API 操作ログ（Who/When/What API）。AWS Config：リソース設定の状態・変更履歴・コンプライアンス評価。",
+    rememberAxis:
+      "誰が何の API を呼んだか → CloudTrail。リソースの設定が今どうなっているか → AWS Config。",
+  },
+  {
+    id: "security-42",
+    category: "Governance & Compliance",
+    modeLabel: "シナリオ",
+    prompt:
+      "RDS インスタンスに対して「マルチ AZ が有効になっているか」「自動バックアップが有効になっているか」を継続的に評価し、変更のたびに再評価させたい。最も適切な Config ルールの評価タイミングはどれですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "定期評価（Periodic）で 1 時間ごとに実行する", hint: "定期評価は一定間隔で評価するが変更の即時検出ではない" },
+      { id: "b", label: "B", text: "CloudWatch Events でトリガーして Lambda で評価する", hint: "Config ルールで実現できる・追加実装が必要" },
+      { id: "c", label: "C", text: "設定変更トリガー（Configuration Change）で RDS の変更時に評価する", hint: "リソース設定が変更されたときに自動でルール評価が実行される" },
+      { id: "d", label: "D", text: "手動で aws configservice start-config-rules-evaluation を実行する", hint: "手動実行は継続的評価ではない" },
+    ],
+    explanation:
+      "AWS Config ルールには「設定変更トリガー」と「定期評価」の 2 種類があります。設定変更トリガーを選択すると、対象リソース（RDS など）の設定が変更されたタイミングで自動的にルール評価が実行され、変更のたびに準拠性を確認できます。",
+    comparePoint:
+      "設定変更トリガー：リソース変更時に即時評価。定期評価：一定間隔（1h・3h・6h・12h・24h）で評価。",
+    rememberAxis:
+      "設定変更のたびに即時評価 → Configuration Change トリガー。定期的な棚卸し評価 → Periodic。",
+  },
+  {
+    id: "security-43",
+    category: "Governance & Compliance",
+    modeLabel: "設計判断",
+    prompt:
+      "CloudTrail Insights を有効にするとどのような追加機能が提供されますか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "すべての API イベントのリアルタイムストリーミング", hint: "リアルタイムストリーミングは Insights の機能ではない" },
+      { id: "b", label: "B", text: "API 呼び出しのベースラインと比較して異常なアクティビティを自動検出する", hint: "Insights は API 呼び出しパターンの異常を機械学習で検出する" },
+      { id: "c", label: "C", text: "ログの暗号化を自動的に有効にする", hint: "暗号化は Insights とは別の設定" },
+      { id: "d", label: "D", text: "CloudWatch Logs へのリアルタイム転送", hint: "ログ転送は Insights とは独立した設定" },
+    ],
+    explanation:
+      "CloudTrail Insights は API 呼び出しのベースラインを機械学習で学習し、突発的な API 呼び出し数の急増や異常なパターン（大量のリソース作成・削除など）を検出してアラートを発行します。通常の監査ログとは別に、異常行動の検出に特化した機能です。",
+    comparePoint:
+      "通常の CloudTrail：全 API 操作を記録。Insights：API の使用パターンの異常を自動検出。",
+    rememberAxis:
+      "API 呼び出しの異常パターンを検出 → CloudTrail Insights。",
+  },
+
+  // Secrets Manager / Parameter Store
+  {
+    id: "security-44",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "大量のアプリケーション設定値（機密ではない）と一部のデータベースパスワード（機密）を管理したい。コストを最小化しつつ機密情報は暗号化する場合の最適な組み合わせはどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "非機密設定は Parameter Store（標準）、DB パスワードは Parameter Store（SecureString）または Secrets Manager", hint: "Parameter Store の SecureString は KMS 暗号化・低コスト" },
+      { id: "b", label: "B", text: "すべて Secrets Manager に保存する", hint: "機能的には可能だがコストが増加する" },
+      { id: "c", label: "C", text: "非機密設定は S3 に、DB パスワードは KMS で直接暗号化して S3 に保存する", hint: "アクセス管理とローテーションが複雑になる" },
+      { id: "d", label: "D", text: "すべて Parameter Store（標準）に保存し、暗号化は不要とする", hint: "DB パスワードを平文で保存することはセキュリティリスク" },
+    ],
+    explanation:
+      "Parameter Store の標準パラメータは無料で非機密の設定値に最適です。SecureString は KMS で暗号化され機密値の保存に使えますが自動ローテーション機能はありません。自動ローテーションが必要な DB 認証情報には Secrets Manager が適切です（有料）。コスト・機能要件のバランスで使い分けます。",
+    comparePoint:
+      "Parameter Store 標準：無料・非機密。Parameter Store SecureString：KMS 暗号化・低コスト・ローテーションなし。Secrets Manager：ローテーション機能あり・有料。",
+    rememberAxis:
+      "ローテーション不要の機密値 → Parameter Store SecureString（低コスト）。自動ローテーション必要 → Secrets Manager。",
+  },
+  {
+    id: "security-45",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "ECS タスクで実行するコンテナに DB のパスワードを安全に渡したい。最も適切な方法はどれですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Dockerfile に ENV 命令でパスワードを埋め込む", hint: "イメージにパスワードが焼き込まれてしまう" },
+      { id: "b", label: "B", text: "ECS のタスク定義の環境変数に平文で記載する", hint: "タスク定義に平文で記録されセキュリティリスク" },
+      { id: "c", label: "C", text: "Secrets Manager または Parameter Store にパスワードを保存し、タスク定義でシークレット参照を設定する", hint: "ECS はシークレットをタスク起動時に取得しコンテナに注入する" },
+      { id: "d", label: "D", text: "S3 にパスワードファイルを置いてコンテナ起動時にダウンロードする", hint: "パスワードの管理とローテーションが複雑になる" },
+    ],
+    explanation:
+      "ECS のタスク定義でシークレット参照（`secrets` セクション）を設定すると、タスク起動時に Secrets Manager または Parameter Store SecureString から値を取得してコンテナの環境変数に注入します。パスワードはタスク定義に平文で記録されず、ECS タスクロールで取得権限を制御できます。",
+    comparePoint:
+      "環境変数（平文）：タスク定義に平文・非推奨。シークレット参照：起動時に取得・暗号化されたまま管理。",
+    rememberAxis:
+      "ECS コンテナへのシークレット注入 → タスク定義のシークレット参照（Secrets Manager / Parameter Store 連携）。",
+  },
+  {
+    id: "security-46",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "Lambda 関数が Secrets Manager からシークレットを取得する際、毎回 API を呼び出すのではなくレイテンシーとコストを削減したい。最も適切な方法はどれですか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "シークレットを Lambda の環境変数に直接設定する", hint: "平文で保存されることになり、ローテーション時に再デプロイが必要" },
+      { id: "b", label: "B", text: "シークレットを S3 にキャッシュして Lambda から参照する", hint: "自前実装が必要・セキュリティ管理が複雑" },
+      { id: "c", label: "C", text: "Lambda のコード内でシークレットをグローバル変数にキャッシュする", hint: "コンテナの再起動で消えるが、有効期限を設けないとローテーション後の古い値を使い続ける" },
+      { id: "d", label: "D", text: "AWS Secrets Manager Lambda 拡張機能（Extension）を使ってローカルキャッシュする", hint: "Extension がシークレットをキャッシュし TTL 後に自動更新する" },
+    ],
+    explanation:
+      "Secrets Manager Lambda Extension をレイヤーとして追加すると、Lambda 実行環境のローカルキャッシュにシークレットを保存し、TTL 以内のアクセスは Secrets Manager API を呼び出さずにキャッシュから返します。ローテーション後も TTL 経過後に自動更新されます。",
+    comparePoint:
+      "毎回 API 呼び出し：常に最新値・レイテンシー増。Lambda Extension キャッシュ：低レイテンシー・TTL 後自動更新。",
+    rememberAxis:
+      "Lambda でのシークレットキャッシュ → Secrets Manager Lambda Extension。",
+  },
+  {
+    id: "security-47",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "Parameter Store の SecureString パラメータを複数の AWS アカウントと共有したい。最も適切な方法はどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Parameter Store にはクロスアカウント共有機能があるため直接共有できる", hint: "Parameter Store 自体にはクロスアカウント共有機能はない" },
+      { id: "b", label: "B", text: "Secrets Manager に移行し、リソースポリシーでクロスアカウントアクセスを許可する", hint: "Secrets Manager はリソースポリシーでクロスアカウント共有が可能" },
+      { id: "c", label: "C", text: "SecureString の値を復号して各アカウントの Parameter Store に複製する", hint: "平文でコピーすることになりセキュリティリスク" },
+      { id: "d", label: "D", text: "IAM ロールの AssumeRole で元アカウントの Parameter Store に直接アクセスする", hint: "Parameter Store はクロスアカウント API アクセスをサポートしない" },
+    ],
+    explanation:
+      "Parameter Store はクロスアカウント共有をネイティブサポートしていません。クロスアカウントでシークレットを共有する要件が生じた場合は Secrets Manager に移行するのが適切です。Secrets Manager はリソースポリシー（シークレットポリシー）で外部アカウントのプリンシパルにアクセスを許可できます。",
+    comparePoint:
+      "Parameter Store：クロスアカウント共有不可。Secrets Manager：リソースポリシーでクロスアカウント共有可能。",
+    rememberAxis:
+      "シークレットのクロスアカウント共有 → Secrets Manager のリソースポリシーを使う。",
+  },
+  {
+    id: "security-48",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "Secrets Manager の自動ローテーションを設定したとき、ローテーション中にアプリケーションが古いシークレットでも新しいシークレットでも認証できるようにする仕組みとして正しいものはどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "ローテーション Lambda がステージング（AWSPENDING）ラベルで新しいシークレットを作成し、テスト後に AWSCURRENT に昇格させる", hint: "Secrets Manager のローテーション 4 ステップの仕組み" },
+      { id: "b", label: "B", text: "ローテーション中は Secrets Manager への API アクセスがブロックされるためダウンタイムが発生する", hint: "ローテーション中もシークレットへのアクセスは継続できる" },
+      { id: "c", label: "C", text: "ローテーション完了後にアプリを再起動して新しいシークレットを読み込む", hint: "アプリは毎回 Secrets Manager から取得するためアプリ再起動は不要" },
+      { id: "d", label: "D", text: "ローテーション中は AWSPREVIOUS と AWSCURRENT の両方が無効化される", hint: "AWSPREVIOUS（前のバージョン）は一定期間保持される" },
+    ],
+    explanation:
+      "Secrets Manager の自動ローテーションは Lambda 関数が①新シークレット作成（AWSPENDING）→②DB 等に新シークレットを設定→③新シークレットの動作テスト→④AWSCURRENT に昇格（AWSPREVIOUS に旧シークレット保持）という 4 ステップで行います。AWSPREVIOUS が保持されるため切り替え直後も古いシークレットでの認証が可能です。",
+    comparePoint:
+      "AWSCURRENT：現在の有効なシークレット。AWSPENDING：ローテーション中の新しいシークレット。AWSPREVIOUS：切り替え前のシークレット（一定期間保持）。",
+    rememberAxis:
+      "Secrets Manager ローテーション：4 ステップ（作成→設定→テスト→昇格）・AWSPREVIOUS で旧シークレットを保持。",
+  },
+  {
+    id: "security-49",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "アプリケーションが高頻度（秒間数百回）でシークレットを取得する場合、Secrets Manager のスロットリングを回避するには何を使うべきですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Secrets Manager のクォータを引き上げる", hint: "有効だが根本的な設計改善にならない" },
+      { id: "b", label: "B", text: "シークレットを環境変数にコピーして使う", hint: "ローテーション時に古い値を使い続けるリスクがある" },
+      { id: "c", label: "C", text: "AWS Secrets Manager Agent や SDK のキャッシュクライアントを使ってシークレットをキャッシュする", hint: "TTL 内はキャッシュから取得し API 呼び出しを削減できる" },
+      { id: "d", label: "D", text: "ElastiCache にシークレットをキャッシュする", hint: "自前実装が必要・セキュリティ管理が複雑になる" },
+    ],
+    explanation:
+      "Secrets Manager SDK（Python boto3 など）にはインメモリキャッシュクライアントが用意されており、デフォルト 1 時間の TTL 内はキャッシュからシークレットを返します。Lambda 向けには Lambda Extension も同様の機能を提供します。これにより高頻度アクセス時のスロットリングを回避できます。",
+    comparePoint:
+      "毎回 API 呼び出し：スロットリングリスク・コスト増。SDK キャッシュ/Extension：TTL 内はキャッシュ・ローテーション後も自動更新。",
+    rememberAxis:
+      "Secrets Manager の高頻度呼び出し対策 → SDK キャッシュクライアントまたは Lambda Extension。",
+  },
+
+  // S3 バケットポリシー / ACL / セキュリティ
+  {
+    id: "security-50",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "新規作成した S3 バケットを誤って公開してしまうリスクを排除したい。アカウントレベルでパブリックアクセスを完全にブロックする最も確実な方法はどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "各バケットのバケットポリシーでパブリックアクセスを Deny する", hint: "バケットごとに設定が必要・新規バケット作成時の漏れが生じる" },
+      { id: "b", label: "B", text: "アカウントレベルの S3 ブロックパブリックアクセスを有効にする", hint: "アカウント全体の全バケットに適用・新規バケットにも自動適用" },
+      { id: "c", label: "C", text: "S3 バケットの ACL を無効化する", hint: "ACL 無効化はアクセス制御の一部・バケットポリシーによる公開は防げない" },
+      { id: "d", label: "D", text: "IAM ポリシーで全ユーザーの s3:PutBucketPolicy を Deny する", hint: "ポリシー変更はできなくなるが既存の公開バケットは対応できない" },
+    ],
+    explanation:
+      "S3 ブロックパブリックアクセスをアカウントレベルで有効にすると、既存・新規のすべてのバケットに対してパブリック ACL・バケットポリシーによる公開設定が自動的に無効化されます。個別のバケット設定より確実に全体を保護できます。",
+    comparePoint:
+      "バケットレベルのブロック：個別バケットのみ。アカウントレベルのブロック：アカウント内全バケットに適用。",
+    rememberAxis:
+      "アカウント全体でパブリックアクセスをブロック → S3 ブロックパブリックアクセスをアカウントレベルで有効化。",
+  },
+  {
+    id: "security-51",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "社内ネットワークの特定 IP レンジからのみ S3 バケットへのアクセスを許可したい。最も適切な設定はどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "S3 バケットポリシーに aws:SourceIp 条件キーで IP レンジを指定して Deny/Allow を設定する", hint: "バケットポリシーの Condition で IP ベースのアクセス制御が可能" },
+      { id: "b", label: "B", text: "Security Group で S3 への通信を制限する", hint: "S3 はマネージドサービスで VPC の外にあり Security Group は適用できない" },
+      { id: "c", label: "C", text: "S3 ACL で IP アドレスを指定する", hint: "S3 ACL は IP ベースの制限をサポートしない" },
+      { id: "d", label: "D", text: "IAM ポリシーに aws:SourceIp 条件を設定して全ユーザーに適用する", hint: "全ユーザーに適用すると管理が複雑・バケットポリシーの方がシンプル" },
+    ],
+    explanation:
+      "S3 バケットポリシーの Condition に `aws:SourceIp` を指定することで、特定の IP アドレスまたは CIDR レンジからのアクセスのみを許可（または拒否）できます。VPC エンドポイント経由のアクセスには `aws:SourceVpc` または `aws:SourceVpce` 条件キーを使います。",
+    comparePoint:
+      "aws:SourceIp：クライアントのパブリック IP で制限。aws:SourceVpce：VPC エンドポイント経由アクセスで制限。",
+    rememberAxis:
+      "S3 への IP ベースアクセス制御 → バケットポリシーの Condition に aws:SourceIp を使用。",
+  },
+  {
+    id: "security-52",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "EC2 インスタンス上のアプリケーションが S3 オブジェクトをダウンロードできる URL を外部ユーザーに一時的に提供したい。外部ユーザーには AWS 認証情報を渡したくない。最も適切な方法はどれですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "S3 バケットをパブリックに公開する", hint: "すべてのオブジェクトが誰でもアクセス可能になる" },
+      { id: "b", label: "B", text: "IAM ユーザーを作成して外部ユーザーにアクセスキーを渡す", hint: "認証情報の共有はセキュリティリスク" },
+      { id: "c", label: "C", text: "S3 プリサインド URL を生成して外部ユーザーに渡す", hint: "有効期限付き URL でオブジェクトへの一時的なアクセスを提供できる" },
+      { id: "d", label: "D", text: "CloudFront のオリジンを S3 にして CloudFront URL を渡す", hint: "有効だが一時的なアクセス制限にはプリサインド URL が適切" },
+    ],
+    explanation:
+      "プリサインド URL は S3 オブジェクトへの一時的なアクセスを提供するための署名付き URL です。生成者の IAM 認証情報で署名され、指定した有効期限が過ぎると無効になります。外部ユーザーに AWS 認証情報を渡さずに特定のオブジェクトへのアクセスを一時的に許可できます。",
+    comparePoint:
+      "プリサインド URL：一時的アクセス・有効期限あり・特定オブジェクト向け。CloudFront 署名付き URL：長期的なコンテンツ配信向け。",
+    rememberAxis:
+      "一時的な S3 アクセスを外部に提供 → プリサインド URL。",
+  },
+  {
+    id: "security-53",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "マルチテナント SaaS で、テナントごとに独立した S3 アクセスポリシーを設定しつつ、すべてのテナントのデータを単一の S3 バケットに格納したい。最も適切な方法はどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "テナントごとに S3 バケットを作成する", hint: "動作はするがアカウントあたりのバケット数制限（デフォルト 100）に引っかかる可能性がある" },
+      { id: "b", label: "B", text: "S3 Access Points を使い、テナントごとにアクセスポイントとポリシーを設定する", hint: "単一バケットに対してテナント別のアクセスポリシーを定義できる" },
+      { id: "c", label: "C", text: "テナントプレフィックスごとに異なる IAM ユーザーを作成してポリシーを設定する", hint: "テナント数が増えると IAM ユーザー管理が煩雑になる" },
+      { id: "d", label: "D", text: "S3 バケットポリシーにすべてのテナントの条件を列挙する", hint: "テナントが増えるとポリシーが肥大化・管理困難" },
+    ],
+    explanation:
+      "S3 Access Points を使うと、単一の S3 バケットに対してテナントごとに独立したエンドポイント（Access Point）とアクセスポリシーを作成できます。各テナントのアプリケーションは専用の Access Point ARN を使ってアクセスし、バケットポリシーは Access Points 経由のアクセスのみを許可するシンプルな構成にできます。",
+    comparePoint:
+      "バケットポリシーのみ：ポリシーが肥大化・管理困難。S3 Access Points：テナントごとに独立したポリシー・管理が容易。",
+    rememberAxis:
+      "マルチテナントの S3 アクセス制御 → S3 Access Points でテナントごとにポリシーを分離。",
+  },
+  {
+    id: "security-54",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "S3 バケットの重要なオブジェクトを誤削除や意図しない上書きから保護したい。最も強力な保護方法はどれですか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "S3 バージョニングを有効にする", hint: "削除・上書きの取り消しが可能だが MFA Delete がなければ削除自体は可能" },
+      { id: "b", label: "B", text: "S3 バケットポリシーで s3:DeleteObject を Deny する", hint: "管理者がポリシーを変更すれば削除できてしまう" },
+      { id: "c", label: "C", text: "IAM ポリシーで削除を禁止する", hint: "ルートユーザーや権限のあるユーザーが変更できてしまう" },
+      { id: "d", label: "D", text: "S3 オブジェクトロック（WORM モード）を有効にする", hint: "保持期間中は root でも削除・上書きが不可能な WORM 保護" },
+    ],
+    explanation:
+      "S3 オブジェクトロックは WORM（Write Once Read Many）モードを実装し、Compliance モードでは保持期間中はルートユーザーでも削除・上書きができません。Governance モードでは特別な権限を持つユーザーのみが設定を変更できます。コンプライアンス要件で改ざん不可の記録が必要な場合に使います。",
+    comparePoint:
+      "バージョニング：過去バージョンの復元可能だが削除は可能。オブジェクトロック（Compliance）：保持期間中は root でも削除不可の最強保護。",
+    rememberAxis:
+      "誤削除・改ざん防止の最強保護 → S3 オブジェクトロック Compliance モード（WORM）。",
+  },
+  {
+    id: "security-55",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "S3 バケットのデータを AWS プライベートネットワーク経由でのみアクセスさせ、インターネット経由のアクセスを完全に禁止したい。最も適切な構成はどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "S3 ゲートウェイ型 VPC エンドポイントを作成し、バケットポリシーで aws:SourceVpce 条件を使ってエンドポイント経由のみ許可する", hint: "VPC エンドポイント経由の S3 アクセスをバケットポリシーで強制できる" },
+      { id: "b", label: "B", text: "S3 ブロックパブリックアクセスを有効にする", hint: "パブリックアクセスのブロックは有効だが、IAM 認証された通信はインターネット経由も可能" },
+      { id: "c", label: "C", text: "NAT Gateway を経由して S3 にアクセスさせる", hint: "NAT Gateway 経由の通信はインターネット経由になる" },
+      { id: "d", label: "D", text: "CloudFront を S3 の前段に置いてアクセスを制御する", hint: "CloudFront は CDN であり S3 へのプライベートアクセス強制には不適切" },
+    ],
+    explanation:
+      "S3 ゲートウェイ型 VPC エンドポイントを作成すると VPC 内から S3 へ AWS のプライベートネットワーク経由でアクセスできます。バケットポリシーに `aws:SourceVpce` 条件を追加して特定のエンドポイント以外からのアクセスを Deny することで、インターネット経由のアクセスを完全に防止できます。",
+    comparePoint:
+      "ゲートウェイ型 VPC エンドポイント（S3・DynamoDB）：無料・ルートテーブルで制御。インターフェース型 VPC エンドポイント：ほかのサービス向け・有料。",
+    rememberAxis:
+      "S3 をプライベートネットワークのみに制限 → VPC エンドポイント ＋ バケットポリシーの aws:SourceVpce 条件。",
+  },
+
+  // IAM
+  {
+    id: "security-6",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "IAM ポリシーの評価において、あるアクションに対して Allow ポリシーと Deny ポリシーが両方存在する場合、最終的な判定はどうなりますか。",
+    context:
+      "IAM のポリシー評価ロジックは複数のポリシーが競合した際の動作を理解していることが前提です。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Allow が優先されアクションは許可される", hint: "Allow と Deny の優先順位を再確認" },
+      { id: "b", label: "B", text: "Deny が優先されアクションは拒否される", hint: "明示的な Deny は常に Allow を上書きする" },
+      { id: "c", label: "C", text: "後から評価されたポリシーが優先される", hint: "IAM の評価順序はポリシーの順番に依存しない" },
+      { id: "d", label: "D", text: "アタッチされたポリシーの種類によって異なる", hint: "基本原則は種類によらず同じ" },
+    ],
+    explanation:
+      "IAM のポリシー評価では、明示的な Deny（Explicit Deny）は常に Allow を上書きします。デフォルトはすべて Deny（暗黙的 Deny）であり、Allow が付与されて初めてアクションが許可されます。そこに明示的な Deny が存在すると、Allow があっても必ず拒否されます。",
+    comparePoint:
+      "暗黙的 Deny（デフォルト）< Allow < 明示的 Deny の順で優先度が高くなります。",
+    rememberAxis:
+      "明示的 Deny は最強。Allow と Deny が共存 → Deny が勝つ。",
+  },
+  {
+    id: "security-7",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "Account A のアプリケーションが Account B の S3 バケットにアクセスする必要があります。認証情報の共有を避けて安全に実装する最も適切な方法はどれですか。",
+    context:
+      "クロスアカウントアクセスでは IAM ユーザーのアクセスキーを共有することは避けるべきです。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "Account B の IAM ユーザーを作成し、アクセスキーを Account A のアプリに渡す", hint: "認証情報の共有はセキュリティリスク" },
+      { id: "b", label: "B", text: "S3 バケットをパブリックに公開する", hint: "誰でもアクセス可能になり不適切" },
+      { id: "c", label: "C", text: "Account B に IAM ロールを作成し Account A を信頼し、Account A のアプリがそのロールを AssumeRole する", hint: "クロスアカウントアクセスの標準パターン" },
+      { id: "d", label: "D", text: "Account A の IAM ユーザーに S3 フルアクセスポリシーをアタッチする", hint: "アカウントをまたいだ権限付与はこれだけでは不十分" },
+    ],
+    explanation:
+      "クロスアカウントアクセスは、Account B に IAM ロールを作成してその信頼ポリシーに Account A を記述し、Account A 側のアプリが STS AssumeRole を呼び出して一時認証情報を取得するパターンが標準です。認証情報を共有する必要がなく、最小権限を維持できます。",
+    comparePoint:
+      "同一アカウント内：ロールをリソースにアタッチ。クロスアカウント：AssumeRole で一時認証情報を取得。",
+    rememberAxis:
+      "クロスアカウントアクセス → AssumeRole。認証情報の共有は絶対 NG。",
+  },
+  {
+    id: "security-8",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "開発者に IAM ポリシーを自由に作成する権限を与えつつ、その開発者が自分自身に管理者権限を付与できないようにしたい。最も適切な仕組みはどれですか。",
+    context:
+      "権限昇格（privilege escalation）を防ぎながら柔軟な権限委任を実現する必要があります。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "IAM Permission Boundary（アクセス許可境界）を設定する", hint: "エンティティが持てる最大権限の上限を定義できる" },
+      { id: "b", label: "B", text: "IAM グループで権限を管理する", hint: "グループは権限をまとめるためのもので上限設定はできない" },
+      { id: "c", label: "C", text: "SCP（サービスコントロールポリシー）を使う", hint: "SCP は Organizations 全体に適用・個別エンティティへの境界設定ではない" },
+      { id: "d", label: "D", text: "IAM ロールに条件キーを設定する", hint: "条件キーでは権限の上限を包括的に設定できない" },
+    ],
+    explanation:
+      "Permission Boundary は IAM エンティティ（ユーザー・ロール）に設定する管理ポリシーで、そのエンティティが実際に持てる有効な権限の上限を定義します。Identity-based ポリシーと Permission Boundary の両方で許可されたアクションのみが有効になるため、開発者が自分の Boundary を超えた権限を自己付与できなくなります。",
+    comparePoint:
+      "Permission Boundary：個別エンティティの権限上限。SCP：Organizations アカウント全体の上限。",
+    rememberAxis:
+      "開発者の権限昇格を防ぐ → Permission Boundary。アカウント全体を制限 → SCP。",
+  },
+  {
+    id: "security-9",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "セキュリティポリシーとして、IAM ユーザーが MFA デバイスを登録していない場合は EC2 の操作を一切できないようにしたい。最も適切な実装はどれですか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "MFA 未登録ユーザーのアカウントを手動で無効化する", hint: "手動対応はスケールしない" },
+      { id: "b", label: "B", text: "GuardDuty で MFA 未設定ユーザーを検出してアラートを出す", hint: "検出はできるがブロックはできない" },
+      { id: "c", label: "C", text: "AWS Config ルールで MFA 未設定を検出し通知する", hint: "検出・通知はできるが即時ブロックはできない" },
+      { id: "d", label: "D", text: "IAM ポリシーに aws:MultiFactorAuthPresent 条件キーを使い MFA 未認証時に Deny する", hint: "条件キーで MFA 認証済みかを確認してアクセス制御できる" },
+    ],
+    explanation:
+      "IAM ポリシーの Condition に `aws:MultiFactorAuthPresent: false` を指定して Deny すると、MFA 認証を経ていないセッションからの操作を拒否できます。これにより MFA 未登録・未認証ユーザーは対象リソースを操作できなくなります。",
+    comparePoint:
+      "条件キー aws:MultiFactorAuthPresent：MFA 認証済みセッションかを確認。aws:MultiFactorAuthAge：MFA 認証からの経過時間を確認。",
+    rememberAxis:
+      "MFA 未認証ユーザーをブロック → IAM ポリシーの Deny + aws:MultiFactorAuthPresent 条件。",
+  },
+  {
+    id: "security-10",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "S3 バケットポリシーや IAM ポリシーが外部（インターネット）からアクセス可能な設定になっていないか継続的に分析したい。最も適切なサービスはどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Amazon GuardDuty", hint: "脅威検出サービス・ポリシーの静的分析は行わない" },
+      { id: "b", label: "B", text: "AWS IAM Access Analyzer", hint: "リソースポリシーを分析し外部アクセスを検出できる" },
+      { id: "c", label: "C", text: "AWS Security Hub", hint: "セキュリティ状態の集約ダッシュボード・ポリシー分析自体は行わない" },
+      { id: "d", label: "D", text: "AWS Trusted Advisor", hint: "ベストプラクティスチェック・詳細なポリシー分析は限定的" },
+    ],
+    explanation:
+      "IAM Access Analyzer は S3・IAM ロール・KMS キー・Lambda・SQS など各種リソースのポリシーを継続的に分析し、信頼ゾーン（アカウントや Organizations）外からアクセスできる設定（外部アクセス）を検出してアラートを出します。",
+    comparePoint:
+      "Access Analyzer：ポリシーの静的分析・外部アクセス検出。GuardDuty：実際のトラフィック・ログベースの脅威検出。",
+    rememberAxis:
+      "ポリシーが「外部に開いていないか」を分析 → Access Analyzer。実際の不審なアクセスを検出 → GuardDuty。",
+  },
+  {
+    id: "security-11",
+    category: "Governance & Compliance",
+    modeLabel: "設計判断",
+    prompt:
+      "AWS Organizations 配下の全アカウントで特定リージョン以外への AWS リソース作成を禁止したい。最も適切な方法はどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "Organizations の SCP（サービスコントロールポリシー）でリージョンを制限する", hint: "SCP は配下の全アカウントに一括適用できる" },
+      { id: "b", label: "B", text: "各アカウントの IAM ポリシーにリージョン条件を追加する", hint: "全アカウントに個別設定する必要があり管理が大変" },
+      { id: "c", label: "C", text: "AWS Config ルールでリージョン外リソースを検出して自動削除する", hint: "事後検出・削除であり作成を事前ブロックできない" },
+      { id: "d", label: "D", text: "CloudTrail のイベントを監視して Lambda で削除する", hint: "作成後に削除する事後対応で、確実なブロックではない" },
+    ],
+    explanation:
+      "SCP は Organizations の OU またはアカウントに適用でき、配下のすべての IAM エンティティの権限の上限を設定します。`aws:RequestedRegion` 条件キーを使って特定リージョン以外への API コールを Deny することで、全アカウントのリソース作成を一括制限できます。",
+    comparePoint:
+      "SCP：作成を事前ブロック・全アカウント一括適用。Config：作成後に非準拠を検出・修復は別途必要。",
+    rememberAxis:
+      "全アカウントでリージョンを制限 → SCP + aws:RequestedRegion。",
+  },
+  {
+    id: "security-12",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "Lambda 関数が DynamoDB にアクセスできるよう権限を付与したい。Lambda の実行ロールの「信頼ポリシー（Trust Policy）」に記述すべき Principal はどれですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "dynamodb.amazonaws.com", hint: "DynamoDB が引き受けるロールの Principal" },
+      { id: "b", label: "B", text: "iam.amazonaws.com", hint: "IAM サービス用の Principal" },
+      { id: "c", label: "C", text: "lambda.amazonaws.com", hint: "Lambda サービスがこのロールを引き受ける" },
+      { id: "d", label: "D", text: "ec2.amazonaws.com", hint: "EC2 用の Principal" },
+    ],
+    explanation:
+      "IAM ロールの信頼ポリシーは「誰がこのロールを AssumeRole できるか」を定義します。Lambda 実行ロールでは `lambda.amazonaws.com` を Principal に指定することで、Lambda サービスがこのロールを引き受けて DynamoDB などへのアクセス権限を使えるようになります。",
+    comparePoint:
+      "信頼ポリシー（Trust Policy）：誰がロールを引き受けられるか。アクセスポリシー（Permission Policy）：ロールで何ができるか。",
+    rememberAxis:
+      "Lambda 実行ロールの Trust Policy には lambda.amazonaws.com を指定する。",
+  },
+  {
+    id: "security-13",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "社員が既存の Active Directory（AD）の認証情報で複数の AWS アカウントにシングルサインオンしたい。最も適切なサービスはどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "各 AWS アカウントに IAM ユーザーを個別作成する", hint: "AD との統合がなく管理が煩雑" },
+      { id: "b", label: "B", text: "AWS IAM Identity Center（旧 AWS SSO）で AD と統合する", hint: "AD との SAML/SCIM 統合・複数アカウントへの SSO が可能" },
+      { id: "c", label: "C", text: "Amazon Cognito ユーザープールを使う", hint: "外部アプリ向けの認証・AWS アカウント間 SSO は目的外" },
+      { id: "d", label: "D", text: "IAM フェデレーションを各アカウントで個別設定する", hint: "アカウントごとに設定が必要で多アカウント管理に向かない" },
+    ],
+    explanation:
+      "IAM Identity Center は Organizations 配下の複数 AWS アカウントへの SSO を一元管理でき、Microsoft AD や外部 IdP と SAML 2.0 で統合できます。社員は既存の AD 認証情報でアクセスポータルにログインし、割り当てられたアカウントとロールを選択できます。",
+    comparePoint:
+      "IAM Identity Center：複数 AWS アカウントへの SSO・AD 統合。Cognito：外部ユーザー向け Web/モバイルアプリ認証。",
+    rememberAxis:
+      "社員が複数 AWS アカウントに SSO → IAM Identity Center。外部ユーザーをアプリに認証 → Cognito。",
+  },
+  {
+    id: "security-14",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "IAM ポリシーで「タグ Env=prod が付いたリソースのみ操作可能」という属性ベースのアクセス制御をしたい。最も適切な仕組みはどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "IAM ポリシーの Condition に aws:ResourceTag 条件キーを使う", hint: "リソースのタグ値に基づいてアクセス制御できる" },
+      { id: "b", label: "B", text: "リソースごとに個別の IAM ポリシーを作成する", hint: "リソースが増えるたびにポリシーが増え管理が煩雑" },
+      { id: "c", label: "C", text: "リソースグループを作成してグループ単位で権限を付与する", hint: "リソースグループは IAM ポリシーの直接の条件には使えない" },
+      { id: "d", label: "D", text: "SCP にタグ条件を記述して Organizations 全体に適用する", hint: "SCP はアカウント全体の制限・ABAC の実装は IAM ポリシー側" },
+    ],
+    explanation:
+      "ABAC（Attribute-Based Access Control）は IAM ポリシーの Condition で `aws:ResourceTag/Env: prod` のようにリソースタグを参照することで実現します。タグで環境や所有者を管理しておけば、ポリシーを変更せずにタグの付け替えだけでアクセス制御を変更できます。",
+    comparePoint:
+      "RBAC（Role-Based）：ロールや IAM グループで制御。ABAC（Attribute-Based）：リソースやユーザーのタグで制御・ポリシー数を削減。",
+    rememberAxis:
+      "タグでアクセス制御 → ABAC。IAM ポリシー Condition の aws:ResourceTag / aws:RequestTag を活用。",
+  },
+  {
+    id: "security-15",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "モバイルアプリのユーザーに Google アカウントでサインインさせ、そのユーザーが自分の S3 フォルダにだけアクセスできるようにしたい。最も適切な組み合わせはどれですか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "IAM ユーザーをアプリユーザー分だけ作成し、各ユーザーに S3 ポリシーをアタッチする", hint: "ユーザー数が増えると管理が不可能になる" },
+      { id: "b", label: "B", text: "Cognito ユーザープールのみを使う", hint: "ユーザープールは認証（サインイン）を担うが AWS リソースへの認可は別途必要" },
+      { id: "c", label: "C", text: "IAM Identity Center で Google と統合する", hint: "Identity Center は AWS アカウントへの SSO 向け・モバイルアプリユーザー認証には向かない" },
+      { id: "d", label: "D", text: "Cognito ユーザープールで認証し、Cognito ID プールで AWS 一時認証情報を取得する", hint: "ユーザープール（認証）＋ ID プール（AWS 認可）の標準パターン" },
+    ],
+    explanation:
+      "Cognito ユーザープールはサインイン機能（Google 連携含む）を提供し、ID プール（Federated Identities）は認証済みユーザーに AWS の一時認証情報を払い出します。IAM ポリシーで `cognito-identity.amazonaws.com:sub` を使えば、ユーザーごとに自分の S3 プレフィックスのみアクセス可能にできます。",
+    comparePoint:
+      "Cognito ユーザープール：Who are you?（認証）。Cognito ID プール：What can you do?（AWS リソースへの認可）。",
+    rememberAxis:
+      "外部 IdP でサインインして AWS リソースにアクセス → ユーザープール＋ ID プールの組み合わせ。",
+  },
+
+  // KMS
+  {
+    id: "security-16",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "大量のデータを KMS で暗号化する際、パフォーマンスとコストを最適化するためにどの手法を使うべきですか。",
+    context:
+      "KMS への API 呼び出しにはスロットリング制限があり、大容量データの直接暗号化はコストも高くなります。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "すべてのデータを KMS API で直接暗号化・復号する", hint: "スロットリングとコスト増のリスクがある" },
+      { id: "b", label: "B", text: "KMS の GenerateDataKeyWithoutPlaintext API を使う", hint: "プレーンテキストキーを返さないため即時の暗号化に使えない" },
+      { id: "c", label: "C", text: "エンベロープ暗号化：KMS でデータキーを生成しデータキーでデータを暗号化する", hint: "KMS 呼び出しを最小化しつつ安全に大量データを暗号化できる" },
+      { id: "d", label: "D", text: "AES キーをソースコードに埋め込んでデータを暗号化する", hint: "キーの管理が困難でセキュリティリスクが高い" },
+    ],
+    explanation:
+      "エンベロープ暗号化では、KMS に GenerateDataKey を呼び出して平文データキーと暗号化済みデータキーを取得し、平文データキーでデータをローカルに暗号化します。その後平文データキーをメモリから破棄し、暗号化済みデータキーをデータと一緒に保存します。KMS 呼び出しはキー生成時の 1 回だけで済むため、スロットリングとコストを最小化できます。",
+    comparePoint:
+      "直接暗号化：4 KB 以下のデータ向け・KMS 呼び出しごとに課金。エンベロープ暗号化：大容量データ向け・KMS 呼び出しを最小化。",
+    rememberAxis:
+      "大量データの暗号化 → エンベロープ暗号化（GenerateDataKey）。小さなデータ → KMS 直接暗号化。",
+  },
+  {
+    id: "security-17",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "Account A が所有する KMS キーを Account B の EC2 インスタンスでも使用できるようにしたい。最も適切な設定はどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "KMS キーポリシーに Account B の IAM プリンシパルを追加し、Account B の IAM ポリシーで KMS 操作を許可する", hint: "キーポリシー＋ IAM ポリシーの両方が必要" },
+      { id: "b", label: "B", text: "KMS キーを Account B にコピーする", hint: "KMS キーはアカウント間でコピーできない" },
+      { id: "c", label: "C", text: "Account B の IAM ポリシーだけで KMS アクセスを許可する", hint: "KMS はキーポリシーが主体・IAM ポリシーだけでは不十分" },
+      { id: "d", label: "D", text: "Account B に同じ CMK を新規作成してデータを再暗号化する", hint: "別キーで再暗号化は管理コストが増え、クロスアカウント共有の要件を満たさない" },
+    ],
+    explanation:
+      "KMS のクロスアカウントアクセスは、①キーポリシーで外部アカウントのプリンシパルを許可、②外部アカウントの IAM ポリシーで KMS 操作を許可、の両方が必要です。KMS はリソースベースポリシー（キーポリシー）が必須であり、IAM ポリシーだけでは権限が付与されません。",
+    comparePoint:
+      "KMS キーポリシー：誰がキーを使えるかの主体。IAM ポリシー：IAM エンティティからのアクセスを追加許可。両方が Allow であることが必須。",
+    rememberAxis:
+      "KMS クロスアカウント → キーポリシーに外部プリンシパルを追加 ＋ 外部アカウントの IAM ポリシーで許可。",
+  },
+  {
+    id: "security-18",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "規制要件として暗号化キーの生成・管理を専用ハードウェア（HSM）上で行う必要があり、その HSM を単独で占有しなければならない。最も適切なサービスはどれですか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "AWS KMS（AWS マネージドキー）", hint: "マルチテナントの共有 HSM・専有は不可" },
+      { id: "b", label: "B", text: "AWS KMS（カスタマーマネージドキー）", hint: "CMK も内部的には共有 HSM 上で動作する" },
+      { id: "c", label: "C", text: "AWS Secrets Manager", hint: "シークレット管理サービス・HSM の専有は提供しない" },
+      { id: "d", label: "D", text: "AWS CloudHSM", hint: "専有の単一テナント HSM を提供" },
+    ],
+    explanation:
+      "CloudHSM は単一テナント（専有）の HSM クラスターを提供します。KMS は内部で HSM を使用しますがマルチテナントです。FIPS 140-2 Level 3 準拠の HSM を専有で管理する必要がある規制要件には CloudHSM を選びます。",
+    comparePoint:
+      "KMS：マネージド・マルチテナント・API で簡単利用。CloudHSM：単一テナント専有 HSM・自己管理・FIPS Level 3。",
+    rememberAxis:
+      "HSM 専有が必要 → CloudHSM。マネージドで十分 → KMS CMK。",
+  },
+  {
+    id: "security-19",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "KMS カスタマーマネージドキー（CMK）を年次で自動ローテーションする設定をしたい。ローテーション後の動作として正しいものはどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "ローテーション後は古いキーで暗号化されたデータは復号できなくなる", hint: "古いキーマテリアルの扱いを確認する" },
+      { id: "b", label: "B", text: "古いキーマテリアルは保持され、既存の暗号化データは引き続き復号できる", hint: "KMS は自動ローテーション後も古いマテリアルを保持する" },
+      { id: "c", label: "C", text: "ローテーション後は新しいキー ARN が発行される", hint: "自動ローテーションでキー ARN は変わらない" },
+      { id: "d", label: "D", text: "自動ローテーションは AWS マネージドキーにのみ設定できる", hint: "CMK にも設定可能" },
+    ],
+    explanation:
+      "CMK の自動ローテーションを有効にすると、毎年新しいキーマテリアルが生成されますが、キー ID・ARN・エイリアスは変わりません。古いキーマテリアルは KMS 内に保持されるため、ローテーション前に暗号化されたデータも引き続き復号できます。アプリ側の変更は不要です。",
+    comparePoint:
+      "自動ローテーション：ARN 変わらず・古いマテリアル保持・アプリ変更不要。手動ローテーション（新キー作成）：ARN が変わる・再暗号化が必要。",
+    rememberAxis:
+      "CMK 自動ローテーション → ARN 変わらず・既存データ復号可能・年次で新マテリアル生成。",
+  },
+  {
+    id: "security-20",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "S3 に保存するデータをサーバーサイドで暗号化したい。暗号化キーを自社で管理し、キーの使用を CloudTrail で監査できる方式はどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "SSE-S3（S3 マネージドキー）", hint: "AWS が完全管理・キーの使用監査は不可" },
+      { id: "b", label: "B", text: "SSE-KMS（KMS カスタマーマネージドキー）", hint: "CMK を使用・CloudTrail でキー使用履歴を監査できる" },
+      { id: "c", label: "C", text: "SSE-C（顧客提供キー）", hint: "顧客がキーを提供・AWS がキーを保存しない・CloudTrail での KMS 監査はない" },
+      { id: "d", label: "D", text: "クライアントサイド暗号化", hint: "アプリで暗号化・S3 はデータを暗号化しない・実装が必要" },
+    ],
+    explanation:
+      "SSE-KMS（CMK）を使うと、S3 はオブジェクトの暗号化・復号に KMS CMK を使い、そのキー使用が CloudTrail に記録されます。SSE-S3 は AWS が管理するキーで監査ログがなく、SSE-C はキーを AWS に渡すが保存されないためキーの監査ができません。",
+    comparePoint:
+      "SSE-S3：最もシンプル・監査不可。SSE-KMS：CMK で監査可能・コスト少し増。SSE-C：自社キーを都度提供・KMS 不使用。",
+    rememberAxis:
+      "キー使用を CloudTrail で監査 → SSE-KMS（CMK）。シンプルに暗号化 → SSE-S3。",
+  },
+  {
+    id: "security-21",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "外部のデータ処理パートナーに対して、特定の KMS CMK を一時的に使用する権限を付与したい。CMK のキーポリシーを変更せずに権限を委任する方法はどれですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "キーポリシーにパートナーの IAM ロールを追加する", hint: "キーポリシーの変更が必要になる" },
+      { id: "b", label: "B", text: "CMK を別アカウントにコピーする", hint: "KMS キーはコピーできない" },
+      { id: "c", label: "C", text: "KMS Grant を作成してパートナーの IAM プリンシパルに特定操作を委任する", hint: "Grant はキーポリシーを変更せずに特定の権限を委任できる" },
+      { id: "d", label: "D", text: "CMK を AWS マネージドキーに変換する", hint: "CMK を AWS マネージドキーに変換することはできない" },
+    ],
+    explanation:
+      "KMS Grant を使うと、キーポリシーを変更せずに特定のプリンシパルへ暗号化・復号などの特定操作を一時的に委任できます。Grant はプログラムから作成・失効が可能で、一時的な権限委任に適しています。",
+    comparePoint:
+      "キーポリシー：恒久的な権限管理。IAM ポリシー：IAM エンティティへの追加許可。Grant：一時的・プログラムからの動的委任。",
+    rememberAxis:
+      "キーポリシーを変えずに一時的な権限委任 → KMS Grant。",
+  },
+  {
+    id: "security-22",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "グローバルに展開するアプリケーションで、複数リージョンにわたって同じ CMK で暗号化・復号を行いたい。レイテンシーを最小化するにはどうすればよいですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "KMS マルチリージョンキーを作成し、必要なリージョンにレプリカキーを配置する", hint: "同じキーマテリアルを複数リージョンに配置できる" },
+      { id: "b", label: "B", text: "各リージョンに別々の CMK を作成し、データを各リージョンで再暗号化する", hint: "キー管理が複雑になり再暗号化コストがかかる" },
+      { id: "c", label: "C", text: "すべてのリージョンから us-east-1 の KMS エンドポイントを呼び出す", hint: "クロスリージョンの KMS 呼び出しはレイテンシーが増加する" },
+      { id: "d", label: "D", text: "S3 クロスリージョンレプリケーションで暗号化データを同期する", hint: "データのレプリケーションでありキーのマルチリージョン化ではない" },
+    ],
+    explanation:
+      "KMS マルチリージョンキーは同じキーマテリアルと ID を複数リージョンに配置でき、あるリージョンで暗号化したデータを別リージョンで追加の復号操作なしに復号できます。各リージョンのローカル KMS エンドポイントを使えるためレイテンシーも最小化されます。",
+    comparePoint:
+      "シングルリージョン CMK：そのリージョン内でのみ暗号化・復号可能。マルチリージョンキー：複数リージョンで同一キーを使用可能。",
+    rememberAxis:
+      "複数リージョンで同じキーを使いたい → KMS マルチリージョンキー。",
+  },
+
+  // Security Groups / NACLs
+  {
+    id: "security-23",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "NACL でアウトバウンドルールを設定する際、クライアントからの HTTP リクエスト（ポート80）に対するレスポンスを返せるようにするにはどのポート範囲を開ける必要がありますか。",
+    context:
+      "NACL はステートレスなため、レスポンストラフィックも明示的に許可する必要があります。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "ポート 80 のアウトバウンドを許可する", hint: "ポート 80 はリクエストの宛先・レスポンスには別のポートが使われる" },
+      { id: "b", label: "B", text: "エフェメラルポート（1024–65535）のアウトバウンドを許可する", hint: "クライアントはランダムな一時ポートを使ってレスポンスを受け取る" },
+      { id: "c", label: "C", text: "全ポート（0–65535）のアウトバウンドを許可する", hint: "動作はするがポート範囲が広すぎる" },
+      { id: "d", label: "D", text: "Security Group と同様にレスポンスは自動許可される", hint: "NACL はステートレスなので自動許可はない" },
+    ],
+    explanation:
+      "NACL はステートレスで、インバウンドとアウトバウンドを独立して評価します。クライアントは TCP 接続時にランダムなエフェメラルポート（1024–65535）を送信元として使用します。サーバーからのレスポンスはクライアントのエフェメラルポート宛てに送られるため、NACL のアウトバウンドでエフェメラルポート範囲を許可する必要があります。",
+    comparePoint:
+      "Security Group（ステートフル）：インバウンドを許可するとレスポンスは自動許可。NACL（ステートレス）：インバウンドとアウトバウンドを独立して設定。",
+    rememberAxis:
+      "NACL でレスポンスを通すにはエフェメラルポートのアウトバウンドを許可する。",
+  },
+  {
+    id: "security-24",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "VPC を新規作成した際のデフォルト Security Group の動作として正しいものはどれですか。",
+    correctChoiceId: "c",
+    choices: [
+      { id: "a", label: "A", text: "すべてのインバウンドとアウトバウンドが許可される", hint: "デフォルト SG はすべての通信を許可しない" },
+      { id: "b", label: "B", text: "すべてのインバウンドとアウトバウンドが拒否される", hint: "アウトバウンドはデフォルトで許可される" },
+      { id: "c", label: "C", text: "同じ SG からのインバウンドと全アウトバウンドが許可される", hint: "デフォルト SG は自己参照（同一 SG 間通信）を許可する" },
+      { id: "d", label: "D", text: "すべてのインバウンドが許可され、アウトバウンドはすべて拒否される", hint: "デフォルト SG の動作を再確認" },
+    ],
+    explanation:
+      "VPC のデフォルト Security Group は、①同じ Security Group に所属するリソースからのインバウンドをすべて許可（自己参照）、②すべてのアウトバウンドを許可、という設定になっています。外部からのインバウンドはデフォルトでは許可されません。",
+    comparePoint:
+      "デフォルト SG：同一 SG 間インバウンド許可＋全アウトバウンド許可。カスタム SG（新規作成）：全インバウンド拒否＋全アウトバウンド許可。",
+    rememberAxis:
+      "デフォルト SG → 同一 SG 間のみインバウンド許可。新規 SG → インバウンドはすべて拒否から始まる。",
+  },
+  {
+    id: "security-25",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "Web サーバーの Security Group（SG-Web）からのトラフィックのみ DB サーバーへのアクセスを許可したい。最もセキュアな方法はどれですか。",
+    correctChoiceId: "a",
+    choices: [
+      { id: "a", label: "A", text: "DB の Security Group のインバウンドルールで、ソースに SG-Web の ID を指定する", hint: "Security Group を参照することで IP に依存しない制御が可能" },
+      { id: "b", label: "B", text: "DB の Security Group のインバウンドルールで、Web サーバーの IP アドレスを指定する", hint: "IP アドレスは変わる可能性があり管理が煩雑" },
+      { id: "c", label: "C", text: "DB の Security Group でポート 3306 をすべての IP から許可し、NACL で制限する", hint: "必要以上に広い許可範囲" },
+      { id: "d", label: "D", text: "VPC フローログで DB へのアクセスを監視し、不正アクセスをアラートする", hint: "監視であり、アクセス制御ではない" },
+    ],
+    explanation:
+      "Security Group のインバウンドルールのソースに別の Security Group の ID を指定できます。これにより IP アドレスに依存せず「SG-Web にアタッチされたリソース」からのアクセスのみを許可できます。Auto Scaling などで IP が変わっても自動で追従し、最小権限を維持できます。",
+    comparePoint:
+      "IP アドレス指定：固定 IP に限定・変更時に管理が必要。SG 参照：IP に依存しない・動的に追従。",
+    rememberAxis:
+      "SG 間のアクセス制御はソースに SG ID を指定する。IP アドレスではなく SG を参照するのがベストプラクティス。",
+  },
+  {
+    id: "security-26",
+    category: "Security",
+    modeLabel: "シナリオ",
+    prompt:
+      "VPC 内のトラフィックを分析してセキュリティインシデントを調査したい。ネットワークレベルの送受信ログを取得するには何を使うべきですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "AWS CloudTrail", hint: "API 操作の監査ログ・ネットワークパケットの内容は記録しない" },
+      { id: "b", label: "B", text: "VPC フローログ", hint: "VPC 内 ENI を通るトラフィックの IP ヘッダー情報を記録する" },
+      { id: "c", label: "C", text: "Amazon GuardDuty", hint: "脅威検出サービス・フローログを分析するがログ自体を提供するわけではない" },
+      { id: "d", label: "D", text: "AWS Config", hint: "リソースの設定変更履歴を記録・トラフィックログは記録しない" },
+    ],
+    explanation:
+      "VPC フローログは VPC・サブネット・ENI レベルで有効化でき、送受信元 IP・ポート・プロトコル・許可/拒否などのネットワークフロー情報を CloudWatch Logs または S3 に記録します。セキュリティインシデント調査や不正アクセスの分析に利用します。",
+    comparePoint:
+      "VPC フローログ：ネットワークトラフィックの IP/ポート情報。CloudTrail：AWS API 操作の監査ログ。GuardDuty：フローログ等を分析して脅威を検出。",
+    rememberAxis:
+      "ネットワークトラフィックのログ → VPC フローログ。AWS 操作の監査 → CloudTrail。",
+  },
+  {
+    id: "security-27",
+    category: "Security",
+    modeLabel: "使い分け重視",
+    prompt:
+      "特定のサブネット全体に対して特定の IP アドレスからのアクセスを明示的に拒否したい。Security Group ではなく NACL を使う主な理由はどれですか。",
+    correctChoiceId: "d",
+    choices: [
+      { id: "a", label: "A", text: "NACL の方がルール数の上限が多いから", hint: "ルール数の上限は NACL の選択理由ではない" },
+      { id: "b", label: "B", text: "NACL はステートフルなのでレスポンストラフィックも自動で管理されるから", hint: "ステートフルなのは Security Group の特徴" },
+      { id: "c", label: "C", text: "NACL はインスタンス単位で適用できるから", hint: "NACL はサブネット単位・インスタンス単位は Security Group" },
+      { id: "d", label: "D", text: "NACL は明示的な Deny ルールを持てるから", hint: "Security Group は Allow しか設定できない" },
+    ],
+    explanation:
+      "Security Group は許可（Allow）ルールしか設定できず、明示的な拒否ルールを持てません。NACL はサブネットレベルで Allow と Deny 両方のルールを設定できるため、特定の IP アドレスを明示的に拒否したい場合に NACL を使います。",
+    comparePoint:
+      "Security Group：Allow のみ・ステートフル・インスタンスレベル。NACL：Allow と Deny・ステートレス・サブネットレベル。",
+    rememberAxis:
+      "特定 IP を明示的に拒否したい → NACL。インスタンス単位で細かく制御 → Security Group。",
+  },
+  {
+    id: "security-28",
+    category: "Security",
+    modeLabel: "設計判断",
+    prompt:
+      "プライベートサブネットの EC2 インスタンスが外部サービスへの HTTPS アウトバウンドのみを許可し、インターネットからのインバウンドは一切受け付けない構成にしたい。最も適切なゲートウェイはどれですか。",
+    correctChoiceId: "b",
+    choices: [
+      { id: "a", label: "A", text: "Internet Gateway（IGW）", hint: "双方向通信が可能・インバウンドも受け付けられる" },
+      { id: "b", label: "B", text: "NAT Gateway", hint: "プライベートサブネットからのアウトバウンドのみ許可・インバウンドの開始は不可" },
+      { id: "c", label: "C", text: "Egress-Only Internet Gateway", hint: "IPv6 専用のアウトバウンド制御ゲートウェイ" },
+      { id: "d", label: "D", text: "VPC ピアリング", hint: "VPC 間接続・インターネット接続は提供しない" },
+    ],
+    explanation:
+      "NAT Gateway はプライベートサブネットの EC2 がインターネットへのアウトバウンド通信を開始できますが、インターネット側からの接続開始（インバウンド）は許可しません。Egress-Only Internet Gateway は IPv6 の場合に同様の役割を果たします（IPv4 には NAT Gateway）。",
+    comparePoint:
+      "IGW：双方向・パブリックサブネット向け。NAT Gateway：アウトバウンドのみ・IPv4・プライベートサブネット向け。Egress-Only IGW：アウトバウンドのみ・IPv6。",
+    rememberAxis:
+      "プライベートサブネットからのアウトバウンドのみ（IPv4）→ NAT Gateway。",
+  },
 ];
