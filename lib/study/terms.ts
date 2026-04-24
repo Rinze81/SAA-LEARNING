@@ -1857,6 +1857,216 @@ export const studyTerms: StudyTerm[] = [
     related: ["Kinesis Data Streams", "Kinesis Firehose", "EMR", "Lambda"],
   },
 
+  // ── 監視・運用（追加分） ──────────────────────────────────────────────────
+
+  {
+    id: "cloudwatch-alarm",
+    docsUrl: "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html",
+    name: "CloudWatch Alarm",
+    category: "監視・運用",
+    shortDefinition: "CloudWatch メトリクスの閾値超過を検知して通知やアクションを自動実行する仕組みです。",
+    description:
+      "CPU 使用率・エラー率・レイテンシなど任意のメトリクスに閾値を設定し、OK／ALARM／INSUFFICIENT_DATA の 3 状態で管理します。SNS 通知・Auto Scaling アクション・EC2 停止などを自動トリガーできます。",
+    examTip:
+      "「メトリクスが閾値を超えたら自動でスケールアウト」「異常を SNS で通知」という要件で選びます。複合アラーム（Composite Alarm）で複数アラームを AND/OR 条件で組み合わせることもできます。",
+    related: ["CloudWatch", "Auto Scaling Group", "SNS", "CloudWatch Logs"],
+  },
+  {
+    id: "cloudwatch-dashboard",
+    docsUrl: "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html",
+    name: "CloudWatch Dashboard",
+    category: "監視・運用",
+    shortDefinition: "複数の CloudWatch メトリクスやログをひとつの画面に集約して可視化するカスタムダッシュボードです。",
+    description:
+      "グラフ・数値・テキストウィジェットを自由に配置し、複数のサービス・リージョンのメトリクスを一画面で監視できます。チームやシステムごとに運用ダッシュボードを作成して共有できます。",
+    examTip:
+      "「複数サービスの稼働状況を一元可視化したい」という要件で選びます。クロスアカウント・クロスリージョンのメトリクスも 1 つのダッシュボードに集約できる点が試験で問われることがあります。",
+    related: ["CloudWatch", "CloudWatch Alarm", "CloudWatch Logs", "X-Ray"],
+  },
+  {
+    id: "cloudwatch-contributor-insights",
+    docsUrl: "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContributorInsights.html",
+    name: "CloudWatch Contributor Insights",
+    category: "監視・運用",
+    shortDefinition: "ログデータから上位の寄与者（高負荷の IP・ユーザー・リソース）をリアルタイムに特定する機能です。",
+    description:
+      "CloudWatch Logs のログストリームをルールで解析し、特定フィールドの上位 N 件をランキング表示します。DDoS 攻撃元 IP の特定・高エラー率のユーザー検出・スロットリングの多いリソース特定などに活用します。",
+    examTip:
+      "「ログから問題のある上位 IP やリソースをリアルタイムに特定したい」という要件で選びます。VPC フローログや API Gateway ログとの組み合わせが問われやすいです。",
+    related: ["CloudWatch Logs", "CloudWatch", "VPC", "API Gateway"],
+  },
+  {
+    id: "systems-manager-session-manager",
+    docsUrl: "https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html",
+    name: "Systems Manager Session Manager",
+    category: "監視・運用",
+    shortDefinition: "SSH やバスティオンホストを使わずに EC2 インスタンスへブラウザや CLI からセキュアにアクセスできる機能です。",
+    description:
+      "SSM Agent がインストールされた EC2 に対して、インバウンドポートを開放せずに安全なシェルセッションを確立します。セッションのログを S3・CloudWatch Logs に記録して監査証跡を残せます。",
+    examTip:
+      "「SSH ポートを開けずに EC2 を操作したい」「バスティオンホストを排除してセキュリティを強化したい」という要件で選びます。セッションログの記録と監査がセットで問われます。",
+    related: ["Systems Manager", "EC2", "CloudTrail", "CloudWatch Logs"],
+  },
+  {
+    id: "aws-config-rules",
+    docsUrl: "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config.html",
+    name: "AWS Config Rules",
+    category: "監視・運用",
+    shortDefinition: "AWS リソースの設定が定義したルールに準拠しているかを継続的に評価する仕組みです。",
+    description:
+      "AWS が提供するマネージドルール（例：S3 のパブリックアクセス禁止・MFA 必須）とカスタムルール（Lambda で実装）があります。非準拠を検出した際に自動修復アクション（SSM Automation）を実行できます。",
+    examTip:
+      "「リソース設定のコンプライアンス継続評価」「非準拠リソースの自動修復」という要件で選びます。CloudTrail（誰が変更したか）との違いは Config Rules がリソース設定の状態を評価する点です。",
+    related: ["AWS Config", "CloudTrail", "Systems Manager", "Security Hub"],
+  },
+  {
+    id: "scp",
+    docsUrl: "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+    name: "Service Control Policy（SCP）",
+    category: "監視・運用",
+    shortDefinition: "AWS Organizations 配下のアカウントに適用できる権限の上限ポリシーです。",
+    description:
+      "OU またはアカウントに適用し、IAM ポリシーと組み合わせて有効な権限の上限を定義します。SCP で Deny されたアクションは、そのアカウントの管理者や root ユーザーでも実行できません。",
+    examTip:
+      "「全アカウントで特定のリージョン以外へのリソース作成を禁止したい」「特定サービスの使用を組織全体で制限したい」という要件で選びます。SCP は許可を与えるのではなく上限を設定するものです。",
+    related: ["AWS Config", "Organizations", "IAM Policy", "Control Tower"],
+  },
+  {
+    id: "license-manager",
+    docsUrl: "https://docs.aws.amazon.com/license-manager/latest/userguide/license-manager.html",
+    name: "AWS License Manager",
+    category: "監視・運用",
+    shortDefinition: "オンプレミスや AWS 上のソフトウェアライセンスを一元管理するサービスです。",
+    description:
+      "Microsoft・Oracle・SAP などのライセンスルール（コア数・ソケット数・インスタンス数）を設定し、ルール超過を自動的に検出・ブロックします。Dedicated Host との組み合わせで BYOL（Bring Your Own License）管理も可能です。",
+    examTip:
+      "「ライセンス超過を防ぎたい」「BYOL の EC2 ライセンスを追跡管理したい」という要件で選びます。Dedicated Host と組み合わせる BYOL のシナリオが出やすいです。",
+    related: ["Systems Manager", "EC2", "Trusted Advisor", "Organizations"],
+  },
+
+  // ── コスト最適化（追加分） ────────────────────────────────────────────────
+
+  {
+    id: "cost-anomaly-detection",
+    docsUrl: "https://docs.aws.amazon.com/cost-management/latest/userguide/getting-started-ad.html",
+    name: "AWS Cost Anomaly Detection",
+    category: "コスト最適化",
+    shortDefinition: "機械学習でコストの異常な増加を自動検出して通知するサービスです。",
+    description:
+      "過去の使用パターンを学習し、サービス・アカウント・タグ別のコスト異常を検出します。閾値設定が不要で、SNS を通じてアラートを受け取れます。Cost Explorer と連携して原因を深掘りできます。",
+    examTip:
+      "「コストが急増したら自動で通知してほしい」「閾値を手動設定せずにコスト異常を検知したい」という要件で選びます。AWS Budgets（固定閾値）との違いは機械学習による自動検知である点です。",
+    related: ["Cost Explorer", "Budgets", "CloudWatch Alarm", "SNS"],
+  },
+  {
+    id: "s3-storage-lens",
+    docsUrl: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage_lens.html",
+    name: "S3 Storage Lens",
+    category: "コスト最適化",
+    shortDefinition: "S3 の使用状況・アクティビティを組織全体で可視化・分析するダッシュボードサービスです。",
+    description:
+      "複数アカウント・リージョンにわたる S3 バケットのストレージ量・リクエスト数・コスト効率をひとつのダッシュボードで確認できます。コスト削減のための推奨事項（未使用バケットの削除・ストレージクラスの最適化など）も提供します。",
+    examTip:
+      "「複数アカウントにまたがる S3 のコストと使用状況を一元管理したい」という要件で選びます。S3 サーバーアクセスログや CloudWatch との違いは、組織全体の集計・推奨機能がある点です。",
+    related: ["S3", "Cost Explorer", "Organizations", "Trusted Advisor"],
+  },
+  {
+    id: "instance-scheduler",
+    docsUrl: "https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/solution-overview.html",
+    name: "EC2 Instance Scheduler",
+    category: "コスト最適化",
+    shortDefinition: "EC2・RDS インスタンスの起動・停止を時間スケジュールで自動化する AWS ソリューションです。",
+    description:
+      "AWS が提供するオープンソースソリューションで、タグを使って起動・停止のスケジュールを定義します。開発・テスト環境の夜間・週末停止を自動化し、使用しない時間帯の EC2・RDS のインスタンス料金を削減します。",
+    examTip:
+      "「開発環境を平日業務時間のみ起動したい」「EC2/RDS の停止を自動化してコストを削減したい」という要件で選びます。EventBridge + Lambda による自動停止の仕組みとセットで理解しましょう。",
+    related: ["EC2", "RDS", "Cost Explorer", "Budgets"],
+  },
+  {
+    id: "reserved-instance-marketplace",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ri-market-general.html",
+    name: "Reserved Instance Marketplace",
+    category: "コスト最適化",
+    shortDefinition: "不要になった EC2 リザーブドインスタンスを第三者に売買できるマーケットプレイスです。",
+    description:
+      "残存期間のある RI を他の AWS ユーザーに販売できます。標準 RI は売却可能ですが、コンバーティブル RI は売却できません。購入者は通常より短い残存期間の RI を割引価格で取得できます。",
+    examTip:
+      "「不要になった RI をどうするか」という問題で選びます。コンバーティブル RI は売却できず属性変更のみ可能である点が重要な比較ポイントです。",
+    related: ["Reserved Instances", "Savings Plans", "Cost Explorer", "Convertible RI"],
+  },
+  {
+    id: "convertible-ri",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/reserved-instances-types.html",
+    name: "Convertible Reserved Instance",
+    category: "コスト最適化",
+    shortDefinition: "インスタンスファミリー・OS・テナンシーを柔軟に変更できるリザーブドインスタンスです。",
+    description:
+      "標準 RI より割引率は低い（最大 54%、標準 RI は最大 72%）ですが、将来のインスタンスタイプ変更に対応できます。RI 同士を交換してより高い属性の RI にアップグレードすることも可能です。",
+    examTip:
+      "「将来的にインスタンスファミリーを変更する可能性がある長期ワークロード」という要件で選びます。標準 RI（高割引・変更不可）vs コンバーティブル RI（低割引・変更可）の使い分けが頻出です。",
+    related: ["Reserved Instances", "Savings Plans", "Reserved Instance Marketplace", "EC2"],
+  },
+  {
+    id: "capacity-reservation",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html",
+    name: "Capacity Reservation",
+    category: "コスト最適化",
+    shortDefinition: "特定の AZ に EC2 キャパシティを予約しておく機能です。",
+    description:
+      "需要急増時やリージョン障害時でも指定したインスタンスタイプを必要なだけ起動できることを保証します。Savings Plans や RI と組み合わせると、キャパシティ保証を維持しながら割引も適用できます。",
+    examTip:
+      "「特定 AZ で確実に EC2 を起動できる保証が必要」「災害復旧時のリソース確保」という要件で選びます。RI は割引が目的でキャパシティ保証はなく、Capacity Reservation はキャパシティ保証が目的で割引はない点が重要です。",
+    related: ["EC2", "Reserved Instances", "Savings Plans", "Auto Scaling Group"],
+  },
+  {
+    id: "graviton",
+    docsUrl: "https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-nitro-instances.html",
+    name: "AWS Graviton",
+    category: "コスト最適化",
+    shortDefinition: "AWS が独自設計した ARM ベースのプロセッサで、高性能かつコスト効率に優れた EC2 インスタンスを提供します。",
+    description:
+      "Graviton3（第 3 世代）ベースの EC2（M7g・C7g・R7g 等）は x86 比で最大 40% 優れた価格性能比を実現します。Lambda・ECS Fargate・RDS・ElastiCache でも Graviton ベースのオプションが選択可能です。",
+    examTip:
+      "「同等性能でコストを削減したい」「価格性能比を最大化したい」という要件で選びます。ARM 互換のアプリ（Linux コンテナなど）が前提で、Windows ワークロードは非対応の点も注意です。",
+    related: ["EC2", "Fargate", "Lambda", "Compute Optimizer"],
+  },
+  {
+    id: "spot-fleet",
+    docsUrl: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet.html",
+    name: "Spot Fleet",
+    category: "コスト最適化",
+    shortDefinition: "複数のスポットインスタンスプール（インスタンスタイプ・AZ の組み合わせ）から自動で最適な構成を選んで起動する仕組みです。",
+    description:
+      "目標キャパシティと価格上限を指定すると、複数のインスタンスタイプ・AZ から最安・最多のスポットプールを自動選択します。一部が中断されても他のプールから補充するため、単一スポットより安定性が高まります。",
+    examTip:
+      "「スポットの中断リスクを分散しつつ大規模な処理基盤を構築したい」という要件で選びます。Auto Scaling グループのスポット構成と組み合わせる場合は Spot Fleet よりも混合インスタンスポリシーが使われます。",
+    related: ["Spot Instance", "EC2", "Auto Scaling Group", "Reserved Instances"],
+  },
+  {
+    id: "pricing-calculator",
+    docsUrl: "https://calculator.aws/pricing/2/home",
+    name: "AWS Pricing Calculator",
+    category: "コスト最適化",
+    shortDefinition: "AWS サービスの利用料金を事前に見積もるためのウェブツールです。",
+    description:
+      "EC2・RDS・S3 など各サービスの設定（インスタンスタイプ・リージョン・使用量）を入力すると月額コストの試算ができます。複数のサービスをまとめた見積もりを作成・共有・エクスポートできます。",
+    examTip:
+      "「新しいシステムの AWS 移行前にコストを見積もりたい」という要件で選びます。Cost Explorer（実績コストの分析）との違いは、Pricing Calculator が将来の見積もり専用ツールである点です。",
+    related: ["Cost Explorer", "Budgets", "Trusted Advisor", "TCO"],
+  },
+  {
+    id: "tco",
+    docsUrl: "https://aws.amazon.com/economics/",
+    name: "TCO（総所有コスト）",
+    category: "コスト最適化",
+    shortDefinition: "システムの取得から廃棄までの全コスト（ハードウェア・人件費・電力・施設等）を合計した概念です。",
+    description:
+      "オンプレミスの TCO には、サーバー購入費・ラック・電力・冷却・運用人件費・更新コストが含まれます。クラウド移行では従量課金と運用コスト削減により TCO を大幅に下げられることが多く、移行の経済的正当性の根拠に使われます。",
+    examTip:
+      "「オンプレミスと AWS のコスト比較」「クラウド移行の経済的メリットを示したい」という問題文で登場します。AWS が提供する TCO 計算ツール（AWS Pricing Calculator）で比較試算できます。",
+    related: ["Pricing Calculator", "Cost Explorer", "Trusted Advisor", "Savings Plans"],
+  },
+
   // ── データベース（追加分） ────────────────────────────────────────────────
 
   {
