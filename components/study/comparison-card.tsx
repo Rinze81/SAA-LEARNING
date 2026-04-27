@@ -22,6 +22,7 @@ function markComparisonRead(id: string) {
 
 type ComparisonCardProps = {
   item: ComparisonItem;
+  defaultOpen?: boolean;
 };
 
 function ChevronIcon({ open }: { open: boolean }) {
@@ -39,8 +40,8 @@ function ChevronIcon({ open }: { open: boolean }) {
   );
 }
 
-export function ComparisonCard({ item }: ComparisonCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function ComparisonCard({ item, defaultOpen = false }: ComparisonCardProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   function handleToggle() {
     if (!isOpen) markComparisonRead(item.id);
@@ -48,7 +49,7 @@ export function ComparisonCard({ item }: ComparisonCardProps) {
   }
 
   return (
-    <article className="rounded-[1.5rem] border border-slate-800/80 bg-slate-950/75 shadow-[0_18px_60px_rgba(2,6,23,0.28)]">
+    <article id={item.id} className="rounded-[1.5rem] border border-slate-800/80 bg-slate-950/75 shadow-[0_18px_60px_rgba(2,6,23,0.28)]">
       {/* ── ヘッダー（常時表示・タップで開閉） ── */}
       <button
         type="button"

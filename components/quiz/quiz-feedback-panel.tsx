@@ -2,7 +2,9 @@ import Link from "next/link";
 import { SectionFrame } from "@/components/ui/section-frame";
 import { StatusChip } from "@/components/ui/status-chip";
 import { questionRelatedTerms } from "@/lib/quiz/related-terms";
+import { questionRelatedComparisons } from "@/lib/quiz/related-comparisons";
 import { studyTerms } from "@/lib/study/terms";
+import { comparisonItems } from "@/lib/study/comparisons";
 import type { useQuizSession } from "@/lib/quiz/use-quiz-session";
 
 type QuizFeedbackPanelProps = {
@@ -41,6 +43,10 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
   const relatedTermList = (questionRelatedTerms[session.question.id] ?? [])
     .map((id) => studyTerms.find((t) => t.id === id))
     .filter((t): t is (typeof studyTerms)[number] => t !== undefined);
+
+  const relatedComparisonList = (questionRelatedComparisons[session.question.id] ?? [])
+    .map((id) => comparisonItems.find((c) => c.id === id))
+    .filter((c): c is (typeof comparisonItems)[number] => c !== undefined);
 
   return (
     <section
@@ -138,6 +144,24 @@ export function QuizFeedbackPanel({ session }: QuizFeedbackPanelProps) {
                   className="inline-flex min-h-[36px] items-center rounded-full border border-sky-900/45 bg-sky-950/30 px-3 py-1 text-xs text-sky-200 transition hover:border-sky-700 hover:text-sky-100"
                 >
                   {term.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {/* ── 関連比較表（不正解時のみ） ── */}
+        {!isCorrect && relatedComparisonList.length > 0 ? (
+          <div className="rounded-[1.25rem] border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
+            <p className="text-[11px] tracking-[0.16em] text-slate-500">関連比較表</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {relatedComparisonList.map((comp) => (
+                <Link
+                  key={comp.id}
+                  href={`/comparisons?id=${comp.id}`}
+                  className="inline-flex min-h-[36px] items-center rounded-full border border-violet-900/45 bg-violet-950/30 px-3 py-1 text-xs text-violet-200 transition hover:border-violet-700 hover:text-violet-100"
+                >
+                  {comp.title}
                 </Link>
               ))}
             </div>

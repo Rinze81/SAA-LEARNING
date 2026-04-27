@@ -1,9 +1,27 @@
+"use client";
+
+import { Suspense, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ComparisonCard } from "@/components/study/comparison-card";
 import { SectionFrame } from "@/components/ui/section-frame";
 import { comparisonItems } from "@/lib/study/comparisons";
 
-export default function ComparisonsPage() {
+function ComparisonsPageContent() {
+  const searchParams = useSearchParams();
+  const highlightedId = searchParams?.get("id") ?? null;
+
+  useEffect(() => {
+    if (!highlightedId) return;
+    const el = document.getElementById(highlightedId);
+    if (el) {
+      const timer = setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedId]);
+
   return (
     <main className="min-h-screen px-4 pb-16 pt-6 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -34,10 +52,22 @@ export default function ComparisonsPage() {
 
         <section className="grid gap-4">
           {comparisonItems.map((item) => (
-            <ComparisonCard key={item.id} item={item} />
+            <ComparisonCard
+              key={item.id}
+              item={item}
+              defaultOpen={item.id === highlightedId}
+            />
           ))}
         </section>
       </div>
     </main>
+  );
+}
+
+export default function ComparisonsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ComparisonsPageContent />
+    </Suspense>
   );
 }
