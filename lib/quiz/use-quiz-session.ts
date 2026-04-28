@@ -118,6 +118,8 @@ export function useQuizSession(options: UseQuizSessionOptions = {}) {
 
     if (answeredCorrectly) {
       setCorrectCount((count) => count + 1);
+      removeReviewRecord(question.id);
+      setReviewIds((current) => current.filter((id) => id !== question.id));
       return;
     }
 
