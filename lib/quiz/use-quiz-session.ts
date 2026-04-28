@@ -16,18 +16,23 @@ type UseQuizSessionOptions = {
 export function useQuizSession(options: UseQuizSessionOptions = {}) {
   const filter = options.filter ?? DEFAULT_QUIZ_FILTER;
 
-  // SSR-safe initial state: apply only category filter (untried/review need localStorage)
+  // SSR-safe initial state: apply only category/difficulty filters (untried/review need localStorage)
   const [orderedQuestions, setOrderedQuestions] = useState<QuizQuestion[]>(() => {
-    const all = quizQuestions;
-    if (filter.category === "all") return all;
-    return all.filter((q) => q.category === filter.category);
+    let all = quizQuestions;
+    if (filter.category !== "all") {
+      all = all.filter((q) => q.category === filter.category);
+    }
+    if (filter.difficulty && filter.difficulty !== "all") {
+      all = all.filter((q) => q.difficulty === filter.difficulty);
+    }
+    return all;
   });
 
   // Stringify filter for stable dependency comparison
   const filterKey = useMemo(
     () => JSON.stringify(filter),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filter.category, filter.untriedOnly, filter.reviewOnly],
+    [filter.category, filter.difficulty, filter.untriedOnly, filter.reviewOnly],
   );
 
   const prevFilterKeyRef = useRef<string>("");
@@ -41,13 +46,18 @@ export function useQuizSession(options: UseQuizSessionOptions = {}) {
       filtered = filtered.filter((q) => q.category === filter.category);
     }
 
-    // 2. Untried only
+    // 2. Difficulty
+    if (filter.difficulty && filter.difficulty !== "all") {
+      filtered = filtered.filter((q) => q.difficulty === filter.difficulty);
+    }
+
+    // 3. Untried only
     if (filter.untriedOnly) {
       const triedIds = new Set(readQuizAttempts().map((a) => a.questionId));
       filtered = filtered.filter((q) => !triedIds.has(q.id));
     }
 
-    // 3. Review only
+    // 4. Review only
     if (filter.reviewOnly) {
       const reviewQIds = new Set(readReviewRecords().map((r) => r.questionId));
       filtered = filtered.filter((q) => reviewQIds.has(q.id));

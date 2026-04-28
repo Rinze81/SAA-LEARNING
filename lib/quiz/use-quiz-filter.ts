@@ -33,7 +33,9 @@ export function useQuizFilter(initialCategory?: string) {
       initialCategory && initialCategory !== "all"
         ? initialCategory
         : base.category;
-    setFilter({ ...base, category });
+    // Ensure difficulty field exists (handles old persisted state without it)
+    const difficulty = base.difficulty ?? "all";
+    setFilter({ ...base, category, difficulty });
   }, [initialCategory]);
 
   function updateFilter(updates: Partial<QuizFilter>) {

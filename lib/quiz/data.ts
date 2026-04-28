@@ -3,6 +3,7 @@ import type { QuizQuestion } from "@/lib/quiz/types";
 export const quizQuestions: QuizQuestion[] = [
   {
     id: "storage-1",
+    difficulty: 'basic',
     category: "Storage",
     modeLabel: "使い分け重視",
     prompt:
@@ -30,6 +31,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-1",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "設計判断",
     prompt:
@@ -52,6 +54,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "database-1",
+    difficulty: 'basic',
     category: "Database",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -77,6 +80,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "storage-2",
+    difficulty: 'basic',
     category: "Storage",
     modeLabel: "使い分け重視",
     prompt:
@@ -99,6 +103,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "storage-3",
+    difficulty: 'basic',
     category: "Storage",
     modeLabel: "使い分け重視",
     prompt:
@@ -121,6 +126,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "storage-4",
+    difficulty: 'basic',
     category: "Storage",
     modeLabel: "コスト最適化",
     prompt:
@@ -143,6 +149,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "storage-5",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "設計判断",
     prompt:
@@ -165,6 +172,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "storage-6",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "使い分け重視",
     prompt:
@@ -187,6 +195,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "storage-7",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -209,6 +218,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "storage-8",
+    difficulty: 'basic',
     category: "Storage",
     modeLabel: "コスト最適化",
     prompt:
@@ -231,6 +241,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "storage-9",
+    difficulty: 'basic',
     category: "Storage",
     modeLabel: "設計判断",
     prompt:
@@ -253,6 +264,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "storage-10",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -275,6 +287,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "storage-11",
+    difficulty: 'advanced',
     category: "Storage",
     modeLabel: "設計判断",
     prompt:
@@ -300,6 +313,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "compute-1",
+    difficulty: 'basic',
     category: "Compute",
     modeLabel: "使い分け重視",
     prompt:
@@ -322,6 +336,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "compute-2",
+    difficulty: 'basic',
     category: "Compute",
     modeLabel: "コスト最適化",
     prompt:
@@ -344,6 +359,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "compute-3",
+    difficulty: 'basic',
     category: "Compute",
     modeLabel: "設計判断",
     prompt:
@@ -366,6 +382,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "compute-4",
+    difficulty: 'standard',
     category: "Compute",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -388,6 +405,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "compute-5",
+    difficulty: 'standard',
     category: "Compute",
     modeLabel: "使い分け重視",
     prompt:
@@ -410,6 +428,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "compute-6",
+    difficulty: 'basic',
     category: "Compute",
     modeLabel: "コスト最適化",
     prompt:
@@ -432,6 +451,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "compute-7",
+    difficulty: 'advanced',
     category: "Compute",
     modeLabel: "設計判断",
     prompt:
@@ -454,6 +474,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "compute-8",
+    difficulty: 'standard',
     category: "Compute",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -476,6 +497,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "compute-9",
+    difficulty: 'advanced',
     category: "Compute",
     modeLabel: "設計判断",
     prompt:
@@ -498,6 +520,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "compute-10",
+    difficulty: 'standard',
     category: "Compute",
     modeLabel: "使い分け重視",
     prompt:
@@ -523,6 +546,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "network-2",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "設計判断",
     prompt:
@@ -545,6 +569,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-3",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "使い分け重視",
     prompt:
@@ -567,6 +592,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-4",
+    difficulty: 'basic',
     category: "Networking",
     modeLabel: "設計判断",
     prompt:
@@ -589,6 +615,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-5",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "設計判断",
     prompt:
@@ -611,6 +638,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-6",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "使い分け重視",
     prompt:
@@ -633,6 +661,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-7",
+    difficulty: 'basic',
     category: "Networking",
     modeLabel: "設計判断",
     prompt:
@@ -655,6 +684,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-8",
+    difficulty: 'basic',
     category: "Networking",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -677,6 +707,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-9",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "設計判断",
     prompt:
@@ -699,6 +730,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-10",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "使い分け重視",
     prompt:
@@ -721,6 +753,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "network-11",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "設計判断",
     prompt:
@@ -746,6 +779,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "database-2",
+    difficulty: 'standard',
     category: "Database",
     modeLabel: "使い分け重視",
     prompt:
@@ -768,6 +802,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "database-3",
+    difficulty: 'advanced',
     category: "Database",
     modeLabel: "設計判断",
     prompt:
@@ -790,6 +825,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "database-4",
+    difficulty: 'standard',
     category: "Database",
     modeLabel: "使い分け重視",
     prompt:
@@ -812,6 +848,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "database-5",
+    difficulty: 'standard',
     category: "Database",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -834,6 +871,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "database-6",
+    difficulty: 'standard',
     category: "Database",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -859,6 +897,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "security-1",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -881,6 +920,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-2",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -903,6 +943,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-3",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -925,6 +966,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-4",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -947,6 +989,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-5",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -972,6 +1015,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "appintegration-1",
+    difficulty: 'basic',
     category: "Application Integration",
     modeLabel: "使い分け重視",
     prompt:
@@ -994,6 +1038,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "appintegration-2",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "設計判断",
     prompt:
@@ -1016,6 +1061,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "appintegration-3",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "設計判断",
     prompt:
@@ -1038,6 +1084,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "appintegration-4",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "使い分け重視",
     prompt:
@@ -1060,6 +1107,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "appintegration-5",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "要件から選ぶ",
     prompt:
@@ -1085,6 +1133,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "cost-1",
+    difficulty: 'advanced',
     category: "Cost Optimization",
     modeLabel: "使い分け重視",
     prompt:
@@ -1110,6 +1159,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "monitoring-1",
+    difficulty: 'basic',
     category: "Monitoring",
     modeLabel: "使い分け重視",
     prompt:
@@ -1135,6 +1185,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-ha-1",
+    difficulty: 'standard',
     category: "High Availability",
     modeLabel: "シナリオ",
     prompt:
@@ -1157,6 +1208,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-ha-2",
+    difficulty: 'advanced',
     category: "High Availability",
     modeLabel: "シナリオ",
     prompt:
@@ -1179,6 +1231,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-ha-3",
+    difficulty: 'advanced',
     category: "High Availability",
     modeLabel: "シナリオ",
     prompt:
@@ -1201,6 +1254,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-ha-4",
+    difficulty: 'standard',
     category: "High Availability",
     modeLabel: "シナリオ",
     prompt:
@@ -1223,6 +1277,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-ha-5",
+    difficulty: 'standard',
     category: "High Availability",
     modeLabel: "シナリオ",
     prompt:
@@ -1248,6 +1303,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-cost-1",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -1270,6 +1326,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-cost-2",
+    difficulty: 'advanced',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -1292,6 +1349,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-cost-3",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -1314,6 +1372,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-cost-4",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -1336,6 +1395,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-cost-5",
+    difficulty: 'advanced',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -1361,6 +1421,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-sec-1",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -1383,6 +1444,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-sec-2",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -1405,6 +1467,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-sec-3",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -1427,6 +1490,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-sec-4",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -1449,6 +1513,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-sec-5",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -1474,6 +1539,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-sls-1",
+    difficulty: 'standard',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -1496,6 +1562,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-sls-2",
+    difficulty: 'standard',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -1518,6 +1585,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-sls-3",
+    difficulty: 'advanced',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -1540,6 +1608,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-sls-4",
+    difficulty: 'standard',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -1562,6 +1631,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-sls-5",
+    difficulty: 'advanced',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -1587,6 +1657,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-db-1",
+    difficulty: 'advanced',
     category: "Database",
     modeLabel: "シナリオ",
     prompt:
@@ -1609,6 +1680,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-db-2",
+    difficulty: 'standard',
     category: "Database",
     modeLabel: "シナリオ",
     prompt:
@@ -1631,6 +1703,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-db-3",
+    difficulty: 'standard',
     category: "Database",
     modeLabel: "シナリオ",
     prompt:
@@ -1653,6 +1726,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-db-4",
+    difficulty: 'advanced',
     category: "Database",
     modeLabel: "シナリオ",
     prompt:
@@ -1675,6 +1749,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-db-5",
+    difficulty: 'standard',
     category: "Database",
     modeLabel: "シナリオ",
     prompt:
@@ -1700,6 +1775,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-storage-1",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -1722,6 +1798,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-storage-2",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -1744,6 +1821,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-storage-3",
+    difficulty: 'advanced',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -1766,6 +1844,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-storage-4",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -1788,6 +1867,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-storage-5",
+    difficulty: 'advanced',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -1813,6 +1893,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-net-1",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -1835,6 +1916,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-net-2",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -1857,6 +1939,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-net-3",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -1879,6 +1962,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-net-4",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -1901,6 +1985,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-net-5",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -1926,6 +2011,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-compute-1",
+    difficulty: 'standard',
     category: "Compute",
     modeLabel: "シナリオ",
     prompt:
@@ -1948,6 +2034,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-compute-2",
+    difficulty: 'standard',
     category: "Compute",
     modeLabel: "シナリオ",
     prompt:
@@ -1970,6 +2057,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-compute-3",
+    difficulty: 'standard',
     category: "Compute",
     modeLabel: "シナリオ",
     prompt:
@@ -1992,6 +2080,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-compute-4",
+    difficulty: 'advanced',
     category: "Compute",
     modeLabel: "シナリオ",
     prompt:
@@ -2014,6 +2103,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-compute-5",
+    difficulty: 'advanced',
     category: "Compute",
     modeLabel: "シナリオ",
     prompt:
@@ -2039,6 +2129,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-ai-1",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -2061,6 +2152,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-ai-2",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -2083,6 +2175,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-ai-3",
+    difficulty: 'advanced',
     category: "Application Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -2105,6 +2198,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-ai-4",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -2127,6 +2221,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-ai-5",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -2152,6 +2247,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "scenario-mon-1",
+    difficulty: 'standard',
     category: "Monitoring",
     modeLabel: "シナリオ",
     prompt:
@@ -2174,6 +2270,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-mon-2",
+    difficulty: 'standard',
     category: "Monitoring",
     modeLabel: "シナリオ",
     prompt:
@@ -2196,6 +2293,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-mon-3",
+    difficulty: 'standard',
     category: "Monitoring",
     modeLabel: "シナリオ",
     prompt:
@@ -2218,6 +2316,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-mon-4",
+    difficulty: 'standard',
     category: "Monitoring",
     modeLabel: "シナリオ",
     prompt:
@@ -2240,6 +2339,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "scenario-mon-5",
+    difficulty: 'advanced',
     category: "Monitoring",
     modeLabel: "シナリオ",
     prompt:
@@ -2265,6 +2365,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "migration-1",
+    difficulty: 'advanced',
     category: "Migration & Transfer",
     modeLabel: "シナリオ",
     prompt:
@@ -2287,6 +2388,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "migration-2",
+    difficulty: 'advanced',
     category: "Migration & Transfer",
     modeLabel: "シナリオ",
     prompt:
@@ -2309,6 +2411,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "migration-3",
+    difficulty: 'advanced',
     category: "Migration & Transfer",
     modeLabel: "シナリオ",
     prompt:
@@ -2331,6 +2434,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "migration-4",
+    difficulty: 'standard',
     category: "Migration & Transfer",
     modeLabel: "シナリオ",
     prompt:
@@ -2353,6 +2457,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "migration-5",
+    difficulty: 'standard',
     category: "Migration & Transfer",
     modeLabel: "シナリオ",
     prompt:
@@ -2378,6 +2483,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "analytics-1",
+    difficulty: 'standard',
     category: "Analytics",
     modeLabel: "シナリオ",
     prompt:
@@ -2400,6 +2506,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "analytics-2",
+    difficulty: 'advanced',
     category: "Analytics",
     modeLabel: "シナリオ",
     prompt:
@@ -2422,6 +2529,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "analytics-3",
+    difficulty: 'standard',
     category: "Analytics",
     modeLabel: "シナリオ",
     prompt:
@@ -2444,6 +2552,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "analytics-4",
+    difficulty: 'standard',
     category: "Analytics",
     modeLabel: "シナリオ",
     prompt:
@@ -2466,6 +2575,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "analytics-5",
+    difficulty: 'standard',
     category: "Analytics",
     modeLabel: "シナリオ",
     prompt:
@@ -2491,6 +2601,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "containers-1",
+    difficulty: 'standard',
     category: "Containers",
     modeLabel: "シナリオ",
     prompt:
@@ -2513,6 +2624,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "containers-2",
+    difficulty: 'standard',
     category: "Containers",
     modeLabel: "シナリオ",
     prompt:
@@ -2535,6 +2647,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "containers-3",
+    difficulty: 'standard',
     category: "Containers",
     modeLabel: "シナリオ",
     prompt:
@@ -2557,6 +2670,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "containers-4",
+    difficulty: 'advanced',
     category: "Containers",
     modeLabel: "シナリオ",
     prompt:
@@ -2579,6 +2693,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "containers-5",
+    difficulty: 'advanced',
     category: "Containers",
     modeLabel: "シナリオ",
     prompt:
@@ -2604,6 +2719,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "edge-1",
+    difficulty: 'standard',
     category: "Edge & Global",
     modeLabel: "シナリオ",
     prompt:
@@ -2626,6 +2742,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "edge-2",
+    difficulty: 'standard',
     category: "Edge & Global",
     modeLabel: "シナリオ",
     prompt:
@@ -2648,6 +2765,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "edge-3",
+    difficulty: 'standard',
     category: "Edge & Global",
     modeLabel: "シナリオ",
     prompt:
@@ -2670,6 +2788,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "edge-4",
+    difficulty: 'advanced',
     category: "Edge & Global",
     modeLabel: "シナリオ",
     prompt:
@@ -2692,6 +2811,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "edge-5",
+    difficulty: 'advanced',
     category: "Edge & Global",
     modeLabel: "シナリオ",
     prompt:
@@ -2717,6 +2837,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "hybrid-1",
+    difficulty: 'standard',
     category: "Hybrid Architecture",
     modeLabel: "シナリオ",
     prompt:
@@ -2739,6 +2860,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "hybrid-2",
+    difficulty: 'advanced',
     category: "Hybrid Architecture",
     modeLabel: "シナリオ",
     prompt:
@@ -2761,6 +2883,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "hybrid-3",
+    difficulty: 'advanced',
     category: "Hybrid Architecture",
     modeLabel: "シナリオ",
     prompt:
@@ -2783,6 +2906,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "hybrid-4",
+    difficulty: 'advanced',
     category: "Hybrid Architecture",
     modeLabel: "シナリオ",
     prompt:
@@ -2805,6 +2929,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "hybrid-5",
+    difficulty: 'standard',
     category: "Hybrid Architecture",
     modeLabel: "シナリオ",
     prompt:
@@ -2830,6 +2955,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "well-arch-1",
+    difficulty: 'standard',
     category: "Well-Architected",
     modeLabel: "シナリオ",
     prompt:
@@ -2852,6 +2978,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "well-arch-2",
+    difficulty: 'advanced',
     category: "Well-Architected",
     modeLabel: "シナリオ",
     prompt:
@@ -2874,6 +3001,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "well-arch-3",
+    difficulty: 'standard',
     category: "Well-Architected",
     modeLabel: "シナリオ",
     prompt:
@@ -2896,6 +3024,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "well-arch-4",
+    difficulty: 'standard',
     category: "Well-Architected",
     modeLabel: "シナリオ",
     prompt:
@@ -2918,6 +3047,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "well-arch-5",
+    difficulty: 'standard',
     category: "Well-Architected",
     modeLabel: "シナリオ",
     prompt:
@@ -2943,6 +3073,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "messaging-1",
+    difficulty: 'standard',
     category: "Messaging & Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -2965,6 +3096,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "messaging-2",
+    difficulty: 'standard',
     category: "Messaging & Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -2987,6 +3119,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "messaging-3",
+    difficulty: 'standard',
     category: "Messaging & Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -3009,6 +3142,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "messaging-4",
+    difficulty: 'advanced',
     category: "Messaging & Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -3031,6 +3165,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "messaging-5",
+    difficulty: 'advanced',
     category: "Messaging & Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -3056,6 +3191,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "ml-1",
+    difficulty: 'standard',
     category: "Machine Learning",
     modeLabel: "シナリオ",
     prompt:
@@ -3078,6 +3214,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "ml-2",
+    difficulty: 'standard',
     category: "Machine Learning",
     modeLabel: "シナリオ",
     prompt:
@@ -3100,6 +3237,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "ml-3",
+    difficulty: 'standard',
     category: "Machine Learning",
     modeLabel: "シナリオ",
     prompt:
@@ -3122,6 +3260,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "ml-4",
+    difficulty: 'advanced',
     category: "Machine Learning",
     modeLabel: "シナリオ",
     prompt:
@@ -3144,6 +3283,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "ml-5",
+    difficulty: 'standard',
     category: "Machine Learning",
     modeLabel: "シナリオ",
     prompt:
@@ -3169,6 +3309,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "governance-1",
+    difficulty: 'advanced',
     category: "Governance & Compliance",
     modeLabel: "シナリオ",
     prompt:
@@ -3191,6 +3332,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "governance-2",
+    difficulty: 'standard',
     category: "Governance & Compliance",
     modeLabel: "シナリオ",
     prompt:
@@ -3213,6 +3355,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "governance-3",
+    difficulty: 'advanced',
     category: "Governance & Compliance",
     modeLabel: "シナリオ",
     prompt:
@@ -3235,6 +3378,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "governance-4",
+    difficulty: 'advanced',
     category: "Governance & Compliance",
     modeLabel: "シナリオ",
     prompt:
@@ -3257,6 +3401,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "governance-5",
+    difficulty: 'advanced',
     category: "Governance & Compliance",
     modeLabel: "シナリオ",
     prompt:
@@ -3282,6 +3427,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "dr-1",
+    difficulty: 'standard',
     category: "Disaster Recovery",
     modeLabel: "シナリオ",
     prompt:
@@ -3304,6 +3450,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "dr-2",
+    difficulty: 'standard',
     category: "Disaster Recovery",
     modeLabel: "シナリオ",
     prompt:
@@ -3326,6 +3473,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "dr-3",
+    difficulty: 'advanced',
     category: "Disaster Recovery",
     modeLabel: "シナリオ",
     prompt:
@@ -3348,6 +3496,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "dr-4",
+    difficulty: 'advanced',
     category: "Disaster Recovery",
     modeLabel: "シナリオ",
     prompt:
@@ -3370,6 +3519,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "dr-5",
+    difficulty: 'advanced',
     category: "Disaster Recovery",
     modeLabel: "シナリオ",
     prompt:
@@ -3395,6 +3545,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "iam-1",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -3417,6 +3568,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "iam-2",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -3439,6 +3591,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "iam-3",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -3461,6 +3614,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "iam-4",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -3483,6 +3637,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "iam-5",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -3508,6 +3663,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "vpc-1",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -3530,6 +3686,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "vpc-2",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -3552,6 +3709,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "vpc-3",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -3574,6 +3732,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "vpc-4",
+    difficulty: 'advanced',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -3596,6 +3755,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "vpc-5",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -3621,6 +3781,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "s3-adv-1",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -3643,6 +3804,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "s3-adv-2",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -3665,6 +3827,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "s3-adv-3",
+    difficulty: 'advanced',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -3687,6 +3850,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "s3-adv-4",
+    difficulty: 'advanced',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -3709,6 +3873,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "s3-adv-5",
+    difficulty: 'advanced',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -3734,6 +3899,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "cost-adv-1",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -3756,6 +3922,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-adv-2",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -3778,6 +3945,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-adv-3",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -3800,6 +3968,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-adv-4",
+    difficulty: 'advanced',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -3822,6 +3991,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-adv-5",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -3847,6 +4017,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "lambda-adv-1",
+    difficulty: 'advanced',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -3869,6 +4040,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "lambda-adv-2",
+    difficulty: 'advanced',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -3891,6 +4063,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "lambda-adv-3",
+    difficulty: 'advanced',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -3913,6 +4086,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "lambda-adv-4",
+    difficulty: 'standard',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -3935,6 +4109,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "lambda-adv-5",
+    difficulty: 'standard',
     category: "Serverless",
     modeLabel: "シナリオ",
     prompt:
@@ -3960,6 +4135,7 @@ export const quizQuestions: QuizQuestion[] = [
 
   {
     id: "iac-1",
+    difficulty: 'standard',
     category: "Well-Architected",
     modeLabel: "シナリオ",
     prompt:
@@ -3982,6 +4158,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "iac-2",
+    difficulty: 'advanced',
     category: "Well-Architected",
     modeLabel: "シナリオ",
     prompt:
@@ -4004,6 +4181,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "iac-3",
+    difficulty: 'standard',
     category: "Well-Architected",
     modeLabel: "シナリオ",
     prompt:
@@ -4026,6 +4204,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "iac-4",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4048,6 +4227,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "iac-5",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -4072,6 +4252,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: RDS・データベース ─────────────────────────────────────────
   {
     id: "rds-1",
+    difficulty: 'standard',
     category: "Database",
     modeLabel: "シナリオ",
     prompt:
@@ -4093,6 +4274,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "rds-2",
+    difficulty: 'basic',
     category: "Database",
     modeLabel: "シナリオ",
     prompt:
@@ -4113,6 +4295,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "rds-3",
+    difficulty: 'standard',
     category: "Database",
     modeLabel: "シナリオ",
     prompt:
@@ -4135,6 +4318,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: ECS・コンテナ（追加） ──────────────────────────────────────
   {
     id: "ecs-1",
+    difficulty: 'basic',
     category: "Containers",
     modeLabel: "シナリオ",
     prompt:
@@ -4155,6 +4339,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "ecs-2",
+    difficulty: 'standard',
     category: "Containers",
     modeLabel: "シナリオ",
     prompt:
@@ -4177,6 +4362,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: Route 53・DNS ────────────────────────────────────────────
   {
     id: "route53-1",
+    difficulty: 'standard',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -4197,6 +4383,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "route53-2",
+    difficulty: 'basic',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -4219,6 +4406,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: ElastiCache ────────────────────────────────────────────
   {
     id: "elasticache-1",
+    difficulty: 'basic',
     category: "Database",
     modeLabel: "シナリオ",
     prompt:
@@ -4241,6 +4429,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: SQS・メッセージング（追加） ────────────────────────────────
   {
     id: "sqs-adv-1",
+    difficulty: 'basic',
     category: "Application Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -4261,6 +4450,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "sqs-adv-2",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -4283,6 +4473,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: Step Functions ──────────────────────────────────────────
   {
     id: "stepfunctions-1",
+    difficulty: 'standard',
     category: "Application Integration",
     modeLabel: "シナリオ",
     prompt:
@@ -4305,6 +4496,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: CloudFront（追加） ──────────────────────────────────────
   {
     id: "cloudfront-1",
+    difficulty: 'basic',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -4325,6 +4517,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cloudfront-2",
+    difficulty: 'basic',
     category: "Networking",
     modeLabel: "シナリオ",
     prompt:
@@ -4347,6 +4540,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: Kinesis・ストリーミング ────────────────────────────────────
   {
     id: "kinesis-1",
+    difficulty: 'advanced',
     category: "Analytics",
     modeLabel: "シナリオ",
     prompt:
@@ -4367,6 +4561,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "kinesis-2",
+    difficulty: 'standard',
     category: "Analytics",
     modeLabel: "シナリオ",
     prompt:
@@ -4389,6 +4584,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: Systems Manager・運用 ──────────────────────────────────────
   {
     id: "ssm-1",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4409,6 +4605,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "ssm-2",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4431,6 +4628,7 @@ export const quizQuestions: QuizQuestion[] = [
   // ── シナリオ: AWS Backup・データ保護 ────────────────────────────────────
   {
     id: "backup-1",
+    difficulty: 'advanced',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -4451,6 +4649,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "backup-2",
+    difficulty: 'standard',
     category: "Storage",
     modeLabel: "シナリオ",
     prompt:
@@ -4475,6 +4674,7 @@ export const quizQuestions: QuizQuestion[] = [
   // WAF / Shield / GuardDuty / Inspector / Macie
   {
     id: "security-29",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -4495,6 +4695,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-30",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -4515,6 +4716,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-31",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -4535,6 +4737,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-32",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -4555,6 +4758,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-33",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4575,6 +4779,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-34",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4595,6 +4800,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-35",
+    difficulty: 'standard',
     category: "Governance & Compliance",
     modeLabel: "設計判断",
     prompt:
@@ -4615,6 +4821,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-36",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4637,6 +4844,7 @@ export const quizQuestions: QuizQuestion[] = [
   // CloudTrail / Config / Security Hub
   {
     id: "security-37",
+    difficulty: 'standard',
     category: "Governance & Compliance",
     modeLabel: "設計判断",
     prompt:
@@ -4657,6 +4865,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-38",
+    difficulty: 'standard',
     category: "Governance & Compliance",
     modeLabel: "シナリオ",
     prompt:
@@ -4677,6 +4886,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-39",
+    difficulty: 'standard',
     category: "Governance & Compliance",
     modeLabel: "設計判断",
     prompt:
@@ -4697,6 +4907,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-40",
+    difficulty: 'basic',
     category: "Governance & Compliance",
     modeLabel: "設計判断",
     prompt:
@@ -4717,6 +4928,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-41",
+    difficulty: 'basic',
     category: "Governance & Compliance",
     modeLabel: "使い分け重視",
     prompt:
@@ -4737,6 +4949,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-42",
+    difficulty: 'standard',
     category: "Governance & Compliance",
     modeLabel: "シナリオ",
     prompt:
@@ -4757,6 +4970,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-43",
+    difficulty: 'basic',
     category: "Governance & Compliance",
     modeLabel: "設計判断",
     prompt:
@@ -4779,6 +4993,7 @@ export const quizQuestions: QuizQuestion[] = [
   // Secrets Manager / Parameter Store
   {
     id: "security-44",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -4799,6 +5014,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-45",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4819,6 +5035,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-46",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4839,6 +5056,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-47",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -4859,6 +5077,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-48",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4879,6 +5098,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-49",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -4901,6 +5121,7 @@ export const quizQuestions: QuizQuestion[] = [
   // S3 バケットポリシー / ACL / セキュリティ
   {
     id: "security-50",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -4921,6 +5142,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-51",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4941,6 +5163,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-52",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -4961,6 +5184,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-53",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -4981,6 +5205,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-54",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5001,6 +5226,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-55",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -5021,6 +5247,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-56",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -5045,6 +5272,7 @@ export const quizQuestions: QuizQuestion[] = [
   // IAM
   {
     id: "security-6",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5067,6 +5295,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-7",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -5089,6 +5318,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-8",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5111,6 +5341,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-9",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -5131,6 +5362,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-10",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5151,6 +5383,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-11",
+    difficulty: 'standard',
     category: "Governance & Compliance",
     modeLabel: "設計判断",
     prompt:
@@ -5171,6 +5404,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-12",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -5191,6 +5425,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-13",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -5211,6 +5446,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-14",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5231,6 +5467,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-15",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -5253,6 +5490,7 @@ export const quizQuestions: QuizQuestion[] = [
   // KMS
   {
     id: "security-16",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5275,6 +5513,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-17",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -5295,6 +5534,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-18",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -5315,6 +5555,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-19",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5335,6 +5576,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-20",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -5355,6 +5597,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-21",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -5375,6 +5618,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-22",
+    difficulty: 'advanced',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -5397,6 +5641,7 @@ export const quizQuestions: QuizQuestion[] = [
   // Security Groups / NACLs
   {
     id: "security-23",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5419,6 +5664,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-24",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -5439,6 +5685,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-25",
+    difficulty: 'standard',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5459,6 +5706,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-26",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "シナリオ",
     prompt:
@@ -5479,6 +5727,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-27",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "使い分け重視",
     prompt:
@@ -5499,6 +5748,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "security-28",
+    difficulty: 'basic',
     category: "Security",
     modeLabel: "設計判断",
     prompt:
@@ -5523,6 +5773,7 @@ export const quizQuestions: QuizQuestion[] = [
   // 購入オプション
   {
     id: "cost-2",
+    difficulty: 'basic',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5545,6 +5796,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-3",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5567,6 +5819,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-4",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5591,6 +5844,7 @@ export const quizQuestions: QuizQuestion[] = [
   // S3 ストレージクラス
   {
     id: "cost-5",
+    difficulty: 'basic',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5613,6 +5867,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-6",
+    difficulty: 'basic',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5635,6 +5890,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-7",
+    difficulty: 'basic',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5659,6 +5915,7 @@ export const quizQuestions: QuizQuestion[] = [
   // EC2 サイジング・Compute Optimizer
   {
     id: "cost-8",
+    difficulty: 'basic',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5679,6 +5936,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-9",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "設計判断",
     prompt:
@@ -5703,6 +5961,7 @@ export const quizQuestions: QuizQuestion[] = [
   // サーバーレスによるコスト削減
   {
     id: "cost-10",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5725,6 +5984,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-11",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5745,6 +6005,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-12",
+    difficulty: 'advanced',
     category: "Cost Optimization",
     modeLabel: "設計判断",
     prompt:
@@ -5769,6 +6030,7 @@ export const quizQuestions: QuizQuestion[] = [
   // データ転送コストの最小化
   {
     id: "cost-13",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5791,6 +6053,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-14",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5811,6 +6074,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-15",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5833,6 +6097,7 @@ export const quizQuestions: QuizQuestion[] = [
   // 不要リソースの停止・削除
   {
     id: "cost-16",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5853,6 +6118,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-17",
+    difficulty: 'standard',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5875,6 +6141,7 @@ export const quizQuestions: QuizQuestion[] = [
   // Cost Explorer / Budgets / Trusted Advisor
   {
     id: "cost-18",
+    difficulty: 'basic',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5895,6 +6162,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-19",
+    difficulty: 'basic',
     category: "Cost Optimization",
     modeLabel: "設計判断",
     prompt:
@@ -5915,6 +6183,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-20",
+    difficulty: 'basic',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:
@@ -5935,6 +6204,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "cost-21",
+    difficulty: 'advanced',
     category: "Cost Optimization",
     modeLabel: "シナリオ",
     prompt:

@@ -1,7 +1,7 @@
 "use client";
 
 import { quizQuestions } from "@/lib/quiz/data";
-import type { QuizFilter } from "@/lib/quiz/types";
+import type { Difficulty, QuizFilter } from "@/lib/quiz/types";
 
 const ALL_VALUE = "all";
 const ALL_LABEL = "すべて";
@@ -9,6 +9,13 @@ const ALL_LABEL = "すべて";
 const categories = Array.from(
   new Set(quizQuestions.map((q) => q.category)),
 ).sort();
+
+const DIFFICULTY_OPTIONS: { value: Difficulty | "all"; label: string }[] = [
+  { value: "all", label: "全て" },
+  { value: "basic", label: "基礎" },
+  { value: "standard", label: "標準" },
+  { value: "advanced", label: "応用" },
+];
 
 type QuizCategoryFilterProps = {
   filter: QuizFilter;
@@ -56,6 +63,21 @@ export function QuizCategoryFilter({
               count={questionCounts[cat] ?? 0}
               isSelected={filter.category === cat}
               onClick={() => onFilterChange({ category: cat })}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 難易度フィルター */}
+      <div className="mt-3 border-t border-slate-800/70 pt-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {DIFFICULTY_OPTIONS.map((opt) => (
+            <DifficultyButton
+              key={opt.value}
+              value={opt.value}
+              label={opt.label}
+              isSelected={filter.difficulty === opt.value}
+              onClick={() => onFilterChange({ difficulty: opt.value })}
             />
           ))}
         </div>
@@ -113,6 +135,36 @@ type ToggleButtonProps = {
   isActive: boolean;
   onClick: () => void;
 };
+
+type DifficultyButtonProps = {
+  value: Difficulty | "all";
+  label: string;
+  isSelected: boolean;
+  onClick: () => void;
+};
+
+const DIFFICULTY_ACTIVE_CLASS: Record<Difficulty | "all", string> = {
+  all: "border-slate-500 bg-slate-700 text-white",
+  basic: "border-slate-500 bg-slate-700 text-slate-200",
+  standard: "border-sky-600 bg-sky-900/60 text-sky-300",
+  advanced: "border-orange-600 bg-orange-900/60 text-orange-300",
+};
+
+function DifficultyButton({ value, label, isSelected, onClick }: DifficultyButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex min-h-[32px] items-center rounded-full border px-3.5 text-xs font-medium transition-all duration-200 active:scale-95 ${
+        isSelected
+          ? DIFFICULTY_ACTIVE_CLASS[value]
+          : "border-slate-700 bg-slate-950/60 text-slate-400 hover:border-slate-600 hover:text-slate-200"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
 
 function ToggleButton({ label, isActive, onClick }: ToggleButtonProps) {
   return (

@@ -1,11 +1,15 @@
+export type Difficulty = 'basic' | 'standard' | 'advanced';
+
 export type QuizFilter = {
   category: string;       // "all" or specific category name
+  difficulty: Difficulty | 'all';
   untriedOnly: boolean;   // show only questions not in saa-quiz-attempts
   reviewOnly: boolean;    // show only questions in saa-review-records
 };
 
 export const DEFAULT_QUIZ_FILTER: QuizFilter = {
   category: "all",
+  difficulty: "all",
   untriedOnly: false,
   reviewOnly: false,
 };
@@ -29,6 +33,7 @@ export type QuizQuestion = {
   rememberAxis: string;
   modeLabel: string;
   relatedTerms?: string[];
+  difficulty: Difficulty;
 };
 
 export type QuizAnswerState = {

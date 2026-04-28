@@ -1,7 +1,19 @@
 import { SectionFrame } from "@/components/ui/section-frame";
 import { StatusChip } from "@/components/ui/status-chip";
-import type { QuizQuestion } from "@/lib/quiz/types";
+import type { Difficulty, QuizQuestion } from "@/lib/quiz/types";
 import type { useQuizSession } from "@/lib/quiz/use-quiz-session";
+
+const DIFFICULTY_LABEL: Record<Difficulty, string> = {
+  basic: "基礎",
+  standard: "標準",
+  advanced: "応用",
+};
+
+const DIFFICULTY_CLASS: Record<Difficulty, string> = {
+  basic: "border-slate-600 bg-slate-800/60 text-slate-400",
+  standard: "border-sky-700/60 bg-sky-950/60 text-sky-400",
+  advanced: "border-orange-700/60 bg-orange-950/60 text-orange-400",
+};
 
 type QuizQuestionCardProps = {
   question: QuizQuestion;
@@ -15,7 +27,16 @@ export function QuizQuestionCard({
   return (
     <SectionFrame
       eyebrow="問題"
-      aside={<StatusChip label={question.category} tone="accent" />}
+      aside={
+        <div className="flex items-center gap-2">
+          <span
+            className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${DIFFICULTY_CLASS[question.difficulty]}`}
+          >
+            {DIFFICULTY_LABEL[question.difficulty]}
+          </span>
+          <StatusChip label={question.category} tone="accent" />
+        </div>
+      }
     >
       <div className="grid gap-4">
         {question.context ? (
